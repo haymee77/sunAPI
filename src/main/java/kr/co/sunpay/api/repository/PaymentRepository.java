@@ -10,6 +10,9 @@ import kr.co.sunpay.api.domain.Payment;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Integer> {
+	
+	public Optional<Payment> findByUid(int uid);
+	
 	public List<Payment> findByStoreId(String storeId);
 	
 	public Optional<Payment> findByStoreIdAndOrderNo(String storeId, String orderNo);

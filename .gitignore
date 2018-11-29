@@ -10,6 +10,7 @@
 .settings
 .springBeans
 .sts4-cache
+/bin/
 
 ### IntelliJ IDEA ###
 .idea
@@ -24,3 +25,6 @@
 /dist/
 /nbdist/
 /.nb-gradle/
+
+### MAC ###
+.DS_Store

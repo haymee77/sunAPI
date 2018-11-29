@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,6 +17,7 @@ import lombok.ToString;
 @Entity
 @Table(name="SP_PAYMENT")
 @ToString
+@ApiModel(description="Payment(결제내역) 상세 - KS결제모듈에서 결제 시도 전 데이터")
 public class Payment {
 	
 	@Id
