@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<form name="payForm" method="post" action="/ksnet/finish">
+		<input type="hidden" name="reCommConId" th:value="${param.reCommConId}">
+		<input type="hidden" name="reCommType" th:value="${param.reCommType}">
+		<input type="hidden" name="reHash" th:value="${param.reHash}">
+
+		<input type="hidden" name="uid" th:value="${order.uid}">
+		sndPaymethod
+		<input type="text" name="sndPaymethod" th:value="${order.sndPaymethod}">
+		<br> sndStoreid
+		<input type="text" name="sndStoreid" th:value="${order.sndStoreid}">
+		<br> sndOrdernumber
+		<input type="text" name="sndOrdernumber" th:value="${order.sndOrdernumber}">
+		<br> sndGoodname
+		<input type="text" name="sndGoodname" th:value="${order.sndGoodname}">
+		<br> sndAmount
+		<input type="text" name="sndAmount" th:value="${order.sndAmount}">
+		<br> sndOrdername
+		<input type="text" name="sndOrdername" th:value="${order.sndOrdername}">
+		<br> sndEmail
+		<input type="text" name="sndEmail" th:value="${order.sndEmail}">
+		<br> sndMobile
+		<input type="text" name="sndMobile" th:value="${order.sndMobile}">
+		<br> sndServicePeriod
+		<input type="text" name="sndServicePeriod" th:value="${order.sndServicePeriod}">
+		<br> sndReply
+		<input type="text" name="sndReply" th:value="${order.sndReply}">
+	</form>
+	<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td valign="middle" align="center">
+				<table width="450" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td>
+							<img src="//kspay.ksnet.to/store/KSPayFlashV1.3/mall/imgs/processing.gif" width="450" height="141">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<img src="//kspay.ksnet.to/store/KSPayFlashV1.3/mall/imgs/process_step.gif" width="456" height="20">
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</body>
+<script>
+	function sendForm() {
+		var rcid = document.getElementsByName("reCommConId")[0].value;
+
+		if (null != rcid && 10 > rcid.length) {
+			alert("ERROR: 결제요청정보(" + rcid + ")를 확인할 수 없어 결제를 중단합니다..");
+			return;
+
+		} else {
+			document.payForm.submit();
+		}
+	}
+
+	sendForm();
+</script>
+</html>

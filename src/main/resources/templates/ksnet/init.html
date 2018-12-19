@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+<head>
+<meta charset="UTF-8">
+<title>Sunpay - KSNet</title>
+</head>
+<body>
+
+	<!-- Content page -->
+	<div layout:fragment="content">
+		<div class="container">
+			<form name="payForm" method="post">
+				<input type="hidden" name="uid" th:value="${uid}">
+				sndPaymethod
+				<input type="text" name="sndPaymethod" th:value="${param.sndPaymethod}">
+				<br> sndStoreid
+				<input type="text" name="sndStoreid" th:value="${param.sndStoreid}">
+				<br> sndOrdernumber
+				<input type="text" name="sndOrdernumber" th:value="${param.sndOrdernumber}">
+				<br> sndGoodname
+				<input type="text" name="sndGoodname" th:value="${param.sndGoodname}">
+				<br> sndAmount
+				<input type="text" name="sndAmount" th:value="${param.sndAmount}">
+				<br> sndOrdername
+				<input type="text" name="sndOrdername" th:value="${param.sndOrdername}">
+				<br> sndEmail
+				<input type="text" name="sndEmail" th:value="${param.sndEmail}">
+				<br> sndMobile
+				<input type="text" name="sndMobile" th:value="${param.sndMobile}">
+				<br> sndServicePeriod
+				<input type="text" name="sndServicePeriod" th:value="${param.sndServicePeriod}">
+				<br> sndReply
+				<input type="text" name="sndReply" th:value="${param.sndReply}">
+			</form>
+		</div>
+	</div>
+	<!-- Content page -->
+
+	<!-- custom javascript -->
+	<th:block layout:fragment="script">
+		<script>
+		// KSNet._pay
+		function _pay(_frm) {
+			_frm.sndReply.value = window.location.origin + "/ksnet/payment/" + document.getElementsByName("uid")[0].value;
+			_frm.target = "_self";
+			_frm.action = "https://kspay.ksnet.to/store/KSPayFlashV1.3/KSPayPWeb.jsp?sndCharSet=utf-8";
+			
+			_frm.submit();
+		}
+		
+		_pay(document.payForm);
+		</script>
+	</th:block>
+	<!-- custom javascript -->
+</body>
+</html>
