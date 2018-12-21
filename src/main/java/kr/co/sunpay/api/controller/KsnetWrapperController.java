@@ -13,8 +13,10 @@ import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.repository.KsnetPayRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import lombok.extern.java.Log;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Log
+@ApiIgnore
 @Controller
 @RequestMapping("/ksnet")
 public class KsnetWrapperController {
