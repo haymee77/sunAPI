@@ -62,7 +62,7 @@ public class KsnetPayResult {
 	private String msg2;
 	
 	// 주문번호
-	@Column(name="ORD_NO", length=60)
+	@Column(name="ORD_NO", length=40)
 	private String ordno;
 	
 	// 결제수단
@@ -102,6 +102,6 @@ public class KsnetPayResult {
 	private LocalDateTime updatedDate;
 	
 	@OneToOne(fetch=FetchType.LAZY, optional=false)
-	@JoinColumn(name="KSNET_PAY_UID_PK")
+	@JoinColumn(name="KSNET_PAY_UID_FK")
 	private KsnetPay ksnetPay;
 }
