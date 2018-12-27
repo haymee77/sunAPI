@@ -23,6 +23,11 @@ import kr.co.sunpay.api.domain.Payment;
 import kr.co.sunpay.api.repository.PaymentRepository;
 import lombok.extern.java.Log;
 
+/**
+ * API 샘플
+ * @author himeepark
+ *
+ */
 @Log
 @RestController
 @RequestMapping("/payment/")

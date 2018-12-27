@@ -28,7 +28,7 @@ public class SwaggerConfig {
 	public static final ApiInfo DEFAULT_API_INFO = new ApiInfo("Sunpay API 1.0", "Sunpay API", "1.0", "urn:tos", DEFAULT_CONTACT, "Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0", Collections.emptyList());
 	
 	// What content type this API support.
-	public static final Set<String> DEFAULT_PRODUCES_AND_CONSUMES = new HashSet<String>(java.util.Arrays.asList("application/json", "application/xml"));
+	public static final Set<String> DEFAULT_PRODUCES_AND_CONSUMES = new HashSet<String>(java.util.Arrays.asList("application/json"));
 	
 	private ApiInfo apiInfo() {
 		return new ApiInfo(

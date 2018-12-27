@@ -15,9 +15,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @Entity
-@Table(name="SP_PAYMENT")
+@Table(name="SAMPLE_PAYMENT")
 @ToString
-@ApiModel(description="Payment(결제내역) 상세 - KS결제모듈에서 결제 시도 전 데이터")
+@ApiModel(description="[SAMPLE API]Payment(결제내역) 상세 - KS결제모듈에서 결제 시도 전 데이터")
 public class Payment {
 	
 	@Id
