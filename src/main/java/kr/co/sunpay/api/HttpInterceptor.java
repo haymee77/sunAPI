@@ -8,12 +8,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import lombok.extern.java.Log;
+
+@Log
 @Component
 public class HttpInterceptor extends HandlerInterceptorAdapter {
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
+		
+		log.info("--HttpInterceptor.preHandle called..");
 
 		return true;
 	}
