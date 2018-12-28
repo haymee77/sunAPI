@@ -1,8 +1,5 @@
 package kr.co.sunpay.api.controller;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,36 +24,29 @@ public class DepositController {
 		log.info("-- DepositController.insertDeposit called..");
 		ApiResponseBody apiResponseBody = new ApiResponseBody();
 		String message = depositMessage.getMessage();
-
-		boolean isKb = depositMessage.getMessage().indexOf("[KB]") != -1 ? true : false;
-		boolean isShinhan = message.indexOf("신한") != -1 ? true : false;
-
 		String lines[] = message.split("\n");
-
-		if (isKb && lines.length > 5) {
-
-			apiResponseBody.setSuccess(true);
-			apiResponseBody.setMessage("KB은행, 입금번호: " + lines[3] + ", 입금액: " + lines[5]);
-
-		} else if (isShinhan && lines.length > 4) {
-
-			String amount = "0";
-			Pattern pattern = Pattern.compile("(([0-9]{0,3}+,){0,}[0-9]{0,3}$)");
-			Matcher matcher = pattern.matcher(lines[3]);
+		
+		if (lines.length < 7) {
+			apiResponseBody.setSuccess(false);
+			apiResponseBody.setMessage("Message format error");
 			
-			if (matcher.find()) {
-				amount = matcher.group(1);
-			}
+			return new ResponseEntity<>(apiResponseBody, HttpStatus.BAD_REQUEST);
+		}
+		
+		String depositFrom = lines[3];
+		String depositAmount = lines[5];
+		
+		if (depositFrom.length() != 6) {
+			apiResponseBody.setSuccess(false);
+			apiResponseBody.setMessage("Deposit Number is invalid");
 			
-			apiResponseBody.setSuccess(true);
-			apiResponseBody.setMessage("신한은행, 입금번호: " + lines[4] + ", 입금액: " + amount);
+			return new ResponseEntity<>(apiResponseBody, HttpStatus.BAD_REQUEST);
 			
 		} else {
-			
-			apiResponseBody.setSuccess(false);
-			apiResponseBody.setMessage("정상적인 메세지가 아닙니다.");
+			apiResponseBody.setSuccess(true);
+			apiResponseBody.setMessage("KB은행, 입금번호: " + depositFrom + ", 입금액: " + depositAmount);
 		}
-
+		
 		return new ResponseEntity<>(apiResponseBody, HttpStatus.OK);
 	}
 }
