@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.repository.MemberRepository;
 import lombok.extern.java.Log;
@@ -27,7 +28,7 @@ public class MemberController {
 	
 	@GetMapping("/{uid}")
 	@ApiOperation(value="특정 멤버 정보 요청", notes="{uid} 멤버에 대한 정보 반환")
-	public Member retrieveMember(@PathVariable int uid) {
+	public Member retrieveMember(@ApiParam("정보를 얻을 멤버의 UID") @PathVariable int uid) {
 		
 		Optional<Member> getMember = memberRepo.findByUid(uid);
 		if (!getMember.isPresent())

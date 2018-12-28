@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,6 +26,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
+	
+	@Value("${api.key-header-name}")
+	private String headerKeyName;
 
 	public static final Contact DEFAULT_CONTACT = new Contact("Sunpay", "http://sunpay.co.kr", "black.bum19@gmail.com");
 	
@@ -58,7 +62,7 @@ public class SwaggerConfig {
 				.consumes(DEFAULT_PRODUCES_AND_CONSUMES)
 				.globalOperationParameters(Arrays.asList(
 						new ParameterBuilder()
-							.name("SUN-KEY")
+							.name(headerKeyName)
 							.description("Sunpay API Key")
 							.modelRef(new ModelRef("string"))
 							.parameterType("header")
