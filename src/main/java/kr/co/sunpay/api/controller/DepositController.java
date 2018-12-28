@@ -30,6 +30,7 @@ public class DepositController {
 			apiResponseBody.setSuccess(false);
 			apiResponseBody.setMessage("Message format error");
 			
+			log.info("-- return: " + apiResponseBody.toString());
 			return new ResponseEntity<>(apiResponseBody, HttpStatus.BAD_REQUEST);
 		}
 		
@@ -40,6 +41,7 @@ public class DepositController {
 			apiResponseBody.setSuccess(false);
 			apiResponseBody.setMessage("Deposit Number is invalid");
 			
+			log.info("-- return: " + apiResponseBody.toString());
 			return new ResponseEntity<>(apiResponseBody, HttpStatus.BAD_REQUEST);
 			
 		} else {
@@ -47,6 +49,7 @@ public class DepositController {
 			apiResponseBody.setMessage("KB은행, 입금번호: " + depositFrom + ", 입금액: " + depositAmount);
 		}
 		
+		log.info("-- return: " + apiResponseBody.toString());
 		return new ResponseEntity<>(apiResponseBody, HttpStatus.OK);
 	}
 }
