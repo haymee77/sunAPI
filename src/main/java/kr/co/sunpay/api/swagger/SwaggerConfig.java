@@ -1,5 +1,6 @@
 package kr.co.sunpay.api.swagger;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,8 +10,10 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Predicates;
 
+import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
@@ -52,7 +55,15 @@ public class SwaggerConfig {
 				.build()
 				.apiInfo(apiInfo())
 				.produces(DEFAULT_PRODUCES_AND_CONSUMES)
-				.consumes(DEFAULT_PRODUCES_AND_CONSUMES);
+				.consumes(DEFAULT_PRODUCES_AND_CONSUMES)
+				.globalOperationParameters(Arrays.asList(
+						new ParameterBuilder()
+							.name("SUN-KEY")
+							.description("Sunpay API Key")
+							.modelRef(new ModelRef("string"))
+							.parameterType("header")
+							.required(true)
+							.build()));
 	}
 	
 	@Bean
