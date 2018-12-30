@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -37,6 +38,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
 		
 		ErrorDetails errorDetails = new ErrorDetails(HttpStatus.NOT_FOUND);
+		errorDetails.setMessage(ex.getMessage());
+		
+		return buildResponseEntity(errorDetails);
+	}
+	
+	@ExceptionHandler(BadCredentialsException.class)
+	protected ResponseEntity<Object> handleBadCredentials(BadCredentialsException ex) {
+		
+		ErrorDetails errorDetails = new ErrorDetails(HttpStatus.UNAUTHORIZED);
 		errorDetails.setMessage(ex.getMessage());
 		
 		return buildResponseEntity(errorDetails);

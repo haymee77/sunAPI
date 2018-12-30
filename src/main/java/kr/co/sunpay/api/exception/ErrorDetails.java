@@ -24,8 +24,14 @@ public class ErrorDetails {
 	private String message;
 	private String debugMessage;
 	
-	private ErrorDetails() {
+	public ErrorDetails() {
 		timestamp = LocalDateTime.now();
+	}
+	
+	public ErrorDetails(HttpStatus status, String message) {
+		this();
+		this.status = status;
+		this.message = message;
 	}
 	
 	ErrorDetails(HttpStatus status) {
