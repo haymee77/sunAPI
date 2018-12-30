@@ -1,11 +1,15 @@
 package kr.co.sunpay.api.security;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 import lombok.extern.java.Log;
 
@@ -36,7 +40,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(AUTH_WHITELIST).permitAll()
 			.antMatchers("/**").permitAll();
 		
-		http.csrf().disable();
-		http.headers().disable();
+		http.csrf().disable()
+			.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
+	}
+	
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 }

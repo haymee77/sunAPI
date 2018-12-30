@@ -4,6 +4,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleBadCredentials(BadCredentialsException ex) {
 		
 		ErrorDetails errorDetails = new ErrorDetails(HttpStatus.UNAUTHORIZED);
+		errorDetails.setMessage(ex.getMessage());
+		
+		return buildResponseEntity(errorDetails);
+	}
+	
+	@ExceptionHandler(DuplicateKeyException.class)
+	protected ResponseEntity<Object> handleDuplicateKey(DuplicateKeyException ex) {
+		
+		ErrorDetails errorDetails = new ErrorDetails(HttpStatus.CONFLICT);
 		errorDetails.setMessage(ex.getMessage());
 		
 		return buildResponseEntity(errorDetails);

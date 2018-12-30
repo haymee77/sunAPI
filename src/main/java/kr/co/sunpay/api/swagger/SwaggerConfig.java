@@ -63,7 +63,7 @@ public class SwaggerConfig {
 				.globalOperationParameters(Arrays.asList(
 						new ParameterBuilder()
 							.name(headerKeyName)
-							.description("Sunpay API Key")
+							.description("Sunpay에서 발급받은 API Key")
 							.modelRef(new ModelRef("string"))
 							.parameterType("header")
 							.required(true)

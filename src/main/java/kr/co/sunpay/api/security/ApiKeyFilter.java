@@ -27,8 +27,12 @@ public class ApiKeyFilter extends GenericFilterBean {
 
 	private String headerKeyName;
 
-	private static final List<String> FILTER_WHITELIST = Arrays.asList("/swagger-ui.html", "/swagger-resources",
-			"/webjars", "/v2/api-docs");
+	private static final List<String> FILTER_WHITELIST = Arrays.asList(
+			"/swagger-ui.html", 
+			"/swagger-resources",
+			"/webjars", 
+			"/v2/api-docs",
+			"/ksnet");
 
 	public ApiKeyFilter(String headerKeyName) {
 		this.headerKeyName = headerKeyName;
