@@ -62,7 +62,11 @@ public class MemberService {
 		checkUid(uid);
 		
 		Member dbMember = memberRepo.findByUid(uid).get();
-		dbMember.setPassword(pwEncoder.encode(member.getPassword()));
+		
+		if (!member.getPassword().isEmpty() && member.getPassword().trim().length() > 0) {
+			dbMember.setPassword(pwEncoder.encode(member.getPassword()));
+		}
+		
 		dbMember.setActivate(member.getActivate());
 		dbMember.setEmail(member.getEmail());
 		dbMember.setMobile(member.getMobile());
