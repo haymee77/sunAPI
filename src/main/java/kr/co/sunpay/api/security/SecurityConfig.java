@@ -1,5 +1,7 @@
 package kr.co.sunpay.api.security;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,8 +42,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(AUTH_WHITELIST).permitAll()
 			.antMatchers("/**").permitAll();
 		
+		CorsConfiguration cors = new CorsConfiguration();
+		cors.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE"));
+		
 		http.csrf().disable()
-			.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
+			.cors().configurationSource(request -> new CorsConfiguration(cors).applyPermitDefaultValues());
 	}
 	
 	@Bean

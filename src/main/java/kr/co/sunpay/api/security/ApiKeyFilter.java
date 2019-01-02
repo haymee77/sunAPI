@@ -67,7 +67,7 @@ public class ApiKeyFilter extends GenericFilterBean {
 				httpResponse.getWriter().write(gson.toJson(error));
 				return;
 			} else {
-
+				log.info("-- API KEY ERROR!!!");
 			}
 		}
 
