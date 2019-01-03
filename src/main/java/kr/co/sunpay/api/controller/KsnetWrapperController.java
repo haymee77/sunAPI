@@ -1,5 +1,6 @@
 package kr.co.sunpay.api.controller;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import kr.co.sunpay.api.domain.KsnetPay;
 import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.repository.KsnetPayRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
+import kr.co.sunpay.api.repository.StoreIdRepository;
 import lombok.extern.java.Log;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -26,6 +28,9 @@ public class KsnetWrapperController {
 	
 	@Autowired
 	KsnetPayResultRepository ksnetPayResultRepo;
+	
+	@Autowired
+	StoreIdRepository storeIdRepo;
 
 	/**
 	 * 결제데이터 받아서 저장 및 KSNet 통신 시작
@@ -65,9 +70,19 @@ public class KsnetWrapperController {
 	@RequestMapping("/finish")
 	public void finish(HttpServletRequest request, Model model) {
 		log.info("-- KsnetWrapperController.finish called...");
+		
 		KsnetPay ksnetPay = ksnetPayRepo.findByUid(Integer.parseInt(request.getParameter("uid")));
 		KsnetPayResult ksnetPayResult = new KsnetPayResult();
+		
+		if (!storeIdRepo.findByIdAndActivated(ksnetPay.getSndStoreid(), true).isPresent()) {
+			throw new EntityNotFoundException("사용가능한 상점 ID가 없습니다.");
+		}
+		
+		// Dashboard에 노출될 내용
 		ksnetPayResult.setKsnetPay(ksnetPay);
+		ksnetPayResult.setStoreId(ksnetPay.getSndStoreid());
+		ksnetPayResult.setServiceTypeCd(
+				storeIdRepo.findByIdAndActivated(ksnetPay.getSndStoreid(), true).get().getServiceTypeCode());
 
 		String rcid = request.getParameter("reCommConId");
 		String authyn = "";

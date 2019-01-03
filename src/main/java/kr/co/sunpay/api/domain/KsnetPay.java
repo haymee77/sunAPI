@@ -1,18 +1,13 @@
 package kr.co.sunpay.api.domain;
 
-import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -26,16 +21,13 @@ import lombok.ToString;
 @Setter
 @Entity
 @Table(name="SP_KSNET_PAY")
-@EqualsAndHashCode(of="uid")
+@Where(clause="DELETED<>1")
+@SQLDelete(sql="UPDATE SP_KSNET_PAY SET DELETED=1 WHERE UID=?")
 @ToString
-public class KsnetPay {
+public class KsnetPay extends BaseEntity {
 	
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="UID")
-	private int uid;
-	
-	@Column(name="PAYMETHOD", length=20)
+	// 결제수단(신용카드, 계좌이체...)
+	@Column(name="KSNET_PAYMETHOD_CD", length=20)
 	private String sndPaymethod;
 	
 	@Column(name="STORE_ID", length=20)
@@ -65,11 +57,4 @@ public class KsnetPay {
 	@Column(name="REPLY", length=200)
 	private String sndReply;
 	
-	@CreationTimestamp
-	@Column(name="CREATED_DT")
-	private LocalDateTime createdDate;
-	
-	@UpdateTimestamp
-	@Column(name="UPDATED_DT")
-	private LocalDateTime updatedDate;
 }

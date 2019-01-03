@@ -33,6 +33,14 @@ public class KsnetPayResult {
 	@Column(name="UID")
 	private int uid;
 	
+	// 거래 상점 ID
+	@Column(name="STORE_ID", length=20)
+	private String storeId;
+	
+	// 정산서비스 타입(순간정산, D+2정산...)
+	@Column(name="SERVICE_TYPE_CD", length=20)
+	private String serviceTypeCd;
+	
 	// 성공여부: 영어대문자 O-성공, X-거절
 	@Column(name="AUTH_YN", length=1)
 	private String authyn;
