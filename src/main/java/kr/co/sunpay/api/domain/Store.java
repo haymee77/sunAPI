@@ -97,4 +97,7 @@ public class Store extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name="GROUP_UID_FK")
 	private Group group;
+	
+	@OneToMany(mappedBy="store")
+	private List<Member> members;
 }

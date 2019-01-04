@@ -86,4 +86,7 @@ public class Group extends BaseEntity {
 	
 	@OneToMany(mappedBy="group")
 	private List<Store> stores;
+	
+	@OneToMany(mappedBy="group")
+	private List<Member> members;
 }
