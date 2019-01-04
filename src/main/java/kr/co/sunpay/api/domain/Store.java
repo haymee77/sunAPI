@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -81,7 +82,19 @@ public class Store extends BaseEntity {
 	@Column(name="BIZ_CONTACT", length=25)
 	private String bizContact;
 	
+	@ApiModelProperty(notes="업종")
+	@Column(name="BIZ_INDUSTRY", length=200)
+	private String bizIndustry;
+	
+	@ApiModelProperty(notes="업태")
+	@Column(name="BIZ_STATUS", length=200)
+	private String bizStatus;
+	
 	@OneToMany(orphanRemoval=true)
 	@JoinColumn(name="STORE_UID_FK")
 	private List<StoreId> storeIds;
+	
+	@ManyToOne
+	@JoinColumn(name="GROUP_UID_FK")
+	private Group group;
 }

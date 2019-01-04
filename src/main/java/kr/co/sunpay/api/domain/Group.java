@@ -1,11 +1,16 @@
 package kr.co.sunpay.api.domain;
 
+import java.util.List;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,4 +24,66 @@ import lombok.ToString;
 @ToString
 public class Group extends BaseEntity {
 	
+	@ApiModelProperty(notes="그룹 권한 코드")
+	@Column(name="ROLE_CD", length=20)
+	private String roleCode;
+	
+	@ApiModelProperty(notes="사업자 구분(1: 사업자, 0: 비사업자)")
+	@Column(name="BIZ_FL", columnDefinition="BIT(1) DEFAULT NULL")
+	private byte bizFl;
+	
+	@ApiModelProperty(notes="은행코드")
+	@Column(name="BANK_CD", length=20)
+	private String bankCode;
+	
+	@ApiModelProperty(notes="계좌번호")
+	@Column(name="BANK_ACCOUNT_NO", length=45)
+	private String bankAccountNo;
+	
+	@ApiModelProperty(notes="계좌주명")
+	@Column(name="BANK_ACCOUNT_NM", length=10)
+	private String bankAccountName;
+	
+	@ApiModelProperty(notes="사업자 등록번호")
+	@Column(name="BIZ_NO", length=15)
+	private String bizNo;
+	
+	@ApiModelProperty(notes="사업자 상호명")
+	@Column(name="BIZ_NM", length=50)
+	private String bizName;
+	
+	@ApiModelProperty(notes="사업자(비사업자) 성명")
+	@Column(name="BIZ_OWNER", length=10)
+	private String bizOwner;
+	
+	@ApiModelProperty(notes="사업자(비사업자) 주민번호")
+	@Column(name="BIZ_OWNER_REGI_NO", length=15)
+	private String bizOwnerRegiNo;
+	
+	@ApiModelProperty(notes="사업자(비사업자) 우편번호")
+	@Column(name="BIZ_ZIPCODE", length=10)
+	private String bizZipcode;
+	
+	@ApiModelProperty(notes="사업자(비사업자) 주소-기본")
+	@Column(name="BIZ_ADDRESS_BASIC", length=100)
+	private String bizAddressBasic;
+	
+	@ApiModelProperty(notes="사업자(비사업자) 주소-상세")
+	@Column(name="BIZ_ADDRESS_DETAIL", length=100)
+	private String bizAddressDetail;
+	
+	@ApiModelProperty(notes="사업자(비사업자) 연락처")
+	@Column(name="BIZ_CONTACT", length=25)
+	private String bizContact;
+	
+	@ApiModelProperty(notes="업종")
+	@Column(name="BIZ_INDUSTRY", length=200)
+	private String bizIndustry;
+	
+	@ApiModelProperty(notes="업태")
+	@Column(name="BIZ_STATUS", length=200)
+	private String bizStatus;
+	
+	@OneToMany(mappedBy="group")
+	private List<Store> stores;
 }
