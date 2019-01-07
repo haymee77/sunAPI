@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -44,11 +45,11 @@ public class Store extends BaseEntity {
 	
 	@ApiModelProperty(notes="취소예치금 금액")
 	@Column(name="DEPOSIT")
-	private int depost;
+	private int deposit;
 	
 	@ApiModelProperty(notes="취소예치금 입금번호")
 	@Column(name="DEPOSIT_NO", length=10)
-	private String depostNo;
+	private String depositNo;
 	
 	@ApiModelProperty(notes="사업자 등록번호")
 	@Column(name="BIZ_NO", length=15)
@@ -94,6 +95,7 @@ public class Store extends BaseEntity {
 	@JoinColumn(name="STORE_UID_FK")
 	private List<StoreId> storeIds;
 	
+	@ApiModelProperty(notes="소속 그룹")
 	@ManyToOne
 	@JoinColumn(name="GROUP_UID_FK")
 	private Group group;
