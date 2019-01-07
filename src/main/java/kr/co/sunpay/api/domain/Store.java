@@ -2,9 +2,9 @@ package kr.co.sunpay.api.domain;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -12,6 +12,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -91,15 +93,17 @@ public class Store extends BaseEntity {
 	@Column(name="BIZ_STATUS", length=200)
 	private String bizStatus;
 	
-	@OneToMany(orphanRemoval=true)
+	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
 	@JoinColumn(name="STORE_UID_FK")
 	private List<StoreId> storeIds;
 	
 	@ApiModelProperty(notes="소속 그룹")
 	@ManyToOne
 	@JoinColumn(name="GROUP_UID_FK")
+	@JsonBackReference
 	private Group group;
 	
+	@JsonBackReference
 	@OneToMany(mappedBy="store")
 	private List<Member> members;
 }

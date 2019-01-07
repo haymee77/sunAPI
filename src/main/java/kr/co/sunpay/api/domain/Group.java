@@ -85,8 +85,8 @@ public class Group extends BaseEntity {
 	private String bizStatus;
 	
 	@OneToMany(mappedBy="group")
-	private List<Store> stores;
+	private List<Member> members;
 	
 	@OneToMany(mappedBy="group")
-	private List<Member> members;
+	private List<Store> stores;
 }

@@ -32,7 +32,8 @@ public class ApiKeyFilter extends GenericFilterBean {
 			"/swagger-resources",
 			"/webjars", 
 			"/v2/api-docs",
-			"/ksnet");
+			"/ksnet",
+			"/error");
 
 	public ApiKeyFilter(String headerKeyName) {
 		this.headerKeyName = headerKeyName;

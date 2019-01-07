@@ -1,9 +1,13 @@
 package kr.co.sunpay.api.controller;
 
 import java.net.URI;
+import java.util.List;
+
+import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +30,19 @@ public class StoreController {
 	@Autowired
 	StoreService storeService;
 	
+	@GetMapping("")
+	public List<Store> retrieveStores() {
+		
+		log.info("-- StoreController.retrieveStores called..");
+		if (storeRepo.count() == 0) {
+			throw new EntityNotFoundException("There is no Store saved.");
+		}
+		
+		return storeRepo.findAll();
+	}
+	
 	@PostMapping("")
-	public ResponseEntity<Object> createStore(@RequestBody Store store) {
+	public ResponseEntity<Object> createStore(@RequestBody Store store) throws Exception {
 		
 		log.info("-- StoreController.createStore called..");
 		Store newStore = storeService.create(store);

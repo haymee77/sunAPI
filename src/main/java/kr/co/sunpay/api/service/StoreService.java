@@ -17,6 +17,11 @@ public class StoreService {
 	public Store create(Store store) {
 		
 		log.info("-- StoreService.create called...");
+		// group id check
+		if (store.getGroup() == null) {
+			throw new IllegalArgumentException("The Required Parameter('group':{'uid': ''}) is missing.");
+		}
+		
 		return storeRepo.save(store);
 	}
 }

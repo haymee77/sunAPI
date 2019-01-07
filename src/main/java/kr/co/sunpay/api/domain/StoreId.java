@@ -2,8 +2,6 @@ package kr.co.sunpay.api.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.SQLDelete;
@@ -32,9 +30,4 @@ public class StoreId extends BaseEntity {
 	@ApiModelProperty(notes="활성화 여부(true: 사용중, false: 미사용)")
 	@Column(name="ACTIVATED")
 	private Boolean activated;
-	
-	@ApiModelProperty(notes="상점 정보")
-	@ManyToOne
-	@JoinColumn(name="STORE_UID_FK", nullable=false)
-	private Store store;
 }

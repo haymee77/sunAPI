@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import kr.co.sunpay.api.domain.Code;
 import kr.co.sunpay.api.repository.CodeRepository;
-import lombok.extern.java.Log;
 
 @Service
 public class CodeService {

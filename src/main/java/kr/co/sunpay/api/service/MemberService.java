@@ -63,7 +63,7 @@ public class MemberService {
 		
 		Member dbMember = memberRepo.findByUid(uid).get();
 		
-		if (!member.getPassword().isEmpty() && member.getPassword().trim().length() > 0) {
+		if (member.getPassword() != null && member.getPassword().trim().length() > 0) {
 			dbMember.setPassword(pwEncoder.encode(member.getPassword()));
 		}
 		
@@ -87,6 +87,15 @@ public class MemberService {
 			if (!member.getRoles().contains(role)) {
 				iRoles.remove();
 			}
+		}
+		
+		// 상점ID, 그룹ID 수정
+		if (member.getStore() != null) {
+			dbMember.setStore(member.getStore());
+		}
+		
+		if (member.getGroup() != null) {
+			dbMember.setGroup(member.getGroup());
 		}
 		
 		return memberRepo.save(dbMember);
