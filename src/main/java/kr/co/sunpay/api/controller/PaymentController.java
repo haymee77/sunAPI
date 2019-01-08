@@ -1,108 +1,83 @@
 package kr.co.sunpay.api.controller;
 
-import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.swagger.annotations.ApiOperation;
-import kr.co.sunpay.api.domain.Payment;
-import kr.co.sunpay.api.repository.PaymentRepository;
-import lombok.extern.java.Log;
+import io.swagger.annotations.ApiParam;
+import kr.co.sunpay.api.domain.Member;
+import kr.co.sunpay.api.domain.MemberRole;
+import kr.co.sunpay.api.domain.Store;
+import kr.co.sunpay.api.model.PaymentItem;
+import kr.co.sunpay.api.repository.MemberRepository;
+import kr.co.sunpay.api.repository.StoreRepository;
 
-/**
- * API 샘플
- * @author himeepark
- *
- */
-@Log
 @RestController
-@RequestMapping("/payment/")
+@RequestMapping("/payment")
 public class PaymentController {
-
+	
 	@Autowired
-	private PaymentRepository paymentRepo;
-
-	@GetMapping("/ks/pay/{storeId}")
-	@ApiOperation(value = "상점ID로 결제내역 요청하기", notes = "특정 상점(storeId)의 결제 시도 내역 모든 리스트 반환함.")
-	public List<Payment> retrieveAllPayment(@PathVariable String storeId) {
-
-		log.info("-- PaymentController.retrieveAllPayment called...");
-
-		return paymentRepo.findByStoreId(storeId);
-	}
-
-	@GetMapping("/ks/pay/{storeId}/{orderNo}")
-	@ApiOperation(value = "상점ID와 주문번호로 결제내역 요청하기", notes = "특정 상점(storeId)의 특정 주문건(orderNo)에 대한 결제 시도 내역 반환함.")
-	public Payment retrievePayment(@PathVariable String storeId, @PathVariable String orderNo) throws Exception {
-
-		log.info("-- PaymentController.retrievePayment called...");
-		Optional<Payment> pay = paymentRepo.findByStoreIdAndOrderNo(storeId, orderNo);
-
-		if (!pay.isPresent())
-			throw new EntityNotFoundException("storeId: " + storeId + " | orderNo: " + orderNo);
-
-		return pay.get();
-	}
-
-	@DeleteMapping("/ks/pay/{storeId}/{orderNo}")
-	@ApiOperation(value = "상점ID와 주문번호로 결제내역 삭제", notes = "상점(storeId)의 주문건(orderNo) 삭제.")
-	public void deletePayment(@PathVariable String storeId, @PathVariable String orderNo) {
-
-		log.info("-- PaymentController.deletePayment called...");
-		Optional<Payment> pay = paymentRepo.findByStoreIdAndOrderNo(storeId, orderNo);
-
-		if (!pay.isPresent())
-			throw new EntityNotFoundException("No payment exist.(storeId: " + storeId + ", orderNo: " + orderNo + ")");
-
-		paymentRepo.deleteById(pay.get().getUid());
-	}
-
-	@PostMapping("/ks/pay")
-	@ApiOperation(value = "결제 시도 내역 저장하기", notes = "결제 시도 내역 저장 후 URL 반환.")
-	public ResponseEntity<Object> createPay(@RequestBody Payment payment) throws Exception {
-
-		log.info("-- PaymentController.addPay called...");
-		log.info(payment.toString());
-
-		// TODO: storeId validation check.
-
-		Payment savedPay = paymentRepo.save(payment);
-
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{storeId}/{orderNo}")
-				.buildAndExpand(savedPay.getStoreId(), savedPay.getOrderNo()).toUri();
-
-		return ResponseEntity.created(location).build();
-	}
-
-	@PutMapping("/ks/pay/{uid}")
-	@ApiOperation(value = "결제내역 수정하기", notes = "결제 내역(uid) 수정")
-	public ResponseEntity<Object> updatePay(@RequestBody Payment payment, @PathVariable int uid) {
-
-		log.info("-- PaymentController.updatePay...");
-		log.info(payment.toString());
-
-		Optional<Payment> existPay = paymentRepo.findByUid(uid);
-
-		if (!existPay.isPresent())
-			throw new EntityNotFoundException("No payment exist.(uid: " + uid + ")");
-
-		payment.setUid(uid);
-		paymentRepo.save(payment);
-
-		return ResponseEntity.noContent().build();
+	StoreRepository storeRepo;
+	
+	@Autowired
+	MemberRepository memberRepo;
+	
+	boolean qualified;
+	
+	@GetMapping("/{memberUid}/{storeUid}")
+	@ApiOperation(value="결제통계 데이터 요청", notes="검색 조건: 상점ID(필수), 기간, 결제방법, 정산방법")
+	public List<PaymentItem> retrieveList(@ApiParam(value="멤버UID", required=true) @PathVariable(value="memberUid") int memberUid,
+			@ApiParam(value="상점UID", required=true) @PathVariable(value="storeUid") int storeUid,
+			@RequestParam(value="결제날짜검색 - 시작일", required=false) String startDate, 
+			@RequestParam(value="결제날짜검색 - 종료일", required=false) String endDate, 
+			@RequestParam(value="결제방법", required=false) String paymethod, 
+			@RequestParam(value="정산방법(코드값)", required=false) String serviceTypeCode) {
+		
+		List<PaymentItem> list = new ArrayList<PaymentItem>();
+		 qualified = false;
+		
+		// memberUid 가 storeId 에 대한 권힌이 있는지 확인
+		Optional<Store> store = storeRepo.findByUid(storeUid);
+		Optional<Member> member = memberRepo.findByUid(memberUid);
+		
+		if (!store.isPresent()) throw new EntityNotFoundException("상점을 찾을 수 없습니다.");
+		if (!member.isPresent()) throw new EntityNotFoundException("멤버를 찾을 수 없습니다.");
+		
+		// 멤버 권한 확인
+		List<MemberRole> roles = member.get().getRoles();
+		for (MemberRole role : roles) {
+			// 최고관리자, 본사 멤버의 경우 자격있음
+			if (role.getRoleName().equals("TOP") || role.getRoleName().equals("HEAD")) {
+				qualified = true;
+				break;
+			}
+			
+		}
+		
+		System.out.println(member.get().getRoles());
+		
+		
+		
+		if (member.get().getStore() != null) {
+			if (member.get().getStore().getUid() == storeUid) {
+				System.out.println("상점 멤버임");
+			} else {
+			}
+		} else {
+			System.out.println("상점 멤버 아님 > 대리점/지사/본사 멤버인지 확인");
+		}
+		
+		return list;
 	}
 }
