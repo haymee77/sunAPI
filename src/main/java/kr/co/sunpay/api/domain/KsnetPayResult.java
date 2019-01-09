@@ -58,8 +58,8 @@ public class KsnetPayResult {
 	private String trdtm;
 	
 	// 금액
-	@Column(name="AMT", length=20)
-	private String amt;
+	@Column(name="AMT")
+	private int amt;
 	
 	// 메세지1
 	@Column(name="MSG1", length=30)
@@ -109,7 +109,7 @@ public class KsnetPayResult {
 	@Column(name="UPDATED_DT")
 	private LocalDateTime updatedDate;
 	
-	@OneToOne(fetch=FetchType.LAZY, optional=false)
+	@OneToOne(fetch=FetchType.EAGER, optional=false)
 	@JoinColumn(name="KSNET_PAY_UID_FK")
 	private KsnetPay ksnetPay;
 }

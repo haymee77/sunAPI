@@ -15,6 +15,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,10 +53,12 @@ public class Member extends BaseEntity {
 	@Column(name="ACTIVATE", columnDefinition="BIT(1)")
 	private Boolean activate;
 	
+	@JsonBackReference(value="store-members")
 	@ManyToOne
 	@JoinColumn(name="STORE_UID_FK")
 	private Store store;
-	
+
+	@JsonBackReference(value="group-members")
 	@ManyToOne
 	@JoinColumn(name="GROUP_UID_FK")
 	private Group group;

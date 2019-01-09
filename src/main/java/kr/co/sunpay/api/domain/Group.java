@@ -10,6 +10,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +25,10 @@ import lombok.ToString;
 @SQLDelete(sql="UPDATE SP_GROUPS SET DELETED=1 WHERE UID=?")
 @ToString
 public class Group extends BaseEntity {
+	
+	@ApiModelProperty(notes="상위 그룹")
+	@Column(name="PARENT_GROUP_UID")
+	private Integer parentGroupUid;
 	
 	@ApiModelProperty(notes="그룹 권한 코드")
 	@Column(name="ROLE_CD", length=20)
@@ -84,9 +90,11 @@ public class Group extends BaseEntity {
 	@Column(name="BIZ_STATUS", length=200)
 	private String bizStatus;
 	
+	@JsonManagedReference(value="group-members")
 	@OneToMany(mappedBy="group")
 	private List<Member> members;
 	
+	@JsonManagedReference(value="group-stores")
 	@OneToMany(mappedBy="group")
 	private List<Store> stores;
 }

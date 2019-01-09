@@ -1,5 +1,8 @@
 package kr.co.sunpay.api.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,5 +26,18 @@ public class StoreService {
 		}
 		
 		return storeRepo.save(store);
+	}
+	
+	/**
+	 * groupUid 자신 그룹과 하위 모든 그룹이 가진 상점 리스트 반환
+	 * @param groupUid
+	 * @return
+	 */
+	public List<Store> getStores(int groupUid) {
+		
+		List<Store> stores = new ArrayList<Store>();
+		stores = storeRepo.findByGroup(groupUid);
+		
+		return stores;
 	}
 }

@@ -101,7 +101,7 @@ public class KsnetWrapperController {
 			ksnetPayResult.setTrno(ipg.kspay_get_value("trno")); // 거래번호(KSNet 고유번호)
 			ksnetPayResult.setTrddt(ipg.kspay_get_value("trddt"));
 			ksnetPayResult.setTrdtm(ipg.kspay_get_value("trdtm"));
-			ksnetPayResult.setAmt(ipg.kspay_get_value("amt"));
+			ksnetPayResult.setAmt(Integer.parseInt(ipg.kspay_get_value("amt")));
 			ksnetPayResult.setMsg1(ipg.kspay_get_value("msg1"));
 			ksnetPayResult.setMsg2(ipg.kspay_get_value("msg2"));
 			ksnetPayResult.setOrdno(ipg.kspay_get_value("ordno"));

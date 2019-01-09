@@ -14,6 +14,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -98,12 +99,12 @@ public class Store extends BaseEntity {
 	private List<StoreId> storeIds;
 	
 	@ApiModelProperty(notes="소속 그룹")
+	@JsonBackReference(value="group-stores")
 	@ManyToOne
 	@JoinColumn(name="GROUP_UID_FK")
-	@JsonBackReference
 	private Group group;
 	
-	@JsonBackReference
+	@JsonManagedReference(value="store-members")
 	@OneToMany(mappedBy="store")
 	private List<Member> members;
 }

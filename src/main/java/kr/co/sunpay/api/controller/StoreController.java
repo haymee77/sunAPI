@@ -8,6 +8,7 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +40,17 @@ public class StoreController {
 		}
 		
 		return storeRepo.findAll();
+	}
+	
+	@GetMapping("/{uid}")
+	public Store retrieveStore(@PathVariable("uid") int uid) {
+		
+		log.info("-- StoreController.retrieveStore called");
+		if (!storeRepo.findByUid(uid).isPresent()) {
+			throw new EntityNotFoundException();
+		}
+		
+		return storeRepo.findByUid(uid).get();
 	}
 	
 	@PostMapping("")
