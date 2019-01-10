@@ -30,9 +30,9 @@ import lombok.ToString;
 @ToString
 public class Store extends BaseEntity {
 
-	@ApiModelProperty(notes="사업자 여부(1:사업자, 0:비사업자)")
-	@Column(name="BIZ_FL", columnDefinition="BIT(1)")
-	private byte bizFl;
+	@ApiModelProperty(notes="사업자 종류(CODES.GROUP_NM='BIZ_TYPE')")
+	@Column(name="BIZ_TYPE_CD", length=20)
+	private String bizTypeCode;
 	
 	@ApiModelProperty(notes="은행코드")
 	@Column(name="BANK_CD", length=20)

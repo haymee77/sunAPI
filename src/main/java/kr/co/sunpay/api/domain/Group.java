@@ -34,9 +34,9 @@ public class Group extends BaseEntity {
 	@Column(name="ROLE_CD", length=20)
 	private String roleCode;
 	
-	@ApiModelProperty(notes="사업자 구분(1: 사업자, 0: 비사업자)")
-	@Column(name="BIZ_FL", columnDefinition="BIT(1) DEFAULT NULL")
-	private byte bizFl;
+	@ApiModelProperty(notes="사업자 종류(CODES.GROUP_NM='BIZ_TYPE')")
+	@Column(name="BIZ_TYPE_CD", length=20)
+	private String bizTypeCode;
 	
 	@ApiModelProperty(notes="은행코드")
 	@Column(name="BANK_CD", length=20)
