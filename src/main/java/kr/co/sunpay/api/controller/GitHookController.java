@@ -1,9 +1,12 @@
 package kr.co.sunpay.api.controller;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,9 +26,10 @@ public class GitHookController {
 	}
 	
 	@PostMapping("/push/{project}")
-	public ResponseEntity<Object> postPush(@PathVariable("project") String project) {
+	public ResponseEntity<Object> postPush(@PathVariable("project") String project, @RequestBody Map<String, Object> body) {
 		
 		System.out.println(project);
+		System.out.println(body.toString());
 		
 		return ResponseEntity.ok().build();
 	}

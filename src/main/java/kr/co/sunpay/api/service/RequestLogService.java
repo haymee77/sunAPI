@@ -37,6 +37,7 @@ public class RequestLogService {
 		log.setMethod(request.getMethod());
 		log.setIp(request.getRemoteAddr());
 		log.setUri(request.getRequestURI());
+		log.setParams(request.getParameterMap().toString());
 		logRepo.save(log);
 	}
 }
