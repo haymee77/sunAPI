@@ -23,8 +23,9 @@ public class GitHookController {
 		
 		System.out.println(project);
 		try {
+			
 			System.out.println("process builder start...");
-			ProcessBuilder pb = new ProcessBuilder("sudo su", "/home/ubuntu/app/dashboard/deploy.sh");
+			ProcessBuilder pb = new ProcessBuilder("/home/ubuntu/app/dashboard/deploy.sh");
 			pb.start();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
