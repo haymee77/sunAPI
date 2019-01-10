@@ -2,9 +2,6 @@ package kr.co.sunpay.api.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
-
-import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -44,21 +41,14 @@ public class MemberController {
 	@ApiOperation(value="특정 멤버 정보 요청", notes="{uid} 멤버에 대한 정보 반환")
 	public Member retrieveMember(@ApiParam("정보를 얻을 멤버의 UID") @PathVariable int uid) {
 		
-		Optional<Member> getMember = memberRepo.findByUid(uid);
-		if (!getMember.isPresent())
-			throw new EntityNotFoundException("There is no Member(uid:" + uid + ")");
-		
-		return getMember.get();
+		return memberService.getMember(uid);
 	}
 	
 	@GetMapping("")
 	@ApiOperation(value="멤버 리스트 요청", notes="멤버 리스트 반환")
 	public List<Member> retrieveMembers() {
 		
-		if (memberRepo.count() == 0)
-			throw new EntityNotFoundException("There is no availabel Member");
-		
-		return memberRepo.findAll();
+		return memberService.getMembers();
 	}
 	
 	@PostMapping("")

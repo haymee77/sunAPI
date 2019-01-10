@@ -3,6 +3,7 @@ package kr.co.sunpay.api.service;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -35,6 +36,49 @@ public class MemberService {
 	StoreService storeService;
 
 	private Member member;
+	
+	public Member getMember(int uid) {
+		
+		Member member;
+		Optional<Member> getMember = memberRepo.findByUid(uid);
+		
+		if (!getMember.isPresent())
+			throw new EntityNotFoundException("There is no Member(uid:" + uid + ")");
+		
+		member = getMember.get();
+		
+		if (member.getStore() != null) {
+			member.setStoreName(member.getStore().getBizName());
+		}
+		
+		if (member.getGroup() != null) {
+			member.setGroupName(member.getGroup().getBizName());
+		}
+		
+		return member;
+	}
+	
+	public List<Member> getMembers() {
+		
+		if (memberRepo.count() == 0)
+			throw new EntityNotFoundException("There is no availabel Member");
+		
+		List<Member> members = new ArrayList<Member>();
+		memberRepo.findAll().forEach(member -> {
+			
+			if (member.getStore() != null) {
+				member.setStoreName(member.getStore().getBizName());
+			}
+			
+			if (member.getGroup() != null) {
+				member.setGroupName(member.getGroup().getBizName());
+			}
+			
+			members.add(member);
+		});
+		
+		return members;
+	}
 
 	public Member createMember(Member member) {
 

@@ -33,7 +33,8 @@ public class ApiKeyFilter extends GenericFilterBean {
 			"/webjars", 
 			"/v2/api-docs",
 			"/ksnet",
-			"/error");
+			"/error",
+			"/git");
 
 	public ApiKeyFilter(String headerKeyName) {
 		this.headerKeyName = headerKeyName;
