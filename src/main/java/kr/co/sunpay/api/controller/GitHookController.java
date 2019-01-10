@@ -12,24 +12,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import springfox.documentation.annotations.ApiIgnore;
 
-@ApiIgnore
+//@ApiIgnore
 @RestController
 @RequestMapping("/git")
 public class GitHookController {
-
-	@GetMapping("/push/{project}")
-	public ResponseEntity<Object> push(@PathVariable("project") String project) {
-		
-		System.out.println(project);
-		
-		return ResponseEntity.ok().build();
-	}
 	
 	@PostMapping("/push/{project}")
-	public ResponseEntity<Object> postPush(@PathVariable("project") String project, @RequestBody Map<String, Object> body) {
+	public ResponseEntity<Object> pushListener(@PathVariable("project") String project, @RequestBody Map<String, Object> body) {
 		
 		System.out.println(project);
-		System.out.println(body.toString());
+		ProcessBuilder pb = new ProcessBuilder("sudo su", "/home/ubuntu/app/dashboard/deploy.sh");
+		pb.start();
 		
 		return ResponseEntity.ok().build();
 	}

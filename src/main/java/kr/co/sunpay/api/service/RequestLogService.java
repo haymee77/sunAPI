@@ -1,5 +1,6 @@
 package kr.co.sunpay.api.service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +17,7 @@ public class RequestLogService {
 	@Autowired
 	RequestLogRepository logRepo;
 
-	public void saveLog(HttpServletRequest request) {
+	public void saveLog(HttpServletRequest request) throws UnsupportedEncodingException {
 
 		RequestLog log = new RequestLog();
 		String headers = "";
@@ -37,7 +38,7 @@ public class RequestLogService {
 		log.setMethod(request.getMethod());
 		log.setIp(request.getRemoteAddr());
 		log.setUri(request.getRequestURI());
-		log.setParams(request.getParameterMap().toString());
+		
 		logRepo.save(log);
 	}
 }
