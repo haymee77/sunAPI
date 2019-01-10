@@ -1,5 +1,6 @@
 package kr.co.sunpay.api.controller;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -21,8 +22,14 @@ public class GitHookController {
 	public ResponseEntity<Object> pushListener(@PathVariable("project") String project, @RequestBody Map<String, Object> body) {
 		
 		System.out.println(project);
-		ProcessBuilder pb = new ProcessBuilder("sudo su", "/home/ubuntu/app/dashboard/deploy.sh");
-		pb.start();
+		try {
+			System.out.println("process builder start...");
+			ProcessBuilder pb = new ProcessBuilder("sudo su", "/home/ubuntu/app/dashboard/deploy.sh");
+			pb.start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return ResponseEntity.ok().build();
 	}
