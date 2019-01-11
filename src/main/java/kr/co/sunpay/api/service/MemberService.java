@@ -34,6 +34,14 @@ public class MemberService {
 	
 	@Autowired
 	StoreService storeService;
+	
+	private final String ROLE_TOP = "TOP";
+	private final String ROLE_HEAD = "HEAD";
+	private final String ROLE_BRANCH = "BRANCH";
+	private final String ROLE_AGENCY = "AGENCY";
+	private final String ROLE_MANAGER = "MANAGER";
+	private final String ROLE_STAFF = "STAFF";
+	private final String ROLE_CS = "CS";
 
 	private Member member;
 	
@@ -171,6 +179,11 @@ public class MemberService {
 		});
 
 		return roleNames;
+	}
+	
+	public boolean hasRole(Member member, String role) {
+		
+		return getRoleNames(member).contains(role);
 	}
 
 	public boolean hasStoreQualification(Member member, Store store) {
