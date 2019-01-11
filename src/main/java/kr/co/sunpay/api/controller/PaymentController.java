@@ -57,6 +57,10 @@ public class PaymentController {
 			@ApiParam(value = "결제수단(코드값)", required = false) @RequestParam(value = "paymethod", required = false) List<String> paymethod,
 			@ApiParam(value = "서비스 타입(순간정산, D2 등 코드값)", required = false) @RequestParam(value = "serviceTypeCode", required = false) List<String> serviceTypeCode) {
 		
+		// test
+		storeUid = 7;
+		memberUid = 17;
+		
 		// memberUid 가 storeId 에 대한 권힌이 있는지 확인
 		Optional<Store> opStore = storeRepo.findByUid(storeUid);
 		Optional<Member> opMember = memberRepo.findByUid(memberUid);
