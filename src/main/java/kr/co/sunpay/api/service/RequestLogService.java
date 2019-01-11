@@ -28,7 +28,7 @@ public class RequestLogService {
 		while (headerNames.hasMoreElements()) {
 			hName = headerNames.nextElement();
 			hValue = request.getHeader(hName);
-			headers += "Header Name: " + hName + ", Value: " + hValue + "\n";
+			headers += hName + ": " + hValue + "\n";
 		}
 
 		if (headers.length() > 1000)

@@ -50,11 +50,11 @@ public class PaymentController {
 	public List<PaymentItem> retrieveList(
 			@ApiParam(value = "멤버UID", required = true) @PathVariable(value = "memberUid") int memberUid,
 			@ApiParam(value = "상점UID", required = true) @PathVariable(value = "storeUid") int storeUid,
-			@RequestParam(value = "결제날짜검색 - 시작일", required = true) String startDate,
-			@RequestParam(value = "결제날짜검색 - 종료일", required = true) String endDate,
-			@RequestParam(value = "결제방법", required = true) String paymethod,
-			@RequestParam(value = "정산방법(코드값)", required = true) String serviceTypeCode) {
-
+			@ApiParam(example = "20190101(YYYYMMDD)") @RequestParam(value = "결제날짜검색 - 시작일", required = true) String startDate,
+			@ApiParam(example = "20190101(YYYYMMDD)") @RequestParam(value = "결제날짜검색 - 종료일", required = true) String endDate,
+			@RequestParam(value = "결제방법", required = true) List<String> paymethod,
+			@RequestParam(value = "정산방법(코드값)", required = true) List<String> serviceTypeCode) {
+		
 		// memberUid 가 storeId 에 대한 권힌이 있는지 확인
 		Optional<Store> opStore = storeRepo.findByUid(storeUid);
 		Optional<Member> opMember = memberRepo.findByUid(memberUid);
@@ -73,15 +73,18 @@ public class PaymentController {
 		
 		List<String> storeIds = new ArrayList<String>();
 		store.getStoreIds().forEach(storeId -> {
-			System.out.println(storeId.getId());
 			storeIds.add(storeId.getId());
 		});
 		
-		List<KsnetPayResult> payList = ksnetPayResultRepo.findByStoreIdIn(storeIds);
+		List<KsnetPayResult> payList = ksnetPayResultRepo.findByStoreIdAndtrddtAndserviceTypeCd(storeIds, startDate, endDate, serviceTypeCode);
 		
 		List<PaymentItem> list = new ArrayList<PaymentItem>(); 
 		
 		payList.forEach(pay -> {
+			if (!paymethod.contains(pay.getKsnetPay().getSndPaymethod())) {
+				return;
+			}
+			
 			PaymentItem item = new PaymentItem();
 			
 			item.setPaidDate(pay.getTrddt() + pay.getTrdtm());
