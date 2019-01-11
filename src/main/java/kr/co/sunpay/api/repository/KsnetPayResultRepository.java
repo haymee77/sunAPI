@@ -12,9 +12,6 @@ import kr.co.sunpay.api.domain.KsnetPayResult;
 @Repository
 public interface KsnetPayResultRepository extends JpaRepository<KsnetPayResult, Integer> {
 
-	List<KsnetPayResult> findByStoreIdIn(List<String> storeIds);
-	List<KsnetPayResult> findBytrddtGreaterThanEqualAndStoreIdIn(String trdStartDt, List<String> storeIds);
-	
 	/**
 	 * GET /payment/{memberUid}/{storeUid} 호출 시 사용됨
 	 * @param storeIds
