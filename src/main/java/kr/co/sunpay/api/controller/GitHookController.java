@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import springfox.documentation.annotations.ApiIgnore;
 
-//@ApiIgnore
+@ApiIgnore
 @RestController
 @RequestMapping("/git")
 public class GitHookController {
@@ -30,8 +30,9 @@ public class GitHookController {
 			@RequestBody Map<String, Object> body) throws IOException {
 
 		System.out.println("pushListener...");
-		String command = "sh /home/ubuntu/app/" + project + "/deploy.sh";
-		ProcessBuilder pb = new ProcessBuilder(command);
+		String command = "sh";
+		String path = "/home/ubuntu/app/" + project + "/deploy.sh";
+		ProcessBuilder pb = new ProcessBuilder(command, path);
 		pb.start();
 
 		return ResponseEntity.ok().build();
