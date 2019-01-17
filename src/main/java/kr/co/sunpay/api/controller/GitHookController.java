@@ -30,7 +30,8 @@ public class GitHookController {
 		try {
 			
 			System.out.println("process builder start...");
-			ProcessBuilder pb = new ProcessBuilder("/home/ubuntu/app/" + project + "/deploy.sh");
+			String command = "/home/ubuntu/app/" + project + "/deploy.sh";
+			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.start();
 			
 		} catch (IOException e) {
