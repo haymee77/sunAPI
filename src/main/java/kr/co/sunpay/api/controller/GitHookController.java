@@ -30,7 +30,7 @@ public class GitHookController {
 			@RequestBody Map<String, Object> body) throws IOException {
 
 		System.out.println("pushListener...");
-		String command = "/home/ubuntu/app/" + project + "/deploy.sh";
+		String command = "sudo /home/ubuntu/app/" + project + "/deploy.sh";
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.start();
 
