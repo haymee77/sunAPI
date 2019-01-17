@@ -27,11 +27,10 @@ public class GitHookController {
 	@PostMapping("/push/{project}")
 	public ResponseEntity<Object> pushListener(@PathVariable("project") String project, @RequestBody Map<String, Object> body) {
 		
-		System.out.println(project);
 		try {
 			
 			System.out.println("process builder start...");
-			ProcessBuilder pb = new ProcessBuilder("/home/ubuntu/app/dashboard/deploy.sh");
+			ProcessBuilder pb = new ProcessBuilder("/home/ubuntu/app/" + project + "/deploy.sh");
 			pb.start();
 			
 		} catch (IOException e) {
