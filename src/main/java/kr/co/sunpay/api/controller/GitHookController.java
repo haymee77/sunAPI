@@ -12,33 +12,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 import springfox.documentation.annotations.ApiIgnore;
 
-@ApiIgnore
+//@ApiIgnore
 @RestController
 @RequestMapping("/git")
 public class GitHookController {
-	
+
 	/**
 	 * Gitlab 에서 Push event 발생 시 호출되는 API
 	 * 
 	 * @param project
 	 * @param body
 	 * @return
+	 * @throws IOException
 	 */
 	@PostMapping("/push/{project}")
-	public ResponseEntity<Object> pushListener(@PathVariable("project") String project, @RequestBody Map<String, Object> body) {
-		
-		try {
-			
-			System.out.println("process builder start...");
-			String command = "/home/ubuntu/app/" + project + "/deploy.sh";
-			ProcessBuilder pb = new ProcessBuilder(command);
-			pb.start();
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+	public ResponseEntity<Object> pushListener(@PathVariable("project") String project,
+			@RequestBody Map<String, Object> body) throws IOException {
+
+		System.out.println("pushListener...");
+		String command = "/home/ubuntu/app/" + project + "/deploy.sh";
+		ProcessBuilder pb = new ProcessBuilder(command);
+		pb.start();
+
 		return ResponseEntity.ok().build();
 	}
 }
