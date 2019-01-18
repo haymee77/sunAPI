@@ -2,10 +2,13 @@ package kr.co.sunpay.api.domain;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -26,7 +29,7 @@ import lombok.ToString;
 @ToString
 public class Group extends BaseEntity {
 	
-	@ApiModelProperty(notes="상위 그룹")
+	@ApiModelProperty(notes="상위 그룹", required=true)
 	@Column(name="PARENT_GROUP_UID")
 	private Integer parentGroupUid;
 	
@@ -90,8 +93,12 @@ public class Group extends BaseEntity {
 	@Column(name="BIZ_STATUS", length=200)
 	private String bizStatus;
 	
+	@ApiModelProperty(notes="기본사용자")
+	@Transient
+	private int ownerMemberUid;
+	
 	@JsonManagedReference(value="group-members")
-	@OneToMany(mappedBy="group")
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER,  mappedBy="group")
 	private List<Member> members;
 	
 	@JsonManagedReference(value="group-stores")

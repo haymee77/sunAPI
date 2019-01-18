@@ -37,6 +37,13 @@ public class MemberController {
 	@Autowired
 	MemberService memberService;
 	
+	@GetMapping("")
+	@ApiOperation(value="멤버 리스트 요청(삭제될 API)", notes="멤버 리스트 반환")
+	public List<Member> retrieveMembers() {
+		
+		return memberService.getMembers();
+	}
+	
 	@GetMapping("/{uid}")
 	@ApiOperation(value="특정 멤버 정보 요청", notes="{uid} 멤버에 대한 정보 반환")
 	public Member retrieveMember(@ApiParam("정보를 얻을 멤버의 UID") @PathVariable int uid) {
@@ -44,11 +51,11 @@ public class MemberController {
 		return memberService.getMember(uid);
 	}
 	
-	@GetMapping("")
-	@ApiOperation(value="멤버 리스트 요청", notes="멤버 리스트 반환")
-	public List<Member> retrieveMembers() {
+	@GetMapping("/list/{memberUid}")
+	@ApiOperation(value="멤버 리스트 요청", notes="멤버 권한으로 볼 수 있는 멤버 리스트 반환")
+	public List<Member> retrieveMembers(@ApiParam("요청자 UID") @PathVariable int memberUid) {
 		
-		return memberService.getMembers();
+		return memberService.getMembers(memberUid);
 	}
 	
 	@PostMapping("")
