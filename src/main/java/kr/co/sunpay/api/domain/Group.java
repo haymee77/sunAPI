@@ -98,7 +98,7 @@ public class Group extends BaseEntity {
 	private int ownerMemberUid;
 	
 	@JsonManagedReference(value="group-members")
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER,  mappedBy="group")
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="group")
 	private List<Member> members;
 	
 	@JsonManagedReference(value="group-stores")

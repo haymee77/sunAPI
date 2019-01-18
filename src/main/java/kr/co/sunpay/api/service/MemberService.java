@@ -107,6 +107,8 @@ public class MemberService {
 			
 			members = group.getMembers();
 			
+			System.out.println(members.size());
+			
 			for (Store store : group.getStores()) {
 				members.addAll(store.getMembers());
 			}
@@ -115,7 +117,7 @@ public class MemberService {
 			
 			members = group.getMembers();
 			
-			List<Group> agencies = groupRepo.findByparentGroupUid(group.getParentGroupUid());
+			List<Group> agencies = groupRepo.findByparentGroupUid(group.getUid());
 			for (Group agency : agencies) {
 				members.addAll(getMembers(agency));
 			}
