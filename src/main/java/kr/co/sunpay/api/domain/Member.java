@@ -64,9 +64,17 @@ public class Member extends BaseEntity {
 	@JoinColumn(name="GROUP_UID_FK")
 	private Group group;
 	
+	@ApiModelProperty(value="소속 상점 UID")
+	@Transient
+	private int storeUid;
+	
 	@ApiModelProperty(value="소속 상점 이름")
 	@Transient
 	private String storeName;
+	
+	@ApiModelProperty(value="소속 그룹 UID")
+	@Transient
+	private int groupUid;
 	
 	@ApiModelProperty(value="소속 그룹 이름")
 	@Transient

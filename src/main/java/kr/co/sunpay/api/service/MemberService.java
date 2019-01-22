@@ -63,10 +63,12 @@ public class MemberService {
 		
 		if (member.getStore() != null) {
 			member.setStoreName(member.getStore().getBizName());
+			member.setStoreUid(member.getStore().getUid());
 		}
 		
 		if (member.getGroup() != null) {
 			member.setGroupName(member.getGroup().getBizName());
+			member.setGroupUid(member.getGroup().getUid());
 		}
 		
 		return member;
@@ -106,8 +108,6 @@ public class MemberService {
 		if (group.getRoleCode().equals("AGENCY")) {
 			
 			members = group.getMembers();
-			
-			System.out.println(members.size());
 			
 			for (Store store : group.getStores()) {
 				members.addAll(store.getMembers());
