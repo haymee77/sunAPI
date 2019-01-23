@@ -12,6 +12,8 @@ import kr.co.sunpay.api.domain.Store;
 public interface StoreRepository extends JpaRepository<Store, Integer> {
 
 	Optional<Store> findByUid(int uid);
+	
+	Optional<Store> findByDepositNo(String depositNo);
 
 	@Query(value="SELECT * FROM SP_STORES WHERE GROUP_UID_FK IN ("
 			+ "SELECT UID FROM SP_GROUPS WHERE PARENT_GROUP_UID=:groupUid OR UID=:groupUid)"

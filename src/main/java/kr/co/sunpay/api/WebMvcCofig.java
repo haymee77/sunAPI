@@ -11,6 +11,7 @@ public class WebMvcCofig implements WebMvcConfigurer {
 	private static final String[] httpInterceptorPath = {
 		"/member", "/member/**"
 		, "/deposit", "/deposit/**"
+		, "/kspay", "/kspay/**"
 		, "/git", "/git/**"
 	};
 	
