@@ -23,17 +23,15 @@ import lombok.ToString;
 @Getter
 @Setter
 @Entity
-@Table(name="SP_DEPOSIT_HISTORY")
+@Table(name="SP_DEPOSIT_LOGS")
 @ToString
-public class DepositHistory {
+public class DepositLog {
 
-	@ApiModelProperty(hidden=true)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="UID")
 	private int uid;
 	
-	@ApiModelProperty(hidden=true)
 	@Column(name="CREATED_DT")
 	@CreationTimestamp
 	private LocalDateTime createdDate;
@@ -44,19 +42,36 @@ public class DepositHistory {
 	private Store store;
 
 	@ApiModelProperty(notes="입금요청 시 전송된 입금번호")
-	@Column(name="INPUT_DEPOSIT_NO")
-	private String inputDepositNo;
+	@Column(name="ORIGINAL_DEPOSIT_NO")
+	private String originalDepositNo;
 	
 	@Column(name="DEPOSIT_NO")
 	private String depositNo;
 	
+	@Column(name="TR_NO")
+	private String trNo;
+	
 	@Column(name="TYPE_CD")
 	private String typeCd;
 	
-	@Column(name="ORDER_NO")
-	private String orderNo;
+	@Column(name="STATUS_CD")
+	private String statusCd;
 	
 	@Column(name="AMOUNT")
 	private int amt;
+	
+	@Column(name="TOTAL")
+	private int total;
+	
+	public DepositLog(Store store, String originalDepositNo, String depositNo, String typeCd, String trNo, String statusCd, int amt, int total) {
+		this.store = store;
+		this.originalDepositNo = originalDepositNo;
+		this.depositNo = depositNo;
+		this.typeCd = typeCd;
+		this.trNo = trNo;
+		this.statusCd = statusCd;
+		this.amt = amt;
+		this.total = total;
+	}
 	
 }

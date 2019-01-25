@@ -2,46 +2,43 @@ package kr.co.sunpay.api.service;
 
 import java.text.SimpleDateFormat;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.sunpay.api.domain.KspayCancelLog;
 import kr.co.sunpay.api.model.KSPayCancelBody;
 import kr.co.sunpay.api.model.KSPayCancelReturns;
+import kr.co.sunpay.api.repository.KspayCancelLogRepository;
 import ksnet.kspay.KSPayApprovalCancelBean;
 
 @Service
-public class KSPayService {
+public class KspayService {
 
+	@Autowired
+	KspayCancelLogRepository cancelLogRepo;
+	
 	/**
 	 * 결제 취소 요청건 저장
 	 * 
 	 * @param cancelBody
 	 */
-	public void saveCancelRequest(KSPayCancelBody cancelBody) {
-
+	public KspayCancelLog saveCancelLog(KSPayCancelBody cancel) {
+		
+		KspayCancelLog log = new KspayCancelLog(cancel.getStoreid(), cancel.getStorepasswd(), cancel.getTrno(),
+				cancel.getAuthty());
+		
+		return cancelLogRepo.save(log);
 	};
 	
-	public boolean checkDeposit(String storeId, int refundAmt) {
-		
-		return false;
-	}
-
 	/**
-	 * 상점ID(storeId)의 보증금(refundAmt) 차감
-	 * 
-	 * @param storeId
-	 * @param refundAmt
+	 * 결제 취소 요청건 결과 저장
+	 * @param log
+	 * @param result
 	 */
-	public void deductDeposit(String storeId, int refundAmt) {
-
-	}
-	
-	/**
-	 * 보증금 북구
-	 * @param storeId
-	 * @param refundAmt
-	 */
-	public void resetDeposit(String storeId, int refundAmt) {
+	public void updateCancelLog(KspayCancelLog log, KSPayCancelReturns result) {
 		
+		log.setResult(result);
+		cancelLogRepo.save(log);
 	}
 
 	/**
@@ -51,11 +48,11 @@ public class KSPayService {
 	 * @return
 	 */
 	public int getPaidAmt(String trNo) {
-
+		
 		return 0;
 	}
 
-	public KSPayCancelReturns sendKSPay(KSPayCancelBody cancelBody) {
+	public KSPayCancelReturns sendKSPay(KSPayCancelBody cancel) {
 		// Default(수정항목이 아님)-------------------------------------------------------
 		String EncType = "0"; // 0: 암화안함, 1:openssl, 2: seed
 		String Version = "0210"; // 전문버전
@@ -71,7 +68,7 @@ public class KSPayService {
 		// -------------------------------------------------------------------------------
 
 		// Header (입력값 (*) 필수항목)--------------------------------------------------
-		String StoreId = cancelBody.getStoreid(); // *상점아이디
+		String StoreId = cancel.getStoreid(); // *상점아이디
 		String OrderNumber = ""; // 주문번호
 		String UserName = ""; // *주문자명
 		String IdNum = ""; // 주민번호 or 사업자번호
@@ -82,8 +79,8 @@ public class KSPayService {
 		// -------------------------------------------------------------------
 
 		// Data Default(수정항목이 아님)-------------------------------------------------
-		String ApprovalType = cancelBody.getAuthty(); // 승인구분
-		String TrNo = cancelBody.getTrno(); // 거래번호
+		String ApprovalType = cancel.getAuthty(); // 승인구분
+		String TrNo = cancel.getTrno(); // 거래번호
 		// Data Default end
 		// -------------------------------------------------------------
 

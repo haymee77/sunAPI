@@ -1,6 +1,7 @@
 package kr.co.sunpay.api.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,6 @@ public interface KsnetPayResultRepository extends JpaRepository<KsnetPayResult, 
 	 */
 	@Query(value="SELECT * FROM SP_KSNET_PAY_RESULT WHERE STORE_ID IN :storeIds AND TRD_DT >= :trdStartDt AND TRD_DT <= :trdEndDt AND SERVICE_TYPE_CD IN :serviceTypeCodes", nativeQuery=true)
 	List<KsnetPayResult> findByStoreIdAndtrddtAndserviceTypeCd(@Param("storeIds") List<String> storeIds, @Param("trdStartDt") String trdStartDt, @Param("trdEndDt") String trdEndDt, @Param("serviceTypeCodes") List<String> serviceTypeCodes);
+	
+	Optional<KsnetPayResult> findByTrnoAndStoreIdAndAuthyn(String trno, String storeId, String Authyn);
 }

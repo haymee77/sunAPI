@@ -1,8 +1,8 @@
 package kr.co.sunpay.api.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import java.util.Optional;
 
-import com.google.common.base.Optional;
+import org.springframework.data.repository.CrudRepository;
 
 import kr.co.sunpay.api.domain.StoreId;
 
