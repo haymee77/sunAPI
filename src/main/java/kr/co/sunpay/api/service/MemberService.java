@@ -162,7 +162,7 @@ public class MemberService {
 		newMem.setName(member.getName());
 		newMem.setMobile(member.getMobile());
 		newMem.setPassword(pwEncoder.encode(member.getPassword()));
-
+		
 		List<MemberRole> roles = new ArrayList<MemberRole>();
 		member.getRoles().forEach(role -> {
 			roles.add(role);

@@ -74,7 +74,7 @@ public class DepositService {
 	 * @param cancelBody
 	 * @throws Exception
 	 */
-	public void tryRefund(KSPayCancelBody cancel) throws Exception {
+	public void tryRefund(KspayCancelBody cancel) throws Exception {
 		
 		// 예치금 차감할 상점 검색
 		Optional<StoreId> oStoreId = storeIdRepo.findById(cancel.getStoreid());
@@ -108,7 +108,13 @@ public class DepositService {
 	
 	public void writeLog(Store store, String originalDepositNo, String depositNo, String typeCode, String trNo, String statusCode, int amt) {
 		
-		DepositLog log = new DepositLog(store, originalDepositNo, depositNo, typeCode, trNo, statusCode, amt, store.getDeposit());
+		int deposit = 0;
+		
+		if (store != null) {
+			deposit = store.getDeposit();
+		}
+		
+		DepositLog log = new DepositLog(store, originalDepositNo, depositNo, typeCode, trNo, statusCode, amt, deposit);
 		depositLogRepo.save(log);
 	}
 
@@ -116,8 +122,34 @@ public class DepositService {
 	 * 결제 취소 실패 시 보증금 원복
 	 * @param cancelBody
 	 */
-	public void resetDeposit(KSPayCancelBody cancelBody) {
-		// TODO Auto-generated method stub
+	public void resetDeposit(KspayCancelBody cancel) throws Exception {
+		
+		// 예치금 복구할 상점 검색
+		Optional<StoreId> oStoreId = storeIdRepo.findById(cancel.getStoreid());
+		if (!oStoreId.isPresent()) {
+			throw new Exception("존재하지 않는 상점 ID");
+		}
+
+		Optional<Store> oStore = storeRepo.findByUid(oStoreId.get().getStore().getUid());
+		if (!oStore.isPresent()) {
+			throw new Exception("상점 정보를 찾을 수 없음");
+		}
+		Store store = oStore.get();
+
+		// 주문번호, 상점ID로 결제금액 검색
+		Optional<KsnetPayResult> oPayResult = ksnetPayResultRepo.findByTrnoAndStoreIdAndAuthyn(cancel.getTrno(),
+				cancel.getStoreid(), "O");
+		if (!oPayResult.isPresent()) {
+			throw new Exception("결제 정보를 찾을 수 없음");
+		}
+
+		int paidAmount = oPayResult.get().getAmt();
+		System.out.println("RESET DEPOSIT AMOUNT:" + paidAmount);
+
+		store.setDeposit(store.getDeposit() + paidAmount);
+		storeRepo.save(store);
+		writeLog(store, null, null, DepositService.TYPE_DEPOSIT, cancel.getTrno(), DepositService.STATUS_FAIL,
+				paidAmount);
 		
 	}
 }

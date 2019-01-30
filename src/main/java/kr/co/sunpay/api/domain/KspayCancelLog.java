@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import kr.co.sunpay.api.model.KSPayCancelReturns;
+import kr.co.sunpay.api.model.KspayCancelReturns;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -69,7 +69,7 @@ public class KspayCancelLog {
 		this.authty = authty;
 	}
 
-	public void setResult(KSPayCancelReturns result) {
+	public void setResult(KspayCancelReturns result) {
 		this.rTradeDate = result.getRTradeDate();
 		this.rTradeTime = result.getRTradeTime();
 		this.rTrNo = result.getRTransactionNo();

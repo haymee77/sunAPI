@@ -10,7 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @ApiModel(description="결제 취소 요청 시 Parameters")
-public class KSPayCancelBody {
+public class KspayCancelBody {
 
 	@ApiModelProperty(notes="상점 ID", example="2999199999", required=true)
 	private String storeid;

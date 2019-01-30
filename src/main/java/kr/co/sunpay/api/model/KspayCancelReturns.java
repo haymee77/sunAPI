@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class KSPayCancelReturns {
+public class KspayCancelReturns {
 
 	private String rTransactionNo;
 	
@@ -21,7 +21,11 @@ public class KSPayCancelReturns {
 	
 	private String rMessage2;
 	
-	public KSPayCancelReturns(String rTransactionNo, String rStatus, String rTradeDate, String rTradeTime,
+	public KspayCancelReturns() {
+		
+	}
+	
+	public KspayCancelReturns(String rTransactionNo, String rStatus, String rTradeDate, String rTradeTime,
 			String rMessage1, String rMessage2) {
 		
 		this.rTransactionNo = rTransactionNo;
