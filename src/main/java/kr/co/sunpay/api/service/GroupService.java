@@ -115,8 +115,7 @@ public class GroupService {
 	 */
 	public Group setParent(Group group) {
 		
-		
-		if (group.getParentGroupUid() > 0) {
+		if (group.getParentGroupUid() != null && group.getParentGroupUid() > 0) {
 			try {
 				// 상위업체 정보 가져오기
 				Group p = getGroup(group.getParentGroupUid());
