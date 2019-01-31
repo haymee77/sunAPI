@@ -100,8 +100,35 @@ public class GroupService {
 		} else {
 			throw new BadCredentialsException("권한이 없습니다.(Need one of TOP, HEAD, BRANCH qualification.)");
 		}
+		
+		for (Group g : groups) {
+			g = setParent(g);
+		}
 
 		return groups;
+	}
+	
+	/**
+	 * 그룹 엔티티에 상위그룹정보 추가
+	 * @param group
+	 * @return
+	 */
+	public Group setParent(Group group) {
+		
+		
+		if (group.getParentGroupUid() > 0) {
+			try {
+				// 상위업체 정보 가져오기
+				Group p = getGroup(group.getParentGroupUid());
+				
+				// 필요한 정보만 제공
+				group.setParentBizName(p.getBizName());
+			} catch (EntityNotFoundException ex) {
+				throw new EntityNotFoundException("그룹(UID:" + group.getUid() + ")의 상위 업체 정보를 찾을 수 없습니다.");
+			}
+		}
+		
+		return group;
 	}
 	
 	public Group getGroup(int groupUid) {

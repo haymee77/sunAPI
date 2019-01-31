@@ -28,9 +28,13 @@ import lombok.ToString;
 @ToString
 public class Group extends BaseEntity {
 	
-	@ApiModelProperty(notes="상위 그룹", required=true)
+	@ApiModelProperty(notes="상위 그룹 UID", required=true)
 	@Column(name="PARENT_GROUP_UID")
 	private Integer parentGroupUid;
+	
+	@ApiModelProperty(notes="상위 그룹 이름")
+	@Transient
+	private String parentBizName;
 	
 	@ApiModelProperty(notes="그룹 권한 코드")
 	@Column(name="ROLE_CD", length=20)
