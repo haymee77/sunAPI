@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -91,5 +93,17 @@ public class MemberController {
 						.buildAndExpand(updatedMember.getUid()).toUri();
 		
 		return ResponseEntity.created(location).build();
+	}
+	
+	@PostMapping("/id/{memberUid}")
+	@ApiOperation(value="ID 중복검사", notes="")
+	public ResponseEntity<Object> hasMember(@ApiParam("API 요청 멤버의 UID") @PathVariable int memberUid,
+			@RequestParam("checkId") String checkId) {
+		
+		if (memberService.hasMember(checkId)) {
+			throw new DuplicateKeyException("아이디 중복");
+		}
+		
+		return ResponseEntity.ok().build();
 	}
 }

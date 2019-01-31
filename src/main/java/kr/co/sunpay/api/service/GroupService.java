@@ -33,6 +33,32 @@ public class GroupService {
 
 	@Autowired
 	MemberService memberService;
+	
+	public List<Group> getChildren(Group group) {
+		System.out.println("## getChildren");
+		System.out.println(group.getUid());
+		
+		List<Group> groups = new ArrayList<Group>();
+		List<Group> children = groupRepo.findByparentGroupUid(group.getUid());
+//		List<Group> children = new ArrayList<Group>();
+		
+		System.out.println(children.isEmpty());
+		
+		
+		return null;
+		
+//		if (children.size() == 0) {
+//			System.out.println("children is null");
+//			groups.add(group);
+//			return groups;
+//		} else {
+//			children.forEach(g -> {
+//				groups.addAll(getChildren(g));
+//			});
+//		}
+		
+//		return groups;
+	}
 
 	/**
 	 * memberUid 권한으로 볼 수 있는 모든 그룹 리스트 반환
@@ -60,13 +86,13 @@ public class GroupService {
 		List<Group> groups = new ArrayList<Group>();
 
 		// 최고관리자, 본사 멤버이면 모든 그룹리스트 반환
-		if (memberService.hasRole(member, memberService.getROLE_TOP())
-				|| memberService.hasRole(member, memberService.getROLE_HEAD())) {
+		if (memberService.hasRole(member, MemberService.ROLE_TOP)
+				|| memberService.hasRole(member, MemberService.ROLE_HEAD)) {
 
 			groups = groupRepo.findAll();
 
 			// 지사 멤버이면 해당 지사의 그룹리스트 반환
-		} else if (memberService.hasRole(member, memberService.getROLE_BRANCH())) {
+		} else if (memberService.hasRole(member, MemberService.ROLE_BRANCH)) {
 
 			groups = groupRepo.findByparentGroupUid(member.getGroup().getUid());
 
@@ -186,13 +212,13 @@ public class GroupService {
 		if (group.getMembers() != null && !group.getMembers().isEmpty()) {
 			// 기존 멤버 소유주의 OWNER 권한 박탈
 			for (Member mem : group.getMembers()) {
-				if (memberService.hasRole(mem, memberService.getROLE_OWNER()) && mem.getUid() != memberUid) {
-					memberService.removeRole(mem, memberService.getROLE_OWNER());
+				if (memberService.hasRole(mem, MemberService.ROLE_OWNER) && mem.getUid() != memberUid) {
+					memberService.removeRole(mem, MemberService.ROLE_OWNER);
 					memberRepo.save(mem);
 				}
 			}
 		}
 
-		memberService.addRole(memberUid, memberService.getROLE_OWNER());
+		memberService.addRole(memberUid, MemberService.ROLE_OWNER);
 	}
 }

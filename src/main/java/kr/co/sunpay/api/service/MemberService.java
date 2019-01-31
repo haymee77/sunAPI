@@ -40,14 +40,17 @@ public class MemberService {
 	@Autowired
 	StoreService storeService;
 	
-	private final String ROLE_TOP = "TOP";
-	private final String ROLE_HEAD = "HEAD";
-	private final String ROLE_BRANCH = "BRANCH";
-	private final String ROLE_AGENCY = "AGENCY";
-	private final String ROLE_MANAGER = "MANAGER";
-	private final String ROLE_STAFF = "STAFF";
-	private final String ROLE_CS = "CS";
-	private final String ROLE_OWNER = "OWNER";
+	// 소속 권한
+	public static final String ROLE_TOP = "TOP";
+	public static final String ROLE_HEAD = "HEAD";
+	public static final String ROLE_BRANCH = "BRANCH";
+	public static final String ROLE_AGENCY = "AGENCY";
+	public static final String ROLE_STORE = "STORE";
+	
+	public static final String ROLE_MANAGER = "MANAGER";
+	public static final String ROLE_STAFF = "STAFF";
+	public static final String ROLE_CS = "CS";
+	public static final String ROLE_OWNER = "OWNER";
 
 	private Member member;
 	
@@ -147,11 +150,20 @@ public class MemberService {
 		
 		return members;
 	}
+	
+	public boolean hasMember(String id) {
+		log.info("-- MemberService.hasMember called..");
+		if (memberRepo.findById(id).isEmpty()) {
+			return false;
+		}
+		
+		return true;
+	}
 
 	public Member createMember(Member member) {
 
 		log.info("-- MemberService.createMember called..");
-		if (!memberRepo.findById(member.getId()).isEmpty()) {
+		if (hasMember(member.getId())) {
 			throw new DuplicateKeyException("아이디 중복");
 		}
 
@@ -280,6 +292,12 @@ public class MemberService {
 		return getRoleNames(member).contains(roleName);
 	}
 
+	/**
+	 * member가 store에 대해 자격이 있는지 확인
+	 * @param member
+	 * @param store
+	 * @return
+	 */
 	public boolean hasStoreQualification(Member member, Store store) {
 
 		boolean qualified = false;
@@ -299,7 +317,8 @@ public class MemberService {
 		} else {
 
 			// 멤버 소속 그룹에 포함된 모든 상점 리스트 가져옴
-			List<Store> stores = storeService.getStores(member.getGroup().getUid());
+			List<Store> memberStores = storeService.getStoresByMember(member);
+			List<Store> stores = storeService.getStoresByGroup(member.getGroup().getUid());
 
 			// 현재 상점이 멤버 소속 그룹 하위에 있는지 확인
 			for (Store s : stores) {
