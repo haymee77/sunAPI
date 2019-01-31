@@ -18,6 +18,7 @@ import kr.co.sunpay.api.domain.MemberRole;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.MemberRepository;
+import kr.co.sunpay.api.repository.StoreRepository;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
@@ -174,6 +175,15 @@ public class MemberService {
 		newMem.setName(member.getName());
 		newMem.setMobile(member.getMobile());
 		newMem.setPassword(pwEncoder.encode(member.getPassword()));
+		
+		if (member.getGroup() == null && member.getStore() == null) {
+			throw new IllegalArgumentException("그룹, 상점 중 한가지 필수입력");
+		} else if (member.getGroup() != null && member.getStore() != null) {
+			throw new IllegalArgumentException("그룹, 상점 중 한가지만 입력");
+		}
+		
+		newMem.setStore(member.getStore());
+		newMem.setGroup(member.getGroup());
 		
 		List<MemberRole> roles = new ArrayList<MemberRole>();
 		member.getRoles().forEach(role -> {
