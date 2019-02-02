@@ -11,4 +11,5 @@ public interface GroupRepository extends JpaRepository<Group, Integer> {
 
 	List<Group> findByparentGroupUid(int parentGroupUid);
 	Optional<Group> findByUid(int uid);
+	Optional<Group> findByRoleCode(String code);
 }

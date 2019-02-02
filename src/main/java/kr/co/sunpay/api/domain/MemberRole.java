@@ -27,4 +27,12 @@ public class MemberRole {
 	
 	@Column(name="ROLE_NM", length=20)
 	private String roleName;
+	
+	public MemberRole() {
+		
+	}
+	
+	public MemberRole(String roleName) {
+		this.roleName = roleName;
+	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -105,6 +106,6 @@ public class Store extends BaseEntity {
 	private Group group;
 	
 	@JsonManagedReference(value="store-members")
-	@OneToMany(mappedBy="store")
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="store")
 	private List<Member> members;
 }

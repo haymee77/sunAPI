@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +20,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import io.swagger.annotations.ApiOperation;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
+import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
+import kr.co.sunpay.api.service.GroupService;
 import kr.co.sunpay.api.service.MemberService;
 import kr.co.sunpay.api.service.StoreService;
 import lombok.extern.java.Log;
@@ -29,6 +32,9 @@ import lombok.extern.java.Log;
 @RequestMapping("/store")
 public class StoreController {
 
+	@Autowired
+	GroupRepository groupRepo;
+	
 	@Autowired
 	StoreRepository storeRepo;
 	
@@ -74,12 +80,21 @@ public class StoreController {
 	@ApiOperation(value="상점 정보 가져오기", notes="{memberUid} 권한 확인 후 {uid} 상점 정보 반환")
 	public Store retrieveStore(@PathVariable("memberUid") int memberUid, @PathVariable("uid") int uid) {
 		
-		log.info("-- StoreController.retrieveStore called");
-		if (!storeRepo.findByUid(uid).isPresent()) {
-			throw new EntityNotFoundException();
+		Member member = memberService.getMember(memberUid);
+		boolean find = false;
+		List<Store> memberStores = storeService.getStoresByMember(member);
+		
+		for (Store s : memberStores) {
+			if (s.getUid() == uid) {
+				return s;
+			}
 		}
 		
-		return storeRepo.findByUid(uid).get();
+		if (!find) {
+			throw new EntityNotFoundException("There is no available store.");
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -94,7 +109,7 @@ public class StoreController {
 	public ResponseEntity<Object> createStoreByManager(@PathVariable("memberUid") int memberUid, @RequestBody Store store) throws Exception {
 		
 		log.info("-- StoreController.createStoreByManager called..");
-		Store newStore = storeService.create(store);
+		Store newStore = storeService.create(store, memberUid);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{uid}")
 						.buildAndExpand(newStore.getUid()).toUri();
 		
@@ -108,13 +123,26 @@ public class StoreController {
 	 * @throws Exception
 	 */
 	@PostMapping("")
-	@ApiOperation(value="상점 생성", notes="상점 생성")
+	@ApiOperation(value="상점 생성", notes="본사 소속으로만 생성 가능")
 	public ResponseEntity<Object> createStore(@RequestBody Store store) throws Exception {
 		
 		log.info("-- StoreController.createStore called..");
+		store.setGroup(groupRepo.findByRoleCode(GroupService.ROLE_HEAD).get());
 		Store newStore = storeService.create(store);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{uid}")
+		Member storeOwner = newStore.getMembers().get(0);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/" + storeOwner.getUid() + "/{uid}")
 						.buildAndExpand(newStore.getUid()).toUri();
+		
+		return ResponseEntity.created(location).build();
+	}
+	
+	@PutMapping("/{memberUid}/{storeUid}")
+	@ApiOperation(value="상점 수정 - Dashboard", notes="{memberUid} 권한 확인 후 상점 수정, {memberUid} 하위 상점인 경우만 수정 가능")
+	public ResponseEntity<Object> updateStoreByManager(@PathVariable("memberUid") int memberUid,
+			@PathVariable("storeUid") int storeUid, @RequestBody Store store) throws Exception {
+		
+		storeService.update(storeUid, store, memberUid);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
 		
 		return ResponseEntity.created(location).build();
 	}

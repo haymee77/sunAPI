@@ -18,7 +18,6 @@ import kr.co.sunpay.api.domain.MemberRole;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.MemberRepository;
-import kr.co.sunpay.api.repository.StoreRepository;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
@@ -253,9 +252,7 @@ public class MemberService {
 	public void addRole(Member member, String roleName) {
 		
 		if (!hasRole(member, roleName)) {
-			MemberRole newRole = new MemberRole();
-			newRole.setRoleName(roleName);
-			member.getRoles().add(newRole);
+			member.getRoles().add(new MemberRole(roleName));
 		}
 		
 		memberRepo.save(member);
@@ -328,10 +325,9 @@ public class MemberService {
 
 			// 멤버 소속 그룹에 포함된 모든 상점 리스트 가져옴
 			List<Store> memberStores = storeService.getStoresByMember(member);
-			List<Store> stores = storeService.getStoresByGroup(member.getGroup().getUid());
 
 			// 현재 상점이 멤버 소속 그룹 하위에 있는지 확인
-			for (Store s : stores) {
+			for (Store s : memberStores) {
 				if (s.getUid() == store.getUid()) {
 					System.out.println("소속상점에 포함됨 - 자격있음");
 					qualified = true;

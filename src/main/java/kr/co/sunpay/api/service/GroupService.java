@@ -34,30 +34,41 @@ public class GroupService {
 	@Autowired
 	MemberService memberService;
 	
-	public List<Group> getChildren(Group group) {
-		System.out.println("## getChildren");
-		System.out.println(group.getUid());
+	public static final String ROLE_HEAD = "HEAD";
+	public static final String ROLE_BRANCH = "BRANCH";
+	public static final String ROLE_AGENCY = "AGENCY";
+	
+	/**
+	 * 하위 모든 그룹 리스트 반환(leaf 그룹까지 포함)
+	 * @param group
+	 * @param isRoot
+	 * @return
+	 */
+	public List<Group> getChildren(Group group, boolean isRoot) {
 		
 		List<Group> groups = new ArrayList<Group>();
+	
+		// 하위 그룹 가져오기
 		List<Group> children = groupRepo.findByparentGroupUid(group.getUid());
-//		List<Group> children = new ArrayList<Group>();
 		
-		System.out.println(children.isEmpty());
+		if (children != null && children.size() > 0) {
+			// 호출 당시 그룹이 아닌경우 자기 자신도 리턴할 그룹리스트에 추가
+			if (!isRoot) {
+				groups.add(group);
+			}
+			
+			// 하위 그룹 순회하면서 재귀태움 
+			for (Group child : children) {
+				// 최하위까지 내려갔다가 올라오면서 계속 리스트 더함
+				groups.addAll(getChildren(child, false));
+			}
+		} else {
+			// 최하위 그룹까지 온 경우 자기 자신을 리스트에 담아 리턴함
+			groups.add(group);
+			return groups;
+		}
 		
-		
-		return null;
-		
-//		if (children.size() == 0) {
-//			System.out.println("children is null");
-//			groups.add(group);
-//			return groups;
-//		} else {
-//			children.forEach(g -> {
-//				groups.addAll(getChildren(g));
-//			});
-//		}
-		
-//		return groups;
+		return groups;
 	}
 
 	/**

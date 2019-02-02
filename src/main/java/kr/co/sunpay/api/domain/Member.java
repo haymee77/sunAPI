@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -51,7 +52,7 @@ public class Member extends BaseEntity {
 	@Column(name="MOBILE", length=20)
 	private String mobile;
 	
-	@Column(name="ACTIVATE", columnDefinition="BIT(1)")
+	@Column(name="ACTIVATE", columnDefinition="BIT(1)", insertable=false)
 	private Boolean activate;
 	
 	@JsonBackReference(value="store-members")
