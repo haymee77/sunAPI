@@ -93,29 +93,19 @@ public class StoreService {
 	 */
 	public Store update(int storeUid, Store store, int memberUid) {
 		
-		if (isAdminable(memberUid, store) || isStoreManager(memberUid, store)) {
-			return update(storeUid, store);
-		} else {
+		if (!isAdminable(memberUid, store) && isStoreManager(memberUid, store)) {
 			throw new IllegalArgumentException("memberUid의 권한으로 수정할 수 없는 그룹 소속입니다.");
 		}
-	}
-	
-	/**
-	 * 상점 데이터 업데이트(수정)
-	 * @param storeUid
-	 * @param store
-	 * @return
-	 */
-	public Store update(int storeUid, Store store) {
-		
+
 		Store updatedStore = getStore(storeUid);
-		
-		// 수정 가능한 항목만 수정함 
+
+		// 수정 가능한 항목만 수정함
 		updatedStore.setBizName(store.getBizName());
-		
+
 		storeRepo.save(updatedStore);
-		
+
 		return updatedStore;
+		
 	}
 	
 	/**
