@@ -94,6 +94,102 @@ public class Store extends BaseEntity {
 	@Column(name="BIZ_STATUS", length=200)
 	private String bizStatus;
 	
+	// TODO BIZ_EXTRA_INFO > 필요한 데이터인지 확인..영수증에 표기될 상호명..결제데이터 넘길 때 상호명 넘길 수 있음..
+	
+	@ApiModelProperty(notes="신용카드 결제 시 최대 할부 개월 수")
+	@Column(name="MAX_INSTALLMENT_LIMIT")
+	private int maxInstallmentLimit;
+	
+	@ApiModelProperty(notes="상점 URL")
+	@Column(name="STORE_URL", length=200)
+	private String storeUrl;
+	
+	@ApiModelProperty(notes="보증보험 가입여부")
+	@Column(name="SURETY_INSURANCE_FL", columnDefinition="BIT(1) DEFAULT 0")
+	private Boolean suretyInsurance = false;
+	
+	@ApiModelProperty(notes="보증보험 가입액")
+	@Column(name="SURETY_INSURANCE_AMOUNT", columnDefinition="DEFAUNT 0")
+	private int suretyInsuranceAmt = 0;
+	
+	@ApiModelProperty(notes="1회 결제한도")
+	@Column(name="PAYMENT_LIMIT_ONCE")
+	private int paymentLimitOnce = 0;
+	
+	@ApiModelProperty(notes="1일 결제한도")
+	@Column(name="PAYMENT_LIMIT_DAILY")
+	private int paymentLimitDaily = 0;
+	
+	@ApiModelProperty(notes="월간 결제한도")
+	@Column(name="PAYMENT_LIMIT_MONTHLY")
+	private int paymentLimitMonthly = 0;
+	
+	@ApiModelProperty(notes="분기 결제한도")
+	@Column(name="PAYMENT_LIMIT_QUARTERLY")
+	private int paymentLimitQuarterly = 0;
+	
+	@ApiModelProperty(notes="연간 결제한도")
+	@Column(name="PAYMENT_LIMIT_ANNUAL")
+	private int paymentLimitAnnual = 0;
+	
+	@ApiModelProperty(notes="일반정산수수료(%단위) - PG사")
+	@Column(name="FEE_PG")
+	private double feePg = 0.0;
+	
+	@ApiModelProperty(notes="일반정산수수료(%단위) - 본사")
+	@Column(name="FEE_HEAD")
+	private double feeHead = 0.0;
+	
+	@ApiModelProperty(notes="일반정산수수료(%단위) - 지사")
+	@Column(name="FEE_BRANCH")
+	private double feeBranch = 0.0;
+	
+	@ApiModelProperty(notes="일반정산수수료(%단위) - 대리점")
+	@Column(name="FEE_AGENCY")
+	private double feeAgency = 0.0;
+	
+	@ApiModelProperty(notes="최소결제금액")
+	@Column(name="MIN_PAYMENT_AMOUNT")
+	private int minPaymentAmt = 0;
+	
+	// TODO 순간정산 수수료 추가해야함(단위가 %인지 원단위인지 확인 후 DB 데이터형 확인하고 추가할 것)
+	
+	@ApiModelProperty(notes="본사 가입비")
+	@Column(name="MEMBERSHIP_FEE_HEAD")
+	private int membershipFeeHead = 0;
+	
+	@ApiModelProperty(notes="지사 가입비")
+	@Column(name="MEMBERSHIP_FEE_BRANCH")
+	private int membershipFeeBranch = 0;
+	
+	@ApiModelProperty(notes="대리점 가입비")
+	@Column(name="MEMBERSHIP_FEE_AGENCY")
+	private int membershipFeeAgency = 0;
+	
+	@ApiModelProperty(notes="본사 설치비")
+	@Column(name="INSTALLATION_FEE_HEAD")
+	private int installationFeeHead = 0;
+	
+	@ApiModelProperty(notes="지사 설치비")
+	@Column(name="INSTALLATION_FEE_BRANCH")
+	private int installationFeeBranch = 0;
+	
+	@ApiModelProperty(notes="대리점 설치비")
+	@Column(name="INSTALLATION_FEE_AGENCY")
+	private int installationFeeAgency = 0;
+	
+	@ApiModelProperty(notes="본사 관리비")
+	@Column(name="MAINTENANCE_FEE_HEAD")
+	private int maintenanceFeeHead = 0;
+	
+	@ApiModelProperty(notes="지사 관리비")
+	@Column(name="MAINTENANCE_FEE_BRANCH")
+	private int maintenanceFeeBranch = 0;
+	
+	@ApiModelProperty(notes="대리점 관리비")
+	@Column(name="MAINTENANCE_FEE_AGENCY")
+	private int maintenanceFeeAgency = 0;
+	
 	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
 	@JoinColumn(name="STORE_UID_FK")
 	private List<StoreId> storeIds;

@@ -193,7 +193,7 @@ public class StoreService {
 		// 비밀번호 암호화
 		owner.setPassword(pwEncoder.encode(owner.getPassword()));
 		
-		// OWNER 권한 셋팅(상점 생성 시 멤버는 STORE, MANAGER, OWNER 권한을 default로 갖는다)
+		// OWNER 권한 확인(상점 생성 시 멤버는 STORE, MANAGER, OWNER 권한을 default로 갖는다)
 		if (!memberService.hasRole(owner, MemberService.ROLE_MANAGER)
 				|| !memberService.hasRole(owner, MemberService.ROLE_OWNER)) {
 			throw new IllegalArgumentException("Store owner member should have OWNER and MANAGER roles.");

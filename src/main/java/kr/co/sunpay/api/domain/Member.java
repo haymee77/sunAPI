@@ -46,7 +46,7 @@ public class Member extends BaseEntity {
 	@Column(name="NAME", length=50)
 	private String name;
 	
-	@Column(name="EMAIL", length=60)
+	@Column(name="EMAIL", length=200)
 	private String email;
 	
 	@Column(name="MOBILE", length=20)

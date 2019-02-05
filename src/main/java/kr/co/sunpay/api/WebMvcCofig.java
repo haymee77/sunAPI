@@ -13,6 +13,7 @@ public class WebMvcCofig implements WebMvcConfigurer {
 		, "/deposit", "/deposit/**"
 		, "/kspay", "/kspay/**"
 		, "/git", "/git/**"
+		, "/store", "/store/**"
 	};
 	
 	@Autowired
