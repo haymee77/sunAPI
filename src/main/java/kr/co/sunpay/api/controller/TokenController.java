@@ -73,8 +73,8 @@ public class TokenController {
 		
 		Message message = Message.builder()
 				.putData("title", "Sunpay")
-				.putData("message", "FCM TOKEN 확인")
-				.putData("isDisplay", "N")
+				.putData("message", "FCM TOKEN 저장되었습니다.")
+				.putData("isDisplay", "Y")
 				.setToken(fCMToken.getFcmToken())
 				.build();
 		
