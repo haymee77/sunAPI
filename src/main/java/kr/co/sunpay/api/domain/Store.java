@@ -153,6 +153,21 @@ public class Store extends BaseEntity {
 	private Integer minPaymentAmt = 0;
 	
 	// TODO 순간정산 수수료 추가해야함(단위가 %인지 원단위인지 확인 후 DB 데이터형 확인하고 추가할 것)
+	@ApiModelProperty(notes="건당 송금수수료 - PG")
+	@Column(name="TRANS_FEE_PG")
+	private Integer transFeePg = 0;
+	
+	@ApiModelProperty(notes="건당 송금수수료 - 본사")
+	@Column(name="TRANS_FEE_HEAD")
+	private Integer transFeeHead = 0;
+	
+	@ApiModelProperty(notes="건당 송금수수료 - 지사")
+	@Column(name="TRANS_FEE_BRANCH")
+	private Integer transFeeBranch = 0;
+	
+	@ApiModelProperty(notes="건당 송금수수료 - 대리점")
+	@Column(name="TRANS_FEE_AGENCY")
+	private Integer transFeeAgency = 0;
 	
 	@ApiModelProperty(notes="본사 가입비")
 	@Column(name="MEMBERSHIP_FEE_HEAD")

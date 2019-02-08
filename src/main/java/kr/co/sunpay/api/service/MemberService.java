@@ -153,7 +153,7 @@ public class MemberService {
 	
 	public boolean hasMember(String id) {
 		log.info("-- MemberService.hasMember called..");
-		if (memberRepo.findById(id).isEmpty()) {
+		if (!memberRepo.findById(id).isPresent()) {
 			return false;
 		}
 		
@@ -352,10 +352,6 @@ public class MemberService {
 	 */
 	public boolean hasGroupQualification(Member member, Group group) {
 		
-		System.out.println(member.getGroup().getUid());
-		System.out.println(group.getRoleCode());
-		System.out.println(group.getUid());
-		
 		// 1. 관리자 권한이 없다면 REJECT
 		if (!hasRole(member, ROLE_MANAGER))
 			return false;
@@ -379,5 +375,34 @@ public class MemberService {
 			return true;
 		
 		return false;
+	}
+
+	/**
+	 * 아이디, 비밀번호로 멤버 찾기
+	 * @param id
+	 * @param password
+	 * @return
+	 */
+	public Member getMember(String id, String password) {
+		
+		if (id == null || id.isEmpty()) {
+			throw new IllegalArgumentException("ID can not be null.");
+		}
+		
+		if (password == null || password.isEmpty()) {
+			throw new IllegalArgumentException("Password can not be null.");
+		}
+		
+		try {
+			Member member = memberRepo.findById(id).get();
+			String rawPassword = member.getPassword();
+			if (pwEncoder.matches(password, rawPassword)) {
+				return member;
+			}
+		} catch (Exception ex) {
+			throw new IllegalArgumentException("ID or Password incorrect, please check ID and Password");
+		}
+		
+		return null;
 	}
 }
