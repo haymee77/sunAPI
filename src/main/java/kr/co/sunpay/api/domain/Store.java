@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -223,4 +224,12 @@ public class Store extends BaseEntity {
 	@Fetch(FetchMode.SUBSELECT)
 	@OrderBy("UID DESC")
 	private List<Member> members;
+	
+	@ApiModelProperty(notes="소속 그룹의 상호명")
+	@Transient
+	private String groupName;
+	
+	@ApiModelProperty(notes="소속 그룹 UID")
+	@Transient
+	private int groupUid;
 }

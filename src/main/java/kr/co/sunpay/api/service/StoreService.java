@@ -227,6 +227,10 @@ public class StoreService {
 			throw new EntityNotFoundException("There is no Store available");
 		}
 		
+		Store store = oStore.get();
+		store.setGroupName(store.getGroup().getBizName());
+		store.setGroupUid(store.getGroup().getUid());
+		
 		return oStore.get();
 	}
 
