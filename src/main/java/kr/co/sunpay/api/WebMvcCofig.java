@@ -8,12 +8,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcCofig implements WebMvcConfigurer {
 
-	private static final String[] httpInterceptorPath = {
-		"/member", "/member/**"
-		, "/deposit", "/deposit/**"
-		, "/kspay", "/kspay/**"
-		, "/git", "/git/**"
-		, "/store", "/store/**"
+	private static final String[] httpExcludePath = {
+			"/swagger-ui.html"
+			, "/swagger-resources", "/swagger-resources/**"
+			, "/webjars", "/webjars/**" 
+			, "/v2/api-docs", "/v2/api-docs/**"
 	};
 	
 	@Autowired
@@ -22,7 +21,7 @@ public class WebMvcCofig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(httpInterceptor)
-				.addPathPatterns(httpInterceptorPath);
+				.excludePathPatterns(httpExcludePath);
 				
 	}
 }
