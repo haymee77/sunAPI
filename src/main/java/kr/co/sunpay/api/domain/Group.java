@@ -7,9 +7,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -103,6 +106,8 @@ public class Group extends BaseEntity {
 	
 	@JsonManagedReference(value="group-members")
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER)
+	@Fetch(FetchMode.SUBSELECT)
+	@OrderBy("UID DESC")
 	private List<Member> members;
 	
 	@JsonManagedReference(value="group-stores")

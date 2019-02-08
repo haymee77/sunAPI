@@ -8,8 +8,11 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -217,5 +220,7 @@ public class Store extends BaseEntity {
 	
 	@JsonManagedReference(value="store-members")
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="store")
+	@Fetch(FetchMode.SUBSELECT)
+	@OrderBy("UID DESC")
 	private List<Member> members;
 }

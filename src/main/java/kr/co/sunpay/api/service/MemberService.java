@@ -120,6 +120,10 @@ public class MemberService {
 			
 			members = group.getMembers();
 			
+			for (Store store : group.getStores()) {
+				members.addAll(store.getMembers());
+			}
+			
 			List<Group> agencies = groupRepo.findByparentGroupUid(group.getUid());
 			for (Group agency : agencies) {
 				members.addAll(getMembers(agency));
