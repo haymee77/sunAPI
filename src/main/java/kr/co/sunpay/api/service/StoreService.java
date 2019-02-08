@@ -292,8 +292,7 @@ public class StoreService {
 		// 최고관리자 또는 본사 멤버인 경우 모든 상점리스트 반환
 		if (memberService.hasRole(member, MemberService.ROLE_TOP)
 				|| memberService.hasRole(member, MemberService.ROLE_HEAD)) {
-			return getStoresByGroup(member.getGroup());
-//			return storeRepo.findAll();
+			stores = getStoresByGroup(member.getGroup());
 		}
 		
 		// 상점 멤버인 경우 해당 상점만 반환 
@@ -304,12 +303,17 @@ public class StoreService {
 		
 		// 대리점 멤버인 경우 해당 대리점의 상점리스트 반환
 		if (memberService.hasRole(member, MemberService.ROLE_AGENCY)) {
-			return groupService.getGroup(member.getGroupUid()).getStores();
+			stores = groupService.getGroup(member.getGroupUid()).getStores();
 		}
 		
 		// 지사 멤버인 경우 해당 지사와 하위 대리점 소속의 상점리스트 반환
 		if (memberService.hasRole(member, MemberService.ROLE_BRANCH)) {
-			return getStoresByGroup(member.getGroup());
+			stores = getStoresByGroup(member.getGroup());
+		}
+		
+		for (Store store : stores) {
+			store.setGroupName(store.getGroup().getBizName());
+			store.setGroupUid(store.getGroup().getUid());
 		}
 		
 		return stores;
