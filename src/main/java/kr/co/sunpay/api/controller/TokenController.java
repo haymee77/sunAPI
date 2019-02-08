@@ -1,9 +1,6 @@
 package kr.co.sunpay.api.controller;
 
 import java.io.FileInputStream;
-import java.util.Optional;
-
-import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -19,6 +17,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 
+import io.jsonwebtoken.Claims;
 import io.swagger.annotations.ApiModelProperty;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.repository.FcmTokenRepository;
@@ -125,7 +124,7 @@ public class TokenController {
 	
 	@ApiModelProperty(notes="유효한 토큰인 경우 멤버 ID 리턴")
 	@GetMapping("/token")
-	public String authToken(@PathParam(value="tk") String token) {
+	public Claims authToken(@RequestParam("token") String token) {
 		if (token == null || token.isEmpty()) {
 			return null;
 		}

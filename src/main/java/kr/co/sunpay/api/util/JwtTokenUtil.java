@@ -31,9 +31,9 @@ public class JwtTokenUtil {
 
 	public String generateToken(Member member) {
 		
-		// 토큰 만료일 - 5분
+		// 토큰 만료일 - 5일
 		Date expiredTime = new Date();
-		expiredTime.setTime(expiredTime.getTime() + TOKEN_FOR_MIN * 5);
+		expiredTime.setTime(expiredTime.getTime() + TOKEN_FOR_DAY * 5);
 		
 		// 암호화
 		SignatureAlgorithm alg = SignatureAlgorithm.HS256;
@@ -58,13 +58,13 @@ public class JwtTokenUtil {
 				.compact();
 	}
 
-	public String verifyToken(String jwt) {
+	public Claims verifyToken(String jwt) {
 		
 		try {
 			Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(SECRET_KEY))
 					.parseClaimsJws(jwt).getBody();
 			
-			return (String) claims.get("username");
+			return claims;
 			
 		} catch (ExpiredJwtException ex) {
 			throw new IllegalArgumentException("토큰 만료됨");
