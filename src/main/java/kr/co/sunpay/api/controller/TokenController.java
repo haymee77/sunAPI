@@ -1,6 +1,7 @@
 package kr.co.sunpay.api.controller;
 
 import java.io.FileInputStream;
+import java.util.Optional;
 
 import javax.websocket.server.PathParam;
 
@@ -62,8 +63,7 @@ public class TokenController {
 			} else {
 				fcmToken.setLoginToken(jwtTokenUtil.generateToken(member));
 				// 기 FCM Token 있는지 확인
-				dbToken = fcmTokenRepo.findById(fcmToken.getId()).get();
-				if (dbToken == null) dbToken = fcmToken;
+				dbToken = fcmTokenRepo.findById(fcmToken.getId()).orElse(fcmToken);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();

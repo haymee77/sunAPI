@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -20,7 +21,8 @@ import kr.co.sunpay.api.domain.Member;
 @Component
 public class JwtTokenUtil {
 	
-	private static final String SECRET_KEY = "5Wjd#qKr8gK@dhS*";
+	@Value("${jwt.secretkey}")
+	private String SECRET_KEY;
 	
 	public static final long TOKEN_FOR_MIN = 1000 * 60;
 	public static final long TOKEN_FOR_DAY = 1000 * 60 * 60 * 24;
