@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import kr.co.sunpay.api.domain.KspayCancelLog;
+import kr.co.sunpay.api.domain.KsnetCancelLog;
 import kr.co.sunpay.api.model.KspayCancelBody;
 import kr.co.sunpay.api.model.KspayCancelReturns;
 import kr.co.sunpay.api.repository.KspayCancelLogRepository;
@@ -30,9 +30,9 @@ public class KspayService {
 	 * 
 	 * @param cancelBody
 	 */
-	public KspayCancelLog saveCancelLog(KspayCancelBody cancel) {
+	public KsnetCancelLog saveCancelLog(KspayCancelBody cancel) {
 
-		KspayCancelLog log = new KspayCancelLog(cancel.getStoreid(), cancel.getStorepasswd(), cancel.getTrno(),
+		KsnetCancelLog log = new KsnetCancelLog(cancel.getStoreid(), cancel.getStorepasswd(), cancel.getTrno(),
 				cancel.getAuthty());
 
 		return cancelLogRepo.save(log);
@@ -44,7 +44,7 @@ public class KspayService {
 	 * @param log
 	 * @param result
 	 */
-	public void updateCancelLog(KspayCancelLog log, KspayCancelReturns result) {
+	public void updateCancelLog(KsnetCancelLog log, KspayCancelReturns result) {
 
 		log.setResult(result);
 		cancelLogRepo.save(log);

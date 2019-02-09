@@ -19,9 +19,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @Entity
-@Table(name="SP_KSPAY_CANCEL_LOGS")
+@Table(name="SP_KSNET_CANCEL_LOGS")
 @ToString
-public class KspayCancelLog {
+public class KsnetCancelLog {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -62,7 +62,7 @@ public class KspayCancelLog {
 	@Column(name="R_MSG2")
 	private String rMsg2;
 	
-	public KspayCancelLog(String storeId, String storePasswd, String trNo, String authty) {
+	public KsnetCancelLog(String storeId, String storePasswd, String trNo, String authty) {
 		this.storeId = storeId;
 		this.storePasswd = storePasswd;
 		this.trNo = trNo;

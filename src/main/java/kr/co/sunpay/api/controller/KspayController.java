@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.co.sunpay.api.domain.KspayCancelLog;
+import kr.co.sunpay.api.domain.KsnetCancelLog;
 import kr.co.sunpay.api.model.DepositService;
 import kr.co.sunpay.api.model.KspayCancelBody;
 import kr.co.sunpay.api.model.KspayCancelReturns;
@@ -35,7 +35,7 @@ public class KspayController {
 		KspayCancelReturns result = new KspayCancelReturns("", "X", "", "", "취소거절", "");
 
 		// 결제 취소 요청 저장
-		KspayCancelLog log = kspayService.saveCancelLog(cancel);
+		KsnetCancelLog log = kspayService.saveCancelLog(cancel);
 		boolean isInstantOn = storeService.isInstantOn(cancel.getStoreid());
 		
 		// 기취소건인지 확인
