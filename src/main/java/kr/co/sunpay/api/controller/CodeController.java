@@ -39,7 +39,7 @@ public class CodeController {
 	}
 	
 	@GetMapping("/private/{groupName}/{memberUid}")
-	@ApiOperation(value="특정 그룹의 코드 리스트 요청")
+	@ApiOperation(value="memberUid 로 접근 가능한(비공개 포함) 특정 그룹의 코드 리스트 요청")
 	public List<Code> privateCodesInGroup(@ApiParam("코드 그룹명") @PathVariable String groupName,
 			@ApiParam("멤버UID") @PathVariable int memberUid) {
 		return codeService.getCodes(groupName, memberUid);
