@@ -102,12 +102,17 @@ public class GroupService {
 
 			groups = groupRepo.findAll();
 
-			// 지사 멤버이면 해당 지사의 그룹리스트 반환
+		// 지사 멤버이면 해당 지사의 그룹리스트 반환
 		} else if (memberService.hasRole(member, MemberService.ROLE_BRANCH)) {
 
+			// 지사 하위 그룹리스
 			groups = groupRepo.findByparentGroupUid(member.getGroup().getUid());
+			
+			// + 멤버 자신의 그룹 포함
+			groups.add(member.getGroup());
+			
 
-			// 권한 없음..
+		// 권한 없음..
 		} else {
 			throw new BadCredentialsException("권한이 없습니다.(Need one of TOP, HEAD, BRANCH qualification.)");
 		}
