@@ -21,15 +21,28 @@ public class CodeController {
 	CodeService codeService;
 	
 	@GetMapping("")
-	@ApiOperation(value="모든 코드 리스트 요청")
+	@ApiOperation(value="모든 공개 코드 리스트 요청")
 	public List<Code> retrieveCodes() {
 		return codeService.getCodes();
+	}
+	
+	@GetMapping("/private/{memberUid}")
+	@ApiOperation(value="memberUid 로 접근 가능한(비공개 포함) 모든 코드 리스트 요청")
+	public List<Code> retrievePrivateCodes(@ApiParam("멤버UID") @PathVariable int memberUid) {
+		return codeService.getCodes(memberUid);
 	}
 
 	@GetMapping("/{groupName}")
 	@ApiOperation(value="특정 그룹의 코드 리스트 요청")
-	public List<Code> retrieveCodes(@ApiParam("코드 그룹명") @PathVariable String groupName) {
+	public List<Code> codesInGroup(@ApiParam("코드 그룹명") @PathVariable String groupName) {
 		return codeService.getCodes(groupName);
+	}
+	
+	@GetMapping("/private/{groupName}/{memberUid}")
+	@ApiOperation(value="특정 그룹의 코드 리스트 요청")
+	public List<Code> privateCodesInGroup(@ApiParam("코드 그룹명") @PathVariable String groupName,
+			@ApiParam("멤버UID") @PathVariable int memberUid) {
+		return codeService.getCodes(groupName, memberUid);
 	}
 	
 	@GetMapping("/groups")

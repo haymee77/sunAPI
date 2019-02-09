@@ -27,4 +27,12 @@ public class Code extends DefaultEntity {
 	@ApiModelProperty(notes="코드 이름(노출될 내용)")
 	@Column(name="CODE_NM", length=65)
 	private String codeName;
+	
+	@ApiModelProperty(notes="코드 공개/비공개 여부")
+	@Column(name="IS_PRIVATE", columnDefinition="BIT(1) DEFAULT FALSE")
+	private boolean isPrivate;
+	
+	@ApiModelProperty(notes="private 코드인 경우 코드를 볼 수 있는 멤버 권한(MEMBER_ROLES), 콤마로 구분함")
+	@Column(name="AUTHORIZED")
+	private String authorized;
 }

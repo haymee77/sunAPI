@@ -14,6 +14,11 @@ public interface CodeRepository extends JpaRepository<Code, Integer> {
 	List<Code> findByGroupName(String groupName);
 	int countByGroupName(String groupName);
 	
+	List<Code> findByGroupNameAndIsPrivate(String groupName, boolean isPrivate);
+	int countByGroupNameAndIsPrivate(String groupName, boolean isPrivate);
+	
 	@Query(value=FIND_GROUP_LIST, nativeQuery=true)
 	List<String> findGroupList();
+	
+	List<Code> findByIsPrivate(boolean isPrivate);
 }
