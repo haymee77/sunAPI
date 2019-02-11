@@ -49,6 +49,7 @@ public class JwtTokenUtil {
 		Map<String, Object> claims = new HashMap<String, Object>();
 		claims.put("username", member.getId());
 		claims.put("email", member.getEmail());
+		claims.put("roles", member.getRoles());
 		
 		return Jwts.builder()
 				.setHeader(header)

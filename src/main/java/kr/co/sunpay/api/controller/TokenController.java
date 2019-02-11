@@ -60,7 +60,10 @@ public class TokenController {
 			if (member == null) {
 				throw new IllegalArgumentException("Can not find ID and Password matching Member");
 			} else {
-				fcmToken.setLoginToken(jwtTokenUtil.generateToken(member));
+				// 로그인 토큰 생성
+				String loginToken = jwtTokenUtil.generateToken(member);
+				fcmToken.setLoginToken(loginToken);
+				
 				// 기 FCM Token 있는지 확인
 				dbToken = fcmTokenRepo.findById(fcmToken.getId()).orElse(fcmToken);
 			}
