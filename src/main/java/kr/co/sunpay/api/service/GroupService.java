@@ -8,17 +8,25 @@ import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import kr.co.sunpay.api.domain.Config;
 import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.domain.Member;
+import kr.co.sunpay.api.model.Fee;
+import kr.co.sunpay.api.repository.ConfigRepository;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.MemberRepository;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Service
 public class GroupService {
 
@@ -30,13 +38,21 @@ public class GroupService {
 
 	@Autowired
 	MemberRepository memberRepo;
-
+	
 	@Autowired
 	MemberService memberService;
-	
+
 	public static final String ROLE_HEAD = "HEAD";
 	public static final String ROLE_BRANCH = "BRANCH";
 	public static final String ROLE_AGENCY = "AGENCY";
+	
+	public final ConfigRepository configRepo;
+	public final Config config;
+	
+	public GroupService(ConfigRepository configRepo, @Value("${config.sitecode}") String siteCode) {
+		this.configRepo = configRepo;
+		config = configRepo.findBySiteCode(siteCode).orElse(null);
+	}
 	
 	/**
 	 * 하위 모든 그룹 리스트 반환(leaf 그룹까지 포함)
@@ -173,8 +189,15 @@ public class GroupService {
 		// MANAGER 권한 없으면 권한없음
 		if (!memberService.hasRole(member, "MANAGER"))
 			throw new BadCredentialsException("권한이 없습니다.(Need MANAGER qualification.)");
-
-		group.setDeleted(false);
+		
+		// 그룹 정보 Validation 검사
+		Group parent;
+		try {
+			parent = getGroup(group.getParentGroupUid());
+		} catch (Exception e) {
+			throw new IllegalArgumentException("상위 그룹 설정 오류(parentGroupUid 확인)");
+		}
+		
 		// 소유주 멤버 등록
 		List<Member> members = new ArrayList<Member>();
 		group.getMembers().forEach(mem -> {
@@ -182,6 +205,33 @@ public class GroupService {
 			members.add(mem);
 		});
 		group.setMembers(members);
+		
+		// 그룹 기본값 설정 >>
+		group.setDeleted(false);
+		
+		// 그룹 생성 시 PG 수수료는 현재 설정된 값으로 함
+		group.setFeePg(config.getFeePg());
+		group.setTransFeePg(config.getTransFeePg());
+		
+		// 수수료 설정(상위그룹의 수수료 받아옴)
+		switch (group.getRoleCode()) {
+		case ROLE_HEAD:
+			// TODO: 본사 수수료 설정은 SP_CONFIG 에도 저장..
+			break;
+		case ROLE_BRANCH:
+			group.setFeeHead(parent.getFeeHead());
+			break;
+			
+		case ROLE_AGENCY:
+			group.setFeeHead(parent.getFeeHead());
+			group.setFeeBranch(parent.getFeeBranch());
+			
+			group.setTransFeeHead(parent.getTransFeeHead());
+			group.setTransFeeBranch(parent.getTransFeeBranch());
+			break;
+		}
+		// << 그룹 기본값 설정 끝
+		
 		Group newGroup = groupRepo.save(group);
 
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{uid}").buildAndExpand(newGroup.getUid())
@@ -262,5 +312,52 @@ public class GroupService {
 		}
 
 		memberService.addRole(memberUid, MemberService.ROLE_OWNER);
+	}
+	
+	/**
+	 * 그룹의 수수료 정보 리턴
+	 * * 상위 그룹의 PG 정보 노출을 막기 위해 아래와 같이 함(상위그룹 수수료는 모두 PG수수료로 합산되어보여짐)
+	 * Fee.pg: PG수수료 + 상위 그룹 수수료 합산(ex.지사그룹이라면 PG + 본사)
+	 * Fee.transPg: PG순간정산(송금) 수수료 + 상위 그룹 수수료 합산(ex.지사그룹이라면 PG + 본사)
+	 * Fee.selfPg: 자사(해당그룹)의 수수료
+	 * Fee.selfTrans: 자사(해당그룹)의 순간정산 수수료
+	 * @param groupUid
+	 * @return
+	 */
+	public Fee getFee(int groupUid) {
+		
+		Fee fee = new Fee();
+		Group group = getGroup(groupUid);
+		
+		switch (group.getRoleCode()) {
+		case ROLE_HEAD:
+			fee.setPg(group.getFeePg());
+			fee.setSelfPg(group.getFeeHead());
+			fee.setTransPg(group.getTransFeePg());
+			fee.setSelfTrans(group.getTransFeeHead());
+			
+			break;
+
+		case ROLE_BRANCH:
+			fee.setPg(group.getFeePg() + group.getFeeHead());
+			fee.setSelfPg(group.getFeeBranch());
+			fee.setTransPg(group.getTransFeePg() + group.getTransFeeHead());
+			fee.setSelfTrans(group.getTransFeeBranch());
+			
+			break;
+
+		case ROLE_AGENCY:
+			fee.setPg(group.getFeePg() + group.getFeeHead() + group.getFeeBranch());
+			fee.setSelfPg(group.getFeeAgency());
+			fee.setTransPg(group.getTransFeePg() + group.getTransFeeHead() + group.getTransFeeBranch());
+			fee.setSelfTrans(group.getTransFeeAgency());
+			
+			break;
+			
+		default:
+			throw new IllegalArgumentException("그룹 권한정보가 없습니다.");
+		}
+		
+		return fee;
 	}
 }

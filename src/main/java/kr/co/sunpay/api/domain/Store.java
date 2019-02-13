@@ -156,7 +156,6 @@ public class Store extends BaseEntity {
 	@Column(name="MIN_PAYMENT_AMOUNT")
 	private Integer minPaymentAmt = 0;
 	
-	// TODO 순간정산 수수료 추가해야함(단위가 %인지 원단위인지 확인 후 DB 데이터형 확인하고 추가할 것)
 	@ApiModelProperty(notes="건당 송금수수료 - PG")
 	@Column(name="TRANS_FEE_PG")
 	private Integer transFeePg = 0;
@@ -225,11 +224,11 @@ public class Store extends BaseEntity {
 	@OrderBy("UID DESC")
 	private List<Member> members;
 	
-	@ApiModelProperty(notes="소속 그룹의 상호명")
+	@ApiModelProperty(notes="*[READ_ONLY]* 소속 그룹의 상호명")
 	@Transient
 	private String groupName;
 	
-	@ApiModelProperty(notes="소속 그룹 UID")
+	@ApiModelProperty(notes="*[READ_ONLY]* 소속 그룹 UID")
 	@Transient
 	private int groupUid;
 }

@@ -115,9 +115,15 @@ public class StoreService {
 	 * @return
 	 */
 	public boolean isAdminable(int memberUid, Store store) {
+		// 상위 그룹 검사
+		if (store.getGroup() == null) {
+			throw new IllegalArgumentException("The Required Parameter('group':{'uid': ''}) is missing.");
+		}
+		
 		// memberUid 권한으로 접근 가능한 그룹 리스트에 소속되는 상점인지 확인
 		try {
 			List<Group> managerGroups = groupService.getGroups(memberUid);
+			
 			for (Group g : managerGroups) {
 				if (store.getGroup().getUid() == g.getUid()) {
 					return true;

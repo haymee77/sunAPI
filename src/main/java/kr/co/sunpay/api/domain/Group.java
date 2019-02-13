@@ -18,7 +18,9 @@ import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModelProperty.AccessMode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -29,14 +31,15 @@ import lombok.ToString;
 @Table(name="SP_GROUPS")
 @Where(clause="DELETED<>1")
 @SQLDelete(sql="UPDATE SP_GROUPS SET DELETED=1 WHERE UID=?")
+@ApiModel
 @ToString
 public class Group extends BaseEntity {
 	
-	@ApiModelProperty(notes="상위 그룹 UID", required=true)
+	@ApiModelProperty(notes="상위 그룹 UID", required=true, position=1)
 	@Column(name="PARENT_GROUP_UID")
 	private Integer parentGroupUid;
 	
-	@ApiModelProperty(notes="상위 그룹 이름")
+	@ApiModelProperty(notes="*[READ_ONLY]* 상위 그룹 이름", position=2)
 	@Transient
 	private String parentBizName;
 	
@@ -100,9 +103,41 @@ public class Group extends BaseEntity {
 	@Column(name="BIZ_STATUS", length=200)
 	private String bizStatus;
 	
-	@ApiModelProperty(notes="기본사용자")
+	@ApiModelProperty(notes="*[READ_ONLY]* 기본사용자")
 	@Transient
 	private int ownerMemberUid;
+	
+	@ApiModelProperty(notes="*[READ_ONLY]* PG수수료(%단위) - PG사", accessMode=AccessMode.READ_ONLY)
+	@Column(name="FEE_PG")
+	private Double feePg = 0.0;
+	
+	@ApiModelProperty(notes="PG수수료(%단위) - 본사, 하위 그룹일 경우 READ_ONLY")
+	@Column(name="FEE_HEAD")
+	private Double feeHead = 0.0;
+	
+	@ApiModelProperty(notes="PG수수료(%단위) - 지사, 하위 그룹일 경우 READ_ONLY")
+	@Column(name="FEE_BRANCH")
+	private Double feeBranch = 0.0;
+	
+	@ApiModelProperty(notes="PG수수료(%단위) - 대리점, 하위 그룹일 경우 READ_ONLY")
+	@Column(name="FEE_AGENCY")
+	private Double feeAgency = 0.0;
+	
+	@ApiModelProperty(notes="*[READ_ONLY]* 건당 송금수수료 - PG", accessMode=AccessMode.READ_ONLY)
+	@Column(name="TRANS_FEE_PG")
+	private Integer transFeePg = 0;
+	
+	@ApiModelProperty(notes="건당 송금수수료 - 본사, 하위 그룹일 경우 READ_ONLY")
+	@Column(name="TRANS_FEE_HEAD")
+	private Integer transFeeHead = 0;
+	
+	@ApiModelProperty(notes="건당 송금수수료 - 지사, 하위 그룹일 경우 READ_ONLY")
+	@Column(name="TRANS_FEE_BRANCH")
+	private Integer transFeeBranch = 0;
+	
+	@ApiModelProperty(notes="건당 송금수수료 - 대리점, 하위 그룹일 경우 READ_ONLY")
+	@Column(name="TRANS_FEE_AGENCY")
+	private Integer transFeeAgency = 0;
 	
 	@JsonManagedReference(value="group-members")
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER)
