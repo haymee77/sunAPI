@@ -126,11 +126,15 @@ public class GroupService {
 			
 			// + 멤버 자신의 그룹 포함
 			groups.add(member.getGroup());
-			
+		
+		// 대리점 멤버이면 자신의 그룹만 포함
+		} else if (memberService.hasRole(member, MemberService.ROLE_AGENCY)) {
 
+			groups.add(member.getGroup());
+		
 		// 권한 없음..
 		} else {
-			throw new BadCredentialsException("권한이 없습니다.(Need one of TOP, HEAD, BRANCH qualification.)");
+			throw new BadCredentialsException("권한이 없습니다.(Need one of TOP, HEAD, BRANCH, AGENCY qualification.)");
 		}
 		
 		for (Group g : groups) {
