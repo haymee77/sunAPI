@@ -221,11 +221,11 @@ public class GroupService {
 		switch (group.getRoleCode()) {
 		// 지사
 		case ROLE_BRANCH:
-			if (!(group.getFeeHead() > 0)) {
+			if (!(group.getFeeHead() >= 0)) {
 				throw new IllegalArgumentException("본사 수수료 미입력");
 			}
 			
-			if (!(group.getTransFeeHead() > 0)) {
+			if (!(group.getTransFeeHead() >= 0)) {
 				throw new IllegalArgumentException("본사 순간정산 서비스 수수료 미입력");
 			}
 			
@@ -238,11 +238,11 @@ public class GroupService {
 				throw new IllegalArgumentException("대리점은 지사 하위로만 생성 가능");
 			}
 			
-			if (!(group.getFeeBranch() > 0)) {
+			if (!(group.getFeeBranch() >= 0)) {
 				throw new IllegalArgumentException("지사 수수료 미입력");
 			}
 			
-			if (!(group.getTransFeeBranch() > 0)) {
+			if (!(group.getTransFeeBranch() >= 0)) {
 				throw new IllegalArgumentException("지사 송금수수료 미입력");
 			}
 			

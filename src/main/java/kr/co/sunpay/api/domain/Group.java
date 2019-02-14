@@ -111,11 +111,11 @@ public class Group extends BaseEntity {
 	@Column(name="FEE_PG")
 	private Double feePg = 0.0;
 	
-	@ApiModelProperty(notes="PG수수료(%단위) - 본사, 하위 그룹일 경우 READ_ONLY")
+	@ApiModelProperty(notes="PG수수료(%단위) - 지사 등록 시 필수값(본사에 할당될 수수료)")
 	@Column(name="FEE_HEAD")
 	private Double feeHead = 0.0;
 	
-	@ApiModelProperty(notes="PG수수료(%단위) - 지사, 하위 그룹일 경우 READ_ONLY")
+	@ApiModelProperty(notes="PG수수료(%단위) - 대리점 등록 시 필수값(지사에 할당될 수수료)")
 	@Column(name="FEE_BRANCH")
 	private Double feeBranch = 0.0;
 	
@@ -123,11 +123,11 @@ public class Group extends BaseEntity {
 	@Column(name="TRANS_FEE_PG")
 	private Integer transFeePg = 0;
 	
-	@ApiModelProperty(notes="건당 송금수수료 - 본사, 하위 그룹일 경우 READ_ONLY")
+	@ApiModelProperty(notes="건당 송금수수료 - 지사 등록 시 필수값(본사에 할당될 수수료)")
 	@Column(name="TRANS_FEE_HEAD")
 	private Integer transFeeHead = 0;
 	
-	@ApiModelProperty(notes="건당 송금수수료 - 지사, 하위 그룹일 경우 READ_ONLY")
+	@ApiModelProperty(notes="건당 송금수수료 - 대리점 등록 시 필수값(지사에 할당될 수수료)")
 	@Column(name="TRANS_FEE_BRANCH")
 	private Integer transFeeBranch = 0;
 	
