@@ -236,14 +236,8 @@ public class MemberService {
 			}
 		}
 
-		// 상점ID, 그룹ID 수정
-		if (member.getStore() != null) {
-			dbMember.setStore(member.getStore());
-		}
-
-		if (member.getGroup() != null) {
-			dbMember.setGroup(member.getGroup());
-		}
+		// 상점ID, 그룹ID 수정 불가 - 소속 변경은 불가능함. 
+		// TODO 소속변경에 대한 요청 시 다방면으로 고려해볼 것.
 
 		return memberRepo.save(dbMember);
 	}

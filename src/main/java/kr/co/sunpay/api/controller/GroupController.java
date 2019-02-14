@@ -56,10 +56,10 @@ public class GroupController {
 		return groupService.updateGroup(memberUid, groupUid, group);
 	}
 	
-	@GetMapping("/fee/{groupUid}")
+	@GetMapping("/fee/{memberUid}/{groupUid}")
 	@ApiOperation(value = "그룹 수수료 정보", notes = "")
-	public Fee getGroupFee(@ApiParam(value = "그룹UID") @PathVariable(value = "groupUid") int groupUid) {
+	public Fee getGroupFee(@ApiParam(value="멤버UID") @PathVariable(value="memberUid") int memberUid, @ApiParam(value = "그룹UID") @PathVariable(value = "groupUid") int groupUid) {
 
-		return groupService.getFee(groupUid);
+		return groupService.getFee(memberUid, groupUid);
 	}
 }

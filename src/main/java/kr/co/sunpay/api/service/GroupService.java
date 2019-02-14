@@ -364,4 +364,36 @@ public class GroupService {
 		
 		return fee;
 	}
+	
+	/**
+	 * memberUid가 groupUid에 대한 권한을 가지고 있는 경우 groupUid에 대한 수수료 정보 리턴
+	 * (권한 없는 경우 BadCredentialsException 발생)
+	 * @param memberUid
+	 * @param groupUid
+	 * @return
+	 */
+	public Fee getFee(int memberUid, int groupUid) {
+		
+		if (hasAuth(memberUid, groupUid)) {
+			return getFee(groupUid);
+		} else {
+			throw new BadCredentialsException("그룹 수수료 조회 권한이 없습니다.");
+		}
+	}
+	
+	/**
+	 * memberUid가 groupUid에 대한 권한을 가진 경우 TRUE 리턴
+	 * @param memberUid
+	 * @param groupUid
+	 * @return
+	 */
+	public boolean hasAuth(int memberUid, int groupUid) {
+		List<Group> authGroups = getGroups(memberUid);
+		
+		for (Group g : authGroups) {
+			if (g.getUid() == groupUid) return true;
+		}
+		
+		return false;
+	}
 }

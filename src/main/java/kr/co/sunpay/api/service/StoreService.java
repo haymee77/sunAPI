@@ -9,6 +9,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
+import kr.co.sunpay.api.model.Fee;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import lombok.extern.java.Log;
@@ -336,5 +338,23 @@ public class StoreService {
 			return true;
 
 		return false;
+	}
+	
+	/**
+	 * memberUid가 groupUid에 대한 접근권한이 있는지 확인 후 groupUid에 대한 수수료 정보 리턴
+	 * @param memberUid
+	 * @param groupUid
+	 * @return
+	 */
+	public Fee getFee(int memberUid, int groupUid) {
+		if (groupService.hasAuth(memberUid, groupUid)) {
+			return getFee(groupUid);
+		} else {
+			throw new BadCredentialsException("그룹 수수료 조회 권한이 없습니다.");
+		}
+	}
+	
+	public Fee getFee(int groupUid) {
+		return null;
 	}
 }
