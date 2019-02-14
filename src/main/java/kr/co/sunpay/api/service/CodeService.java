@@ -104,8 +104,15 @@ public class CodeService {
 		List<Code> privateCodes = repo.findByGroupNameAndIsPrivate(groupName, true);
 		
 		Member member = memberService.getMember(memberUid);
-		if (memberService.hasRole(member, "TOP") || memberService.hasRole(member, "HEAD")) {
+		if (memberService.hasRole(member, MemberService.ROLE_TOP)) {
 			codes.addAll(privateCodes);
+		} else if (memberService.hasRole(member, MemberService.ROLE_HEAD)) {
+			
+			for (Code c : privateCodes) {
+				if (c.getAuthorized().indexOf(MemberService.ROLE_BRANCH) > 0) {
+					codes.add(c);
+				}
+			}
 		} else if (memberService.hasRole(member, MemberService.ROLE_BRANCH)) {
 			
 			for (Code c : privateCodes) {

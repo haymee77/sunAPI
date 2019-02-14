@@ -1,6 +1,7 @@
 package kr.co.sunpay.api.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +52,12 @@ public class MemberService {
 	public static final String ROLE_STAFF = "STAFF";
 	public static final String ROLE_CS = "CS";
 	public static final String ROLE_OWNER = "OWNER";
+	public static final String ROLE_DEV = "DEV";
+	
+	// 멤버 수정 시 수정할 수 없는 권한
+	public static final List<String> UNAMENDABLE_ROLES = Arrays.asList(
+		ROLE_HEAD, ROLE_BRANCH, ROLE_AGENCY, ROLE_STORE, ROLE_OWNER, ROLE_DEV
+	);
 
 	private Member member;
 	
@@ -219,18 +226,21 @@ public class MemberService {
 		dbMember.setMobile(member.getMobile());
 		dbMember.setName(member.getName());
 
+		// 권한 변경 적용
 		// 새로운 권한 추가
-		member.getRoles().forEach(role -> {
+		for (MemberRole role : member.getRoles()) {
+			if (UNAMENDABLE_ROLES.contains(role.getRoleName())) continue;
 			if (!dbMember.getRoles().contains(role)) {
 				dbMember.getRoles().add(role);
 			}
-		});
-
+		}
+		
 		// 제거된 권한 삭제
 		Iterator<MemberRole> iRoles = dbMember.getRoles().iterator();
 		while (iRoles.hasNext()) {
 			MemberRole role = iRoles.next();
 
+			if (UNAMENDABLE_ROLES.contains(role.getRoleName())) continue;
 			if (!member.getRoles().contains(role)) {
 				iRoles.remove();
 			}
