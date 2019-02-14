@@ -32,9 +32,4 @@ public class Config extends BaseEntity {
 	@Column(name="TRANS_FEE_PG", columnDefinition="DEFAULT 0")
 	private Integer transFeePg = 0;
 	
-	@Column(name="FEE_HEAD", columnDefinition="DEFAULT 0.0")
-	private Double feeHead = 0.0;
-	
-	@Column(name="TRANS_FEE_HEAD", columnDefinition="DEFAULT 0")
-	private Integer transFeeHead = 0;
 }
