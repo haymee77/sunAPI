@@ -18,10 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
-import kr.co.sunpay.api.model.Fee;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.service.GroupService;
@@ -147,12 +145,5 @@ public class StoreController {
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
 		
 		return ResponseEntity.created(location).build();
-	}
-	
-	@GetMapping("/fee/{memberUid}/{groupUid}")
-	@ApiOperation(value = "상점 수수료 정보", notes = "")
-	public Fee getGroupFee(@ApiParam(value="멤버UID") @PathVariable(value="memberUid") int memberUid, @ApiParam(value = "상점을 생성할 그룹UID") @PathVariable(value = "groupUid") int groupUid) {
-
-		return storeService.getFee(memberUid, groupUid);
 	}
 }

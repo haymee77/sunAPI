@@ -83,7 +83,7 @@ public class MemberController {
 	}
 	
 	@PutMapping("/{uid}")
-	@ApiOperation(value="멤버 수정 요청", notes="{uid} 멤버 수정")
+	@ApiOperation(value="멤버 수정 요청", notes="{uid} 멤버 수정\n\n소속권한, 기타권한에 대한 수정내용은 적용되지 않음")
 	public ResponseEntity<Object> updateMember(@ApiParam("수정할 멤버의 uid") @PathVariable int uid,
 			@RequestBody Member member) {
 		

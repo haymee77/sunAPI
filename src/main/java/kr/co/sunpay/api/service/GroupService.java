@@ -217,21 +217,38 @@ public class GroupService {
 		group.setFeePg(config.getFeePg());
 		group.setTransFeePg(config.getTransFeePg());
 		
-		// 수수료 설정(상위그룹의 수수료 받아옴)
+		// 본사, 지점, 대리점 속성값 확인 및 기본값 설정
 		switch (group.getRoleCode()) {
-		case ROLE_HEAD:
-			// TODO: 본사 수수료 설정은 SP_CONFIG 에도 저장..
-			break;
+		// 지사
 		case ROLE_BRANCH:
-			group.setFeeHead(parent.getFeeHead());
+			if (!(group.getFeeHead() > 0)) {
+				throw new IllegalArgumentException("본사 수수료 미입력");
+			}
+			
+			if (!(group.getTransFeeHead() > 0)) {
+				throw new IllegalArgumentException("본사 순간정산 서비스 수수료 미입력");
+			}
+			
+			group.setFeeBranch(0.0);
 			break;
 			
+		// 대리점
 		case ROLE_AGENCY:
-			group.setFeeHead(parent.getFeeHead());
-			group.setFeeBranch(parent.getFeeBranch());
+			if (!parent.getRoleCode().equals(ROLE_BRANCH)) {
+				throw new IllegalArgumentException("대리점은 지사 하위로만 생성 가능");
+			}
 			
+			if (!(group.getFeeBranch() > 0)) {
+				throw new IllegalArgumentException("지사 수수료 미입력");
+			}
+			
+			if (!(group.getTransFeeBranch() > 0)) {
+				throw new IllegalArgumentException("지사 송금수수료 미입력");
+			}
+			
+			// 본사 수수료는 지사와 동일하게 셋팅
+			group.setFeeHead(parent.getFeeHead());
 			group.setTransFeeHead(parent.getTransFeeHead());
-			group.setTransFeeBranch(parent.getTransFeeBranch());
 			break;
 		}
 		// << 그룹 기본값 설정 끝
@@ -335,26 +352,19 @@ public class GroupService {
 		
 		switch (group.getRoleCode()) {
 		case ROLE_HEAD:
-			fee.setPg(group.getFeePg());
-			fee.setSelfPg(group.getFeeHead());
-			fee.setTransPg(group.getTransFeePg());
-			fee.setSelfTrans(group.getTransFeeHead());
-			
+			fee.setPg(config.getFeePg());
+			fee.setTransPg(config.getTransFeePg());
 			break;
 
 		case ROLE_BRANCH:
 			fee.setPg(group.getFeePg() + group.getFeeHead());
-			fee.setSelfPg(group.getFeeBranch());
 			fee.setTransPg(group.getTransFeePg() + group.getTransFeeHead());
-			fee.setSelfTrans(group.getTransFeeBranch());
 			
 			break;
 
 		case ROLE_AGENCY:
 			fee.setPg(group.getFeePg() + group.getFeeHead() + group.getFeeBranch());
-			fee.setSelfPg(group.getFeeAgency());
 			fee.setTransPg(group.getTransFeePg() + group.getTransFeeHead() + group.getTransFeeBranch());
-			fee.setSelfTrans(group.getTransFeeAgency());
 			
 			break;
 			

@@ -119,10 +119,6 @@ public class Group extends BaseEntity {
 	@Column(name="FEE_BRANCH")
 	private Double feeBranch = 0.0;
 	
-	@ApiModelProperty(notes="PG수수료(%단위) - 대리점, 하위 그룹일 경우 READ_ONLY")
-	@Column(name="FEE_AGENCY")
-	private Double feeAgency = 0.0;
-	
 	@ApiModelProperty(notes="*[READ_ONLY]* 건당 송금수수료 - PG", accessMode=AccessMode.READ_ONLY)
 	@Column(name="TRANS_FEE_PG")
 	private Integer transFeePg = 0;
@@ -134,10 +130,6 @@ public class Group extends BaseEntity {
 	@ApiModelProperty(notes="건당 송금수수료 - 지사, 하위 그룹일 경우 READ_ONLY")
 	@Column(name="TRANS_FEE_BRANCH")
 	private Integer transFeeBranch = 0;
-	
-	@ApiModelProperty(notes="건당 송금수수료 - 대리점, 하위 그룹일 경우 READ_ONLY")
-	@Column(name="TRANS_FEE_AGENCY")
-	private Integer transFeeAgency = 0;
 	
 	@JsonManagedReference(value="group-members")
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER)
