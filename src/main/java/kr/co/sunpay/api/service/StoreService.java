@@ -207,6 +207,59 @@ public class StoreService {
 		members.add(store.getMembers().get(0));
 		store.setMembers(members);
 		
+		// <- 상점 생성 시 수수료 데이터 셋팅 시작
+		Group group = store.getGroup();
+		
+		// - PG 수수료는 환경설정에서 가져옴
+		store.setFeePg(groupService.getConfig().getFeePg());
+		store.setTransFeePg(groupService.getConfig().getTransFeePg());
+		
+		switch (group.getRoleCode()) {
+		case GroupService.ROLE_HEAD:
+			if (!(store.getFeeHead() > 0)) {
+				throw new IllegalArgumentException("수수료 미입력");
+			}
+			
+			if (!(store.getTransFeeHead() > 0)) {
+				throw new IllegalArgumentException("순간정산수수료 미입력");
+			}
+			
+			store.setFeeBranch(0.0);
+			store.setFeeAgency(0.0);
+			store.setTransFeeBranch(0);
+			store.setTransFeeAgency(0);
+			break;
+
+		case GroupService.ROLE_BRANCH:
+			if (!(store.getFeeBranch() > 0)) {
+				throw new IllegalArgumentException("수수료 미입력");
+			}
+			if (!(store.getTransFeeBranch() > 0)) {
+				throw new IllegalArgumentException("순간정산수수료 미입력");
+			}
+			
+			store.setFeeHead(group.getFeeHead());
+			store.setFeeAgency(0.0);
+			store.setTransFeeHead(group.getTransFeeHead());
+			store.setTransFeeAgency(0);
+			break;
+			
+		case GroupService.ROLE_AGENCY:
+			if (!(store.getFeeAgency() > 0)) {
+				throw new IllegalArgumentException("수수료 미입력");
+			}
+			if (!(store.getTransFeeAgency() > 0)) {
+				throw new IllegalArgumentException("순간정산수수료 미입력");
+			}
+			
+			store.setFeeHead(group.getFeeHead());
+			store.setFeeBranch(group.getFeeBranch());
+			store.setTransFeeHead(group.getTransFeeHead());
+			store.setTransFeeBranch(group.getTransFeeBranch());
+			break;
+		}
+		// 상점 생성 시 수수료 데이터 셋팅 끝 ->
+		
 		// 상점 생성 후 예치금 번호 생성
 		Store newStore = storeRepo.save(store);
 		newStore.setDepositNo(createDepositNo());

@@ -231,4 +231,19 @@ public class Store extends BaseEntity {
 	@ApiModelProperty(notes="*[READ_ONLY]* 소속 그룹 UID")
 	@Transient
 	private int groupUid;
+
+	public Store hideFee() {
+		
+		setFeePg(getFeePg() + getFeeHead() + getFeeBranch() + getFeeAgency());
+		setTransFeePg(getTransFeePg() + getTransFeeHead() + getTransFeeBranch() + getTransFeeAgency());
+		
+		setFeeHead(0.0);
+		setFeeBranch(0.0);
+		setFeeAgency(0.0);
+		setTransFeeHead(0);
+		setTransFeeBranch(0);
+		setTransFeeAgency(0);
+		
+		return this;
+	}
 }

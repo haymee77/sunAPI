@@ -25,9 +25,7 @@ import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.service.GroupService;
 import kr.co.sunpay.api.service.MemberService;
 import kr.co.sunpay.api.service.StoreService;
-import lombok.extern.java.Log;
 
-@Log
 @RestController
 @RequestMapping("/store")
 public class StoreController {
@@ -53,21 +51,21 @@ public class StoreController {
 	@ApiOperation(value="상점리스트 가져오기", notes="{memberUid}의 그룹 권한으로 볼 수 있는 상점리스트 반환")
 	public List<Store> retrieveStores(@PathVariable("memberUid") int memberUid) {
 		
-		log.info("-- StoreController.retrieveStores called..");
-		if (storeRepo.count() == 0) {
-			throw new EntityNotFoundException("There is no Store saved.");
-		}
-		
 		Member member = memberService.getMember(memberUid);
+		List<Store> stores = new ArrayList<Store>();
 		
 		if (member.getStoreUid() > 0) {
-			List<Store> stores = new ArrayList<Store>();
 			stores.add(storeService.getStore(member.getStoreUid()));
-			
-			return stores;
+		} else {
+			stores = storeService.getStoresByMember(member);
 		}
 		
-		return storeService.getStoresByMember(member);
+		// 그룹별 수수료 정보 합산하여 리턴함
+		for (Store s : stores) {
+			s = s.hideFee();
+		}
+		
+		return stores;
 	}
 	
 	/**
@@ -86,7 +84,7 @@ public class StoreController {
 		
 		for (Store s : memberStores) {
 			if (s.getUid() == uid) {
-				return s;
+				return s.hideFee();
 			}
 		}
 		
@@ -108,7 +106,6 @@ public class StoreController {
 	@ApiOperation(value="상점 생성 - Dashboard", notes="{memberUid} 권한 확인 후 상점 생성, {memberUid} 하위 소속으로만 생성 가능")
 	public ResponseEntity<Object> createStoreByManager(@PathVariable("memberUid") int memberUid, @RequestBody Store store) throws Exception {
 		
-		log.info("-- StoreController.createStoreByManager called..");
 		Store newStore = storeService.create(store, memberUid);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{uid}")
 						.buildAndExpand(newStore.getUid()).toUri();
@@ -126,7 +123,6 @@ public class StoreController {
 	@ApiOperation(value="상점 생성", notes="본사 소속으로만 생성 가능")
 	public ResponseEntity<Object> createStore(@RequestBody Store store) throws Exception {
 		
-		log.info("-- StoreController.createStore called..");
 		store.setGroup(groupRepo.findByRoleCode(GroupService.ROLE_HEAD).get());
 		Store newStore = storeService.create(store);
 		Member storeOwner = newStore.getMembers().get(0);

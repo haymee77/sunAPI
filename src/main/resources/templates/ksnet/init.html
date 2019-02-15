@@ -9,7 +9,9 @@
 	<!-- Content page -->
 	<div layout:fragment="content">
 		<div class="container">
-			<form name="payForm" method="post">
+			<input type="hidden" id="err" th:value="${err}">
+			
+			<form th:if="(${err} == null) AND (${uid} != null)" name="payForm" method="post" style="display:none">
 				<input type="hidden" name="uid" th:value="${uid}">
 				sndPaymethod
 				<input type="text" name="sndPaymethod" th:value="${param.sndPaymethod}">
@@ -41,14 +43,24 @@
 		<script>
 		// KSNet._pay
 		function _pay(_frm) {
-			_frm.sndReply.value = window.location.origin + "/ksnet/payment/" + document.getElementsByName("uid")[0].value;
-			_frm.target = "_self";
-			_frm.action = "https://kspay.ksnet.to/store/KSPayFlashV1.3/KSPayPWeb.jsp?sndCharSet=utf-8";
-			
-			_frm.submit();
+			if (document.getElementsByName("uid")[0] != null) {
+				_frm.sndReply.value = window.location.origin + "/ksnet/payment/" + document.getElementsByName("uid")[0].value;
+				_frm.target = "_self";
+				_frm.action = "https://kspay.ksnet.to/store/KSPayFlashV1.3/KSPayPWeb.jsp?sndCharSet=utf-8";
+				
+				_frm.submit();	
+			}
 		}
 		
 		_pay(document.payForm);
+		
+		$(function () {
+			
+			if ($("#err").val().length > 0) {
+				alert("Error!!");
+				window.close();
+			}
+		});
 		</script>
 	</th:block>
 	<!-- custom javascript -->

@@ -17,9 +17,7 @@ import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.model.Fee;
 import kr.co.sunpay.api.service.GroupService;
-import lombok.extern.java.Log;
 
-@Log
 @RestController
 @RequestMapping("/group")
 public class GroupController {

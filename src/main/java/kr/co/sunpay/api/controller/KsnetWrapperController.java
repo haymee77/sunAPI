@@ -42,7 +42,14 @@ public class KsnetWrapperController {
 	public void init(KsnetPay ksnetPay, Model model) {
 		log.info("-- KsnetWrapperController.init called...");
 		KsnetPay newPay = ksnetPayRepo.save(ksnetPay);
-		model.addAttribute("uid", newPay.getUid());
+		
+		// TODO ksnetPay.getSndStoreid() 검증 - 썬페이에서 가지고 있는 상점 ID가 맞는지, 예치금확인, 최소결제금액 확인, 결제한도 확인
+		System.out.println(ksnetPay.getSndStoreid());
+		if (!storeIdRepo.findByIdAndActivated(ksnetPay.getSndStoreid(), true).isPresent()) {
+			model.addAttribute("err", "Can not find Store ID.");
+		} else {
+			model.addAttribute("uid", newPay.getUid());
+		}
 	}
 
 	/**

@@ -32,4 +32,12 @@ public class Config extends BaseEntity {
 	@Column(name="TRANS_FEE_PG", columnDefinition="DEFAULT 0")
 	private Integer transFeePg = 0;
 	
+	// 상점 결제건당 본사에 지불하는 기본 수수료(%)
+	@Column(name="FEE_HEAD", columnDefinition="DEFAULT 0.0")
+	private Double feeHead = 0.0;
+	
+	// 상점 결제건당 본사에 지불하는 기본 순간정산(송금)수수료(%)
+	@Column(name="TRANS_FEE_HEAD", columnDefinition="DEFAULT 0")
+	private Integer transFeeHead = 0;
+	
 }
