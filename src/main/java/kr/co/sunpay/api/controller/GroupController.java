@@ -17,7 +17,9 @@ import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.model.Fee;
 import kr.co.sunpay.api.service.GroupService;
+import lombok.extern.java.Log;
 
+@Log
 @RestController
 @RequestMapping("/group")
 public class GroupController {
@@ -28,7 +30,15 @@ public class GroupController {
 	@GetMapping("/{memberUid}")
 	@ApiOperation(value = "본사/지사/대리점 리스트 요청(멤버 권한으로 접근 가능한 그룹의 리스트 반환)")
 	public List<Group> retrieveGroups(@ApiParam(value = "멤버 고유 번호") @PathVariable(value = "memberUid") int memberUid) {
-		return groupService.getGroups(memberUid);
+		
+		List<Group> groups = groupService.getGroups(memberUid);
+		
+		// 수수료 정보 숨김
+		for (Group g : groups) {
+			g = g.hideFee();
+		}
+		
+		return groups;
 	}
 	
 	@GetMapping("/{memberUid}/{groupUid}")
@@ -37,7 +47,9 @@ public class GroupController {
 			@ApiParam(value = "멤버 고유 번호") @PathVariable(value = "memberUid") int memberUid,
 			@ApiParam(value = "그룹 고유 번호") @PathVariable(value = "groupUid") int groupUid) {
 
-		return groupService.getGroup(memberUid, groupUid);
+		Group group = groupService.getGroup(memberUid, groupUid).hideFee();
+
+		return group;
 	}
 
 	@RequestMapping(path="/{memberUid}", method=RequestMethod.POST)

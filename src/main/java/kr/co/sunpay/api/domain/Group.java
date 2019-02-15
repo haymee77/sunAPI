@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModelProperty.AccessMode;
+import kr.co.sunpay.api.service.GroupService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -140,4 +141,30 @@ public class Group extends BaseEntity {
 	@JsonManagedReference(value="group-stores")
 	@OneToMany(mappedBy="group")
 	private List<Store> stores;
+
+	/** 
+	 * 수수료 정보 노출 막기위함
+	 * @return
+	 */
+	public Group hideFee() {
+		
+		switch (this.roleCode) {
+		case GroupService.ROLE_BRANCH:
+			setFeePg(this.feePg + this.feeHead);
+			setTransFeePg(this.transFeePg + this.transFeeHead);
+			setFeeHead(0.0);
+			setTransFeeHead(0);
+			break;
+			
+		case GroupService.ROLE_AGENCY:
+			setFeePg(this.feePg + this.feeHead + this.feeBranch);
+			setTransFeePg(this.transFeePg + this.transFeeHead + this.transFeeBranch);
+			setFeeHead(0.0);
+			setTransFeeHead(0);
+			setFeeBranch(0.0);
+			setTransFeeBranch(0);
+			break;
+		}
+		return this;
+	}
 }
