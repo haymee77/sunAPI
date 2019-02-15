@@ -109,7 +109,7 @@ public class CodeService {
 		} else if (memberService.hasRole(member, MemberService.ROLE_HEAD)) {
 			
 			for (Code c : privateCodes) {
-				if (c.getAuthorized().indexOf(MemberService.ROLE_BRANCH) > 0) {
+				if (c.getAuthorized().indexOf(MemberService.ROLE_HEAD) > 0) {
 					codes.add(c);
 				}
 			}
