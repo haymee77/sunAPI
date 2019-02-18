@@ -86,6 +86,10 @@ public class GroupService {
 		
 		return groups;
 	}
+	
+	public List<Group> getGroups(Member member) {
+		return getGroups(member.getUid());
+	}
 
 	/**
 	 * memberUid 권한으로 볼 수 있는 모든 그룹 리스트 반환

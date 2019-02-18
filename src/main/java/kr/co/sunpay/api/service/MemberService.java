@@ -41,6 +41,9 @@ public class MemberService {
 	@Autowired
 	StoreService storeService;
 	
+	@Autowired
+	GroupService groupService;
+	
 	// 소속 권한
 	public static final String ROLE_TOP = "TOP";
 	public static final String ROLE_HEAD = "HEAD";
@@ -316,34 +319,26 @@ public class MemberService {
 	public boolean hasStoreQualification(Member member, Store store) {
 
 		boolean qualified = false;
-		List<String> memberRoleNames = getRoleNames(member);
-
-		// 최고관리자, 본사 멤버의 경우 자격있음
-		if (memberRoleNames.contains(ROLE_TOP) || memberRoleNames.contains(ROLE_HEAD)) {
-			System.out.println("TOP/HEAD 권한 - 자격있음");
+		
+		// 해당 상점의 멤버인 경우
+		if (member.getStore() != null && member.getStore().getUid() == store.getUid()) {
 			qualified = true;
-
-			// 멤버와 상점이 같은 그룹의 소속인 경우 - 자격있음
-		} else if (member.getGroup().equals(store.getGroup())) {
-
-			System.out.println("같은 그룹 소속 - 자격있음");
-			qualified = true;
-
-		} else {
-
-			// 멤버 소속 그룹에 포함된 모든 상점 리스트 가져옴
-			List<Store> memberStores = storeService.getStoresByMember(member);
-
-			// 현재 상점이 멤버 소속 그룹 하위에 있는지 확인
-			for (Store s : memberStores) {
-				if (s.getUid() == store.getUid()) {
-					System.out.println("소속상점에 포함됨 - 자격있음");
-					qualified = true;
-					break;
+			
+		// 그룹의 멤버인 경우 멤버가 접근 가능한 그룹 중 상점이 포함되었는지 확인
+		} else if (member.getGroup() != null) {
+			List<Group> groups = groupService.getGroups(member);
+			
+			outerLoop:
+			for (Group g : groups) {
+				for (Store s : g.getStores()) {
+					if (s.getUid() == store.getUid()) {
+						qualified = true;
+						break outerLoop;
+					}
 				}
 			}
 		}
-
+		
 		return qualified;
 	}
 	

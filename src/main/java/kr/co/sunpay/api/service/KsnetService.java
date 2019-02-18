@@ -12,7 +12,7 @@ import kr.co.sunpay.api.repository.KspayCancelLogRepository;
 import ksnet.kspay.KSPayApprovalCancelBean;
 
 @Service
-public class KspayService {
+public class KsnetService {
 
 	@Autowired
 	KspayCancelLogRepository cancelLogRepo;
