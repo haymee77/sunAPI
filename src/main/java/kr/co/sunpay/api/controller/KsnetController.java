@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.co.sunpay.api.domain.KsnetCancelLog;
+import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.model.DepositService;
 import kr.co.sunpay.api.model.KspayCancelBody;
 import kr.co.sunpay.api.model.KspayCancelReturns;
 import kr.co.sunpay.api.service.KsnetService;
+import kr.co.sunpay.api.service.PushService;
 import kr.co.sunpay.api.service.StoreService;
 
 @RestController
@@ -37,6 +39,16 @@ public class KsnetController {
 		// 결제 취소 요청 저장
 		KsnetCancelLog log = ksnetService.saveCancelLog(cancel);
 		boolean isInstantOn = storeService.isInstantOn(cancel.getStoreid());
+		
+		// 주문정보 조회 
+		KsnetPayResult paidResult = ksnetService.getPaidResult(cancel.getTrno(), cancel.getStoreid());
+		if (paidResult == null) {
+			result.setRMessage2("주문정보 없음");
+			ksnetService.updateCancelLog(log, result);
+			return new ResponseEntity<Object>(result, HttpStatus.FOUND);
+		}
+		
+		log.setAmt(paidResult.getAmt());
 		
 		// 기취소건인지 확인
 		if (ksnetService.hasCancelSuccessLog(cancel)) {
@@ -67,6 +79,12 @@ public class KsnetController {
 		}
 		
 		ksnetService.updateCancelLog(log, result);
+		
+		// 취소 결과 PUSH 발송
+		System.out.println("취소 결과 발송 --");
+		PushService.sendPush(log);
+		System.out.println(log);
+		
 		return new ResponseEntity<Object>(result, HttpStatus.FOUND);
 	}
 }

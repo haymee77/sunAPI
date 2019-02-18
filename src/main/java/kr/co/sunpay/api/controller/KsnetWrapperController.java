@@ -14,6 +14,7 @@ import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.repository.KsnetPayRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.StoreIdRepository;
+import kr.co.sunpay.api.service.PushService;
 import lombok.extern.java.Log;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -25,10 +26,10 @@ public class KsnetWrapperController {
 
 	@Autowired
 	KsnetPayRepository ksnetPayRepo;
-	
+
 	@Autowired
 	KsnetPayResultRepository ksnetPayResultRepo;
-	
+
 	@Autowired
 	StoreIdRepository storeIdRepo;
 
@@ -42,8 +43,9 @@ public class KsnetWrapperController {
 	public void init(KsnetPay ksnetPay, Model model) {
 		log.info("-- KsnetWrapperController.init called...");
 		KsnetPay newPay = ksnetPayRepo.save(ksnetPay);
-		
-		// TODO ksnetPay.getSndStoreid() 검증 - 썬페이에서 가지고 있는 상점 ID가 맞는지, 예치금확인, 최소결제금액 확인, 결제한도 확인
+
+		// TODO ksnetPay.getSndStoreid() 검증 - 썬페이에서 가지고 있는 상점 ID가 맞는지, 예치금확인, 최소결제금액 확인,
+		// 결제한도 확인
 		System.out.println(ksnetPay.getSndStoreid());
 		if (!storeIdRepo.findByIdAndActivated(ksnetPay.getSndStoreid(), true).isPresent()) {
 			model.addAttribute("err", "Can not find Store ID.");
@@ -77,14 +79,14 @@ public class KsnetWrapperController {
 	@RequestMapping("/finish")
 	public void finish(HttpServletRequest request, Model model) {
 		log.info("-- KsnetWrapperController.finish called...");
-		
+
 		KsnetPay ksnetPay = ksnetPayRepo.findByUid(Integer.parseInt(request.getParameter("uid")));
 		KsnetPayResult ksnetPayResult = new KsnetPayResult();
-		
+
 		if (!storeIdRepo.findByIdAndActivated(ksnetPay.getSndStoreid(), true).isPresent()) {
 			throw new EntityNotFoundException("사용가능한 상점 ID가 없습니다.");
 		}
-		
+
 		// Dashboard에 노출될 내용
 		ksnetPayResult.setKsnetPay(ksnetPay);
 		ksnetPayResult.setStoreId(ksnetPay.getSndStoreid());
@@ -101,10 +103,10 @@ public class KsnetWrapperController {
 		if (ipg.kspay_send_msg("1")) {
 			authyn = ipg.kspay_get_value("authyn");
 			authno = ipg.kspay_get_value("authno");
-			
+
 			ksnetPayResult.setAuthyn(authyn); // 성공여부
 			ksnetPayResult.setAuthno(authno);
-			
+
 			ksnetPayResult.setTrno(ipg.kspay_get_value("trno")); // 거래번호(KSNet 고유번호)
 			ksnetPayResult.setTrddt(ipg.kspay_get_value("trddt"));
 			ksnetPayResult.setTrdtm(ipg.kspay_get_value("trdtm"));
@@ -118,13 +120,16 @@ public class KsnetWrapperController {
 			ksnetPayResult.setHalbu(ipg.kspay_get_value("halbu"));
 			ksnetPayResult.setCbtrno(ipg.kspay_get_value("cbtrno"));
 		}
-		
+
 		ksnetPayResult = ksnetPayResultRepo.save(ksnetPayResult);
-		
+
+		// 결제 결과 PUSH 발송
+		PushService.sendPush(ksnetPayResult);
+
 		model.addAttribute("sndReply", ksnetPay.getSndReply());
 		model.addAttribute("reCommConId", rcid);
 		model.addAttribute("reCommType", request.getParameter("reCommType"));
 		model.addAttribute("reHash", request.getParameter("reHash"));
-		
+
 	}
 }

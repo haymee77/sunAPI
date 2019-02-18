@@ -112,4 +112,17 @@ public class KsnetPayResult {
 	@OneToOne(fetch=FetchType.EAGER, optional=false)
 	@JoinColumn(name="KSNET_PAY_UID_FK")
 	private KsnetPay ksnetPay;
+	
+	public String msgGenerator() {
+		String msg = "";
+		
+		msg = "상품명: " + this.ksnetPay.getSndGoodname() 
+				+ "\n결제금액: " + getAmt();
+		
+		if (getAuthyn().equals("O")) {
+			msg += "\n결제완료";
+		}
+		
+		return msg;
+	}
 }

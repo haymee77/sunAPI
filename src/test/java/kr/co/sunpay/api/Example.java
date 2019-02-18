@@ -2,7 +2,9 @@ package kr.co.sunpay.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -21,6 +23,7 @@ import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.service.GroupService;
+import kr.co.sunpay.api.service.PushService;
 import kr.co.sunpay.api.service.StoreService;
 
 @RunWith(SpringRunner.class)
@@ -44,6 +47,21 @@ public class Example {
 
 	@Autowired
 	KsnetPayResultRepository ksnetPayResultRepo;
+	
+	@Autowired
+	PushService pushService;
+	
+	@Test
+	public void pushTest() {
+		// 결제 성공 시에만 PUSH 발솔
+			Map<String, String> msg = new HashMap<String, String>();
+			msg.put("cate", "paid");
+			msg.put("isDisplay", "Y");
+			msg.put("title", "상품 결제 완료");
+			msg.put("message", "테스트..");
+			
+			pushService.push(msg);
+	}
 
 	@Test
 	public void createStore() {

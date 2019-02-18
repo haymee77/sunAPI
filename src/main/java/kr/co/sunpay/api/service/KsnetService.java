@@ -1,13 +1,16 @@
 package kr.co.sunpay.api.service;
 
 import java.text.SimpleDateFormat;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.co.sunpay.api.domain.KsnetCancelLog;
+import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.model.KspayCancelBody;
 import kr.co.sunpay.api.model.KspayCancelReturns;
+import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.KspayCancelLogRepository;
 import ksnet.kspay.KSPayApprovalCancelBean;
 
@@ -16,6 +19,9 @@ public class KsnetService {
 
 	@Autowired
 	KspayCancelLogRepository cancelLogRepo;
+	
+	@Autowired
+	KsnetPayResultRepository ksnetPayResultRepo;
 
 	public static final String IPG_IP_ADDR = "13.209.200.120";
 	public static final int IPG_PORT = 29991;
@@ -61,9 +67,11 @@ public class KsnetService {
 	 * @param trNo
 	 * @return
 	 */
-	public int getPaidAmt(String trNo) {
+	public KsnetPayResult getPaidResult(String trNo, String storeId) {
 
-		return 0;
+		Optional<KsnetPayResult> oPayResult = ksnetPayResultRepo.findByTrnoAndStoreIdAndAuthyn(trNo, storeId, "O");
+		
+		return oPayResult.orElse(null);
 	}
 
 	public KspayCancelReturns sendKSPay(KspayCancelBody cancel) {

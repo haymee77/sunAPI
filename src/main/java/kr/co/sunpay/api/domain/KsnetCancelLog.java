@@ -40,6 +40,9 @@ public class KsnetCancelLog {
 	
 	@Column(name="TR_NO")
 	private String trNo;
+	
+	@Column(name="AMT")
+	private int amt;
 
 	@Column(name="AUTHTY")
 	private String authty;
@@ -76,5 +79,13 @@ public class KsnetCancelLog {
 		this.rStatus = result.getRStatus();
 		this.rMsg1 = result.getRMessage1();
 		this.rMsg2 = result.getRMessage2();
+	}
+	
+	public String msgGenerator() {
+		String msg = "[결제취소]"
+				+ "\n주문번호: " + getTrNo()
+				+ "\n취소금액: " + getAmt();
+		
+		return msg;
 	}
 }
