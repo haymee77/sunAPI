@@ -121,6 +121,8 @@ public class KsnetPayResult {
 		
 		if (getAuthyn().equals("O")) {
 			msg += "\n결제완료";
+		} else {
+			msg += "\n" + msg1 + "\n" + msg2;
 		}
 		
 		return msg;

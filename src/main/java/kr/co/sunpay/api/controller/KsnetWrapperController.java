@@ -32,6 +32,9 @@ public class KsnetWrapperController {
 
 	@Autowired
 	StoreIdRepository storeIdRepo;
+	
+	@Autowired
+	PushService pushService;
 
 	/**
 	 * 결제데이터 받아서 저장 및 KSNet 통신 시작
@@ -124,7 +127,7 @@ public class KsnetWrapperController {
 		ksnetPayResult = ksnetPayResultRepo.save(ksnetPayResult);
 
 		// 결제 결과 PUSH 발송
-		PushService.sendPush(ksnetPayResult);
+		pushService.sendPush(ksnetPayResult);
 
 		model.addAttribute("sndReply", ksnetPay.getSndReply());
 		model.addAttribute("reCommConId", rcid);

@@ -20,7 +20,7 @@ import lombok.Setter;
 @SQLDelete(sql = "UPDATE SP_TOKENS SET DELETED=1 WHERE UID=?")
 public class FcmToken extends BaseEntity {
 
-	@ApiModelProperty(required=true)
+	@ApiModelProperty(required=true, notes="멤버ID")
 	@Column(name="ID", length=25)
 	private String id;
 	

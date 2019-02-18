@@ -1,6 +1,8 @@
 package kr.co.sunpay.api.controller;
 
 import java.io.FileInputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
 
 import io.jsonwebtoken.Claims;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,6 +23,7 @@ import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.repository.FcmTokenRepository;
 import kr.co.sunpay.api.domain.FcmToken;
 import kr.co.sunpay.api.service.MemberService;
+import kr.co.sunpay.api.service.PushService;
 import kr.co.sunpay.api.util.JwtTokenUtil;
 
 @RestController
@@ -34,6 +35,9 @@ public class TokenController {
 	
 	@Autowired
 	MemberService memberService;
+	
+	@Autowired
+	PushService pushService;
 	
 	@Autowired
 	private FcmTokenRepository fcmTokenRepo;
@@ -91,36 +95,26 @@ public class TokenController {
 			return fcmToken;
 		}
 		
-		Message message = Message.builder()
-				.putData("title", "Sunpay")
-				.putData("message", "FCM TOKEN 저장되었습니다.")
-				.putData("isDisplay", "Y")
-				.setToken(fcmToken.getFcmToken())
-				.build();
+		// FCM PUSH 테스트 및 토큰 갱싱, 저장
+		Map<String, String> msg = new HashMap<String, String>();
+		msg.put("cate", "Log");
+		msg.put("title", "Sunpay");
+		msg.put("message", "FCM TOCKEN SAVED");
+		msg.put("isDisplay", "N");
 		
-		try {
-			String response = FirebaseMessaging.getInstance().send(message);
-			fcmToken.setFcmReturns(response);
+		if (pushService.sendTest(fcmToken.getFcmToken(), msg)) {
+			
 			fcmToken.setSuccess(true);
 			
-			// fcmToken 갱신 및 저장
-			dbToken.setFcmReturns(fcmToken.getFcmReturns());
-			dbToken.setSuccess(fcmToken.getSuccess());
-			dbToken.setFcmToken(fcmToken.getFcmToken());
-			fcmTokenRepo.save(dbToken);
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} else {
+			fcmToken.setSuccess(false);
 			fcmToken.setFcmReturns("PUSH Faild, please check FCM Token.");
-
-			// fcmToken 갱신 및 저장
-			dbToken.setFcmReturns(fcmToken.getFcmReturns());
-			dbToken.setSuccess(fcmToken.getSuccess());
-			dbToken.setFcmToken(fcmToken.getFcmToken());
-			fcmTokenRepo.save(dbToken);
-			
-			return fcmToken;
 		}
+		
+		dbToken.setFcmReturns(fcmToken.getFcmReturns());
+		dbToken.setSuccess(fcmToken.getSuccess());
+		dbToken.setFcmToken(fcmToken.getFcmToken());
+		fcmTokenRepo.save(dbToken);
 		
 		return fcmToken;
 	}

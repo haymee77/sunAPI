@@ -54,13 +54,16 @@ public class Example {
 	@Test
 	public void pushTest() {
 		// 결제 성공 시에만 PUSH 발솔
-			Map<String, String> msg = new HashMap<String, String>();
-			msg.put("cate", "paid");
-			msg.put("isDisplay", "Y");
-			msg.put("title", "상품 결제 완료");
-			msg.put("message", "테스트..");
-			
-			pushService.push(msg);
+		Map<String, String> msg = new HashMap<String, String>();
+		msg.put("cate", "paid");
+		msg.put("isDisplay", "Y");
+		msg.put("title", "BT");
+		msg.put("message", "50자가가가가가가가50자가가가가가가가50자가가가가가가가50자가가가가가가가50자가가가가가가가");
+
+		String fcmToken = "ekTcwkuwJjk:APA91bEA6IGknujJJN_xJG_8ZZLwiCAxXX_FGU2-K5l7kbRKslJtiuzAP6cSyyp6QTTzT3ou1zLzbmdp9gVijTsNcxx4fLb0l0hrbtBgN2tykC09uFukXpXx7ATvWcZMLS_q_kcHDjPF1";
+		pushService.push(fcmToken, msg);
+		
+//		pushService.sendPush(ksnetPayResultRepo.findByTrnoAndStoreIdAndAuthyn("169910098172", "2645200002", "O").get());
 	}
 
 	@Test

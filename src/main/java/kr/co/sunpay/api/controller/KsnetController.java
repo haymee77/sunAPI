@@ -29,6 +29,9 @@ public class KsnetController {
 	
 	@Autowired
 	StoreService storeService;
+	
+	@Autowired
+	PushService pushService;
 
 	@PostMapping("/cancel")
 	public ResponseEntity<Object> cancel(@RequestBody KspayCancelBody cancel) throws Exception {
@@ -81,9 +84,7 @@ public class KsnetController {
 		ksnetService.updateCancelLog(log, result);
 		
 		// 취소 결과 PUSH 발송
-		System.out.println("취소 결과 발송 --");
-		PushService.sendPush(log);
-		System.out.println(log);
+		pushService.sendPush(log);
 		
 		return new ResponseEntity<Object>(result, HttpStatus.FOUND);
 	}

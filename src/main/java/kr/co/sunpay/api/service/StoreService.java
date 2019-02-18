@@ -93,7 +93,7 @@ public class StoreService {
 	 */
 	public Store update(int storeUid, Store store, int memberUid) {
 		
-		if (!isAdminable(memberUid, store) && isStoreManager(memberUid, store)) {
+		if (!isAdminable(memberUid, store) && !isStoreManager(memberUid, store)) {
 			throw new IllegalArgumentException("memberUid의 권한으로 수정할 수 없는 그룹 소속입니다.");
 		}
 

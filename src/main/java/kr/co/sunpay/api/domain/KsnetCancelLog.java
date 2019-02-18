@@ -84,7 +84,8 @@ public class KsnetCancelLog {
 	public String msgGenerator() {
 		String msg = "[결제취소]"
 				+ "\n주문번호: " + getTrNo()
-				+ "\n취소금액: " + getAmt();
+				+ "\n취소금액: " + getAmt()
+				+ "\n결과: " + getRMsg1() + "-" + getRMsg2();
 		
 		return msg;
 	}

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import kr.co.sunpay.api.domain.Store;
+import kr.co.sunpay.api.domain.StoreId;
 
 public interface StoreRepository extends JpaRepository<Store, Integer> {
 
@@ -20,4 +21,6 @@ public interface StoreRepository extends JpaRepository<Store, Integer> {
 
 	@Query(value = "SELECT UID, BIZ_NO, BIZ_OWNER, BIZ_NM FROM SP_STORES WHERE BIZ_NO=:bizNo", nativeQuery = true)
 	List<Object[]> findByBizNo(@Param("bizNo") String bizNo);
+	
+	Optional<Store> findByStoreIds(StoreId storeId);
 }
