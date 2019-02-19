@@ -1,7 +1,9 @@
 package kr.co.sunpay.api.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -137,5 +139,20 @@ public class CodeService {
 		List<String> list = repo.findGroupList();
 		
 		return list;
+	}
+	
+	/**
+	 * Code - CodeName 키-값 쌍으로 리턴
+	 * @param groupName
+	 * @return
+	 */
+	public Map<String, String> getCodeMap(String groupName) {
+		Map<String, String> codeMap = new HashMap<String, String>();
+		
+		getCodes(groupName).forEach(c -> {
+			codeMap.put(c.getCode(), c.getCodeName());
+		});
+		
+		return codeMap;
 	}
 }

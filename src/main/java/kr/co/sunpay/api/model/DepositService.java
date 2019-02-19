@@ -1,10 +1,16 @@
 package kr.co.sunpay.api.model;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import kr.co.sunpay.api.domain.DepositLog;
@@ -15,9 +21,11 @@ import kr.co.sunpay.api.repository.DepositLogRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
+import kr.co.sunpay.api.service.CodeService;
+import kr.co.sunpay.api.service.StoreService;
 
 @Service
-public class DepositService {
+public class DepositService extends CodeService {
 
 	@Autowired
 	StoreRepository storeRepo;
@@ -30,6 +38,9 @@ public class DepositService {
 	
 	@Autowired
 	KsnetPayResultRepository ksnetPayResultRepo;
+	
+	@Autowired
+	StoreService storeService;
 	
 	public static final String TYPE_DEPOSIT = "DEPOSIT";		// 입금
 	public static final String TYPE_WITHDRAW = "WITHDRAW";		// 출금
@@ -151,5 +162,61 @@ public class DepositService {
 		writeLog(store, null, null, DepositService.TYPE_DEPOSIT, cancel.getTrno(), DepositService.STATUS_FAIL,
 				paidAmount);
 		
+	}
+	
+	/**
+	 * 예치금 내역 리턴
+	 * @param memberUid
+	 * @param depositNo
+	 * @return
+	 */
+	public List<DepositLog> getLogs(int memberUid, String depositNo) {
+		List<DepositLog> logs = new ArrayList<DepositLog>();
+		
+		// memberUid 권한 확인
+		Store store = storeRepo.findByDepositNo(depositNo).orElse(null);
+		if (store == null) throw new IllegalArgumentException("Can not find store information.");
+		if (!storeService.hasStoreQualification(memberUid, store)) throw new BadCredentialsException("Permission Denied.");
+		
+		// DepositNo 로 검색하여 리턴
+		logs = depositLogRepo.findByDepositNo(depositNo);
+		for (DepositLog log : logs) {
+			wrappingLog(log);
+		}
+		
+		return logs;
+	}
+	
+	/**
+	 * 예치금 내역 리턴
+	 * @param memberUid
+	 * @param depositNo
+	 * @param type
+	 * @return
+	 */
+	public List<DepositLog> getLogs(int memberUid, String depositNo, String type) {
+		
+		List<DepositLog> logs = new ArrayList<DepositLog>();
+		List<DepositLog> filteredLogs = new ArrayList<DepositLog>();
+		
+		if (type == null || type.isEmpty()) return getLogs(memberUid, depositNo);
+		
+		return logs;
+	}
+	
+	public DepositLog wrappingLog(DepositLog log) {
+	
+		Map<String, String> typeMap = getCodeMap("DEPOSIT_TYPE");
+		Map<String, String> statusMap = getCodeMap("DEPOSIT_STATUS");
+		
+		// 코드값 변환
+		log.setType(typeMap.get(log.getTypeCd()));
+		log.setStatus(statusMap.get(log.getStatusCd()));
+		
+		// 금액 천단위 표기
+		log.setFormatAmt(NumberFormat.getNumberInstance(Locale.US).format(log.getAmt()));
+		log.setFormatTotal(NumberFormat.getNumberInstance(Locale.US).format(log.getTotal()));
+		
+		return log;
 	}
 }

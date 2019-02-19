@@ -22,7 +22,7 @@ import lombok.extern.java.Log;
 
 @Log
 @Service
-public class StoreService {
+public class StoreService extends MemberService {
 
 	@Autowired
 	StoreRepository storeRepo;
@@ -110,6 +110,7 @@ public class StoreService {
 	
 	/**
 	 * 관리 가능한 멤버인지 확인(상점 소속 그룹을 포함한 상위그룹의 멤버인지 확인)
+	 * ** 상점의 매니저 권한은 {@link #isStoreManager(int, Store)} 로 확인
 	 * @param memberUid
 	 * @param store
 	 * @return

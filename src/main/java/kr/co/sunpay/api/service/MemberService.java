@@ -309,9 +309,20 @@ public class MemberService {
 		
 		return getRoleNames(member).contains(roleName);
 	}
+	
+	/**
+	 * member가 store에 대해 자격이 있는지 확인(store 매니저 또는 상위그룹의 멤버) 
+	 * @param memberUid
+	 * @param store
+	 * @return
+	 */
+	public boolean hasStoreQualification(int memberUid, Store store) {
+		Member member = getMember(memberUid);
+		return hasStoreQualification(member, store);
+	}
 
 	/**
-	 * member가 store에 대해 자격이 있는지 확인
+	 * member가 store에 대해 자격이 있는지 확인(store 매니저 또는 상위그룹의 멤버) 
 	 * @param member
 	 * @param store
 	 * @return

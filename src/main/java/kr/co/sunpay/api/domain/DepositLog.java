@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -54,14 +55,34 @@ public class DepositLog {
 	@Column(name="TYPE_CD")
 	private String typeCd;
 	
+	@Transient
+	@ApiModelProperty(notes="구분값(사용/충전)")
+	private String type;
+	
 	@Column(name="STATUS_CD")
 	private String statusCd;
+	
+	@Transient
+	@ApiModelProperty(notes="상태")
+	private String status;
 	
 	@Column(name="AMOUNT")
 	private int amt;
 	
+	@Transient
+	@ApiModelProperty(notes="천단위 표기 금액")
+	private String formatAmt;
+	
 	@Column(name="TOTAL")
 	private int total;
+	
+	@Transient
+	@ApiModelProperty(notes="천단위 표기 잔액")
+	private String formatTotal;
+	
+	public DepositLog() {
+		
+	}
 	
 	public DepositLog(Store store, String originalDepositNo, String depositNo, String typeCd, String trNo, String statusCd, int amt, int total) {
 		this.store = store;
