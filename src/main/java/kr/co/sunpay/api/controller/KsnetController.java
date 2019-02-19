@@ -53,7 +53,7 @@ public class KsnetController {
 		
 		log.setAmt(paidResult.getAmt());
 		
-		// 기취소건인지 확인
+		// 기취소건인지 확인 TODO: hasCancelSuccessLog 로직 구현
 		if (ksnetService.hasCancelSuccessLog(cancel)) {
 			result.setRMessage2("기취소거래건");
 			ksnetService.updateCancelLog(log, result);
@@ -76,9 +76,19 @@ public class KsnetController {
 		// KSPay 통신 시작
 		result = ksnetService.sendKSPay(cancel);
 		
-		// 순간정산 사용중이고 통신 결과에 문제있는 경우 보증금 원복
-		if (isInstantOn && result.getRStatus().equals("X")) {
-			depositService.resetDeposit(cancel);
+		// 순간정산 환불 시 처리
+		if (isInstantOn) {
+			// KSPay 통신 성공, 환불 완료 처리
+			if (result.getRStatus().equals("O")) {
+				System.out.println("-- 통신 성공");
+				// 임시 차감된 예치금의 상태를 완료로 업데이트
+				depositService.completeRefund(cancel);
+				
+			// 통신 결과에 문제가 있는 경우
+			} else {
+				// 예치금 원복
+				depositService.resetDeposit(cancel);
+			}
 		}
 		
 		ksnetService.updateCancelLog(log, result);

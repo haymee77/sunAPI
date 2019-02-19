@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.DepositLog;
 import kr.co.sunpay.api.model.ApiResponseBody;
 import kr.co.sunpay.api.model.DepositMessage;
@@ -63,7 +62,7 @@ public class DepositController {
 			apiResponseBody.setSuccess(true);
 			apiResponseBody.setMessage("입금번호: " + depositNo + ", 입금액: " + amt + ", 예치금 증액 완료");
 			
-			// TODO: 상점관리자에 예치금 입금완료 PUSH
+			depositService.sendDepositAddPush(depositNo, amt);
 		}
 		
 		log.info("-- return: " + apiResponseBody.toString());

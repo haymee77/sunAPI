@@ -2,6 +2,7 @@ package kr.co.sunpay.api.model;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -22,6 +23,7 @@ import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.service.CodeService;
+import kr.co.sunpay.api.service.PushService;
 import kr.co.sunpay.api.service.StoreService;
 
 @Service
@@ -40,6 +42,9 @@ public class DepositService extends CodeService {
 	KsnetPayResultRepository ksnetPayResultRepo;
 	
 	@Autowired
+	PushService pushService;
+	
+	@Autowired
 	StoreService storeService;
 	
 	public static final String TYPE_DEPOSIT = "DEPOSIT";		// 입금
@@ -51,6 +56,12 @@ public class DepositService extends CodeService {
 	public static final String STATUS_COMPLETE = "REFUND_COMPLETE";	// 예치금 차감 완료
 	public static final String STATUS_FAIL = "REFUND_FAIL";			// 예치금 차감 실패
 	
+	public static final String LOG_TYPE_CD_GROUP_NM = "DEPOSIT_TYPE";
+	public static final String LOG_STATUS_CD_GROUP_NM = "DEPOSIT_STATUS";
+	
+	public Map<String, String> TYPE_MAP = null;
+	public Map<String, String> STATUS_MAP = null;
+	
 	/**
 	 * depositNo로 상점 검색해서 예치금 증액 및 히스토리 기록
 	 * @param depositNo
@@ -58,15 +69,42 @@ public class DepositService extends CodeService {
 	 */
 	public void deposit(String depositNo, int depositAmt) {
 		
-		Optional<Store> oStore = storeRepo.findByDepositNo(depositNo);
-		if (!oStore.isPresent()) throw new EntityNotFoundException("상점을 찾을 수 없습니다.");
+		Store store = storeRepo.findByDepositNo(depositNo).orElse(null);
+		if (store == null) throw new EntityNotFoundException("상점을 찾을 수 없습니다.");
 		
-		Store store = oStore.get();
 		store.setDeposit(store.getDeposit() + depositAmt);
 		storeRepo.save(store);
 		writeLog(store, depositNo, store.getDepositNo(), DepositService.TYPE_DEPOSIT, null, DepositService.STATUS_FINISH, depositAmt);
 	}
 	
+	/**
+	 * 예치금 입금 PUSH 발송
+	 * @param depositNo
+	 * @param depositAmt
+	 */
+	public void sendDepositAddPush(String depositNo, int depositAmt) {
+		
+		Store store = storeRepo.findByDepositNo(depositNo).orElse(null);
+		
+		if (store != null) {
+			List<String> tokens = pushService.getTokensByStore(store);
+			
+			if (tokens.size() > 0) {
+				Map<String, String> msg = new HashMap<String, String>();
+				String msgText = "[예치금입금]"
+						+ "\n입금액: " + NumberFormat.getNumberInstance(Locale.US).format(depositAmt) + "원"
+						+ "\n잔액: " + NumberFormat.getNumberInstance(Locale.US).format(store.getDeposit()) + "원";
+				msg.put("cate", "deposit");
+				msg.put("isDisplay", "Y");
+				msg.put("title", "예치금 입금");
+				msg.put("message", msgText);
+
+				tokens.forEach(token -> {
+					pushService.push(token, msg);
+				});
+			}
+		}
+	}
 	/**
 	 * 입금번호로 상점 검색하여 유효한 입금번호인지 확인
 	 * @param depositNo
@@ -88,16 +126,12 @@ public class DepositService extends CodeService {
 	public void tryRefund(KspayCancelBody cancel) throws Exception {
 		
 		// 예치금 차감할 상점 검색
-		Optional<StoreId> oStoreId = storeIdRepo.findById(cancel.getStoreid());
-		if (!oStoreId.isPresent()) {
-			throw new Exception("존재하지 않는 상점 ID");
-		}
+		StoreId storeId = storeIdRepo.findById(cancel.getStoreid()).orElse(null);
+		Store store = storeRepo.findByStoreIds(storeId).orElse(null);
 		
-		Optional<Store> oStore = storeRepo.findByUid(oStoreId.get().getStore().getUid());
-		if (!oStore.isPresent()) {
+		if (store == null) {
 			throw new Exception("상점 정보를 찾을 수 없음");
 		}
-		Store store = oStore.get();
 		
 		// 주문번호, 상점ID로 결제금액 검색
 		Optional<KsnetPayResult> oPayResult = ksnetPayResultRepo.findByTrnoAndStoreIdAndAuthyn(cancel.getTrno(), cancel.getStoreid(), "O");
@@ -106,8 +140,6 @@ public class DepositService extends CodeService {
 		}
 		
 		int paidAmount = oPayResult.get().getAmt();
-		System.out.println("PAID AMOUNT:" + paidAmount);
-		
 		if (store.getDeposit() < paidAmount) {
 			throw new Exception("취소예치금 부족");
 		}
@@ -117,12 +149,25 @@ public class DepositService extends CodeService {
 		writeLog(store, null, null, DepositService.TYPE_WITHDRAW, cancel.getTrno(), DepositService.STATUS_TRY, paidAmount);
 	}
 	
+	
+	public void completeRefund(KspayCancelBody cancel) throws Exception {
+		DepositLog log = depositLogRepo.findFirstByTrNoAndStatusCdOrderByCreatedDateDesc(cancel.getTrno(), DepositService.STATUS_TRY).orElse(null);
+		
+		if (log == null) {
+			throw new Exception("취소 요청내역 찾을 수 없음");
+		}
+
+		log.setStatusCd(DepositService.STATUS_COMPLETE);
+	}
+	
 	public void writeLog(Store store, String originalDepositNo, String depositNo, String typeCode, String trNo, String statusCode, int amt) {
 		
 		int deposit = 0;
 		
 		if (store != null) {
 			deposit = store.getDeposit();
+			
+			if (depositNo == null) depositNo = store.getDepositNo();
 		}
 		
 		DepositLog log = new DepositLog(store, originalDepositNo, depositNo, typeCode, trNo, statusCode, amt, deposit);
@@ -205,13 +250,18 @@ public class DepositService extends CodeService {
 	}
 	
 	public DepositLog wrappingLog(DepositLog log) {
-	
-		Map<String, String> typeMap = getCodeMap("DEPOSIT_TYPE");
-		Map<String, String> statusMap = getCodeMap("DEPOSIT_STATUS");
 		
+		if (TYPE_MAP == null) {
+			TYPE_MAP = getCodeMap(LOG_TYPE_CD_GROUP_NM);
+		}
+		
+		if (STATUS_MAP == null) {
+			STATUS_MAP = getCodeMap(LOG_STATUS_CD_GROUP_NM);
+		}
+	
 		// 코드값 변환
-		log.setType(typeMap.get(log.getTypeCd()));
-		log.setStatus(statusMap.get(log.getStatusCd()));
+		log.setType(TYPE_MAP.get(log.getTypeCd()));
+		log.setStatus(STATUS_MAP.get(log.getStatusCd()));
 		
 		// 금액 천단위 표기
 		log.setFormatAmt(NumberFormat.getNumberInstance(Locale.US).format(log.getAmt()));

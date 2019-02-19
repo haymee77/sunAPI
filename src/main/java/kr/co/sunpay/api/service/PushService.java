@@ -79,7 +79,7 @@ public class PushService {
 	public void sendPush(KsnetPayResult ksnetPayResult) {
 
 		// 상점 ID로 수신자 조회
-		List<String> tokens = getTokenByStoreId(ksnetPayResult.getStoreId());
+		List<String> tokens = getTokensByStoreId(ksnetPayResult.getStoreId());
 		
 		Map<String, String> msg = new HashMap<String, String>();
 		msg.put("cate", "paid");
@@ -100,7 +100,7 @@ public class PushService {
 	public void sendPush(KsnetCancelLog cancel) {
 
 		// 상점 ID로 수신자 조회
-		List<String> tokens = getTokenByStoreId(cancel.getStoreId());
+		List<String> tokens = getTokensByStoreId(cancel.getStoreId());
 
 		Map<String, String> msg = new HashMap<String, String>();
 		msg.put("cate", "refund");
@@ -151,16 +151,22 @@ public class PushService {
 		return true;
 	}
 
-	public List<String> getTokenByStoreId(String id) {
+	public List<String> getTokensByStoreId(String id) {
 		
 		System.out.println("## PushService");
 		System.out.println("상점ID로 조회: " + id);
 		
-		List<String> tokens = new ArrayList<String>();
-
 		// 상점ID로 상점 조회 > 상점의 멤버 > FCM TOKEN 조회
 		StoreId storeId = storeIdRepo.findById(id).orElse(null);
 		Store store = storeRepo.findByStoreIds(storeId).orElse(null);
+		
+		return getTokensByStore(store);
+	}
+	
+	public List<String> getTokensByStore(Store store) {
+		
+		List<String> tokens = new ArrayList<String>();
+
 		FcmToken fcmToken;
 
 		for (Member member : store.getMembers()) {
