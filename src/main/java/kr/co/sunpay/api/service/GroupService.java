@@ -171,11 +171,13 @@ public class GroupService {
 	}
 	
 	public Group getGroup(int groupUid) {
-		Optional<Group> group = groupRepo.findByUid(groupUid);
-		if (!group.isPresent())
+		Group group = groupRepo.findByUid(groupUid).orElse(null);
+		if (group == null)
 			throw new EntityNotFoundException("그룹을 찾을 수 없습니다.");
+		
+		setParent(group);
 
-		return group.get();
+		return group;
 	}
 	
 	public Group getGroup(int memberUid, int groupUid) {
