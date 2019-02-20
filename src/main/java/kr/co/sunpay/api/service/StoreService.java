@@ -209,7 +209,8 @@ public class StoreService extends MemberService {
 		store.setMembers(members);
 		
 		// <- 상점 생성 시 수수료 데이터 셋팅 시작
-		Group group = store.getGroup();
+		Group group = groupService.getGroup(store.getGroup().getUid());
+		store.setGroup(group);
 		
 		// - PG 수수료는 환경설정에서 가져옴
 		store.setFeePg(groupService.getConfig().getFeePg());
