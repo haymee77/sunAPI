@@ -210,8 +210,24 @@ public class MemberService {
 
 	public void deleteMember(int uid) {
 
-		checkUid(uid);
-		memberRepo.delete(memberRepo.findByUid(uid).get());
+		Member member = memberRepo.findByUid(uid).orElse(null);
+		
+		// Cascade 설정때문에 부모-자식관계 제거해주어야 삭제 가능함
+		if (member != null) {
+			if (member.getStore() != null) {
+				
+				member.getStore().getMembers().remove(member);
+				
+			} else if (member.getGroup() != null) {
+				
+				member.getGroup().getMembers().remove(member);
+			}
+		} else {
+			throw new IllegalArgumentException("존재하지 않는 멤버UID 입니다.");
+		}
+
+		memberRepo.delete(member);
+
 	}
 
 	public Member updateMember(int uid, Member member) {

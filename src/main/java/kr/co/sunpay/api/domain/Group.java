@@ -133,7 +133,7 @@ public class Group extends BaseEntity {
 	private Integer transFeeBranch = 0;
 	
 	@JsonManagedReference(value="group-members")
-	@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER)
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER, orphanRemoval=true)
 	@Fetch(FetchMode.SUBSELECT)
 	@OrderBy("UID DESC")
 	private List<Member> members;
