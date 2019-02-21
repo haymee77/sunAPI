@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import kr.co.sunpay.api.model.KspayCancelReturns;
+import kr.co.sunpay.api.model.KspayRefundReturns;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,9 +19,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @Entity
-@Table(name="SP_KSNET_CANCEL_LOGS")
+@Table(name="SP_KSNET_REFUND_LOGS")
 @ToString
-public class KsnetCancelLog {
+public class KsnetRefundLog {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -65,14 +65,17 @@ public class KsnetCancelLog {
 	@Column(name="R_MSG2")
 	private String rMsg2;
 	
-	public KsnetCancelLog(String storeId, String storePasswd, String trNo, String authty) {
+	public KsnetRefundLog() {
+	}
+	
+	public KsnetRefundLog(String storeId, String storePasswd, String trNo, String authty) {
 		this.storeId = storeId;
 		this.storePasswd = storePasswd;
 		this.trNo = trNo;
 		this.authty = authty;
 	}
 
-	public void setResult(KspayCancelReturns result) {
+	public void setResult(KspayRefundReturns result) {
 		this.rTradeDate = result.getRTradeDate();
 		this.rTradeTime = result.getRTradeTime();
 		this.rTrNo = result.getRTransactionNo();

@@ -105,6 +105,32 @@ public class DepositService extends CodeService {
 			}
 		}
 	}
+	
+	/**
+	 * 예치금 부족 PUSH 발송
+	 * @param refundBody
+	 */
+	public void pushRefundLack(String storeId, KsnetPayResult paidResult) {
+		
+		if (storeId == null || storeId.isEmpty()) return;
+		
+		Store store = storeService.getStoreByStoreId(storeId);
+		List<String> tokens = pushService.getTokensByStoreId(storeId);
+		
+		Map<String, String> msg = new HashMap<String, String>();
+		String msgText = "예치금이 부족하여 환불이 취소되었습니다."
+				+ "\n예치금 잔액: " + NumberFormat.getInstance(Locale.US).format(store.getDeposit()) + "원"
+				+ "\n환불요청금액: " + NumberFormat.getInstance(Locale.US).format(paidResult.getAmt()) + "원";
+		msg.put("cate", "deposit");
+		msg.put("isDisplay", "Y");
+		msg.put("title", "예치금을 충전해주세요.");
+		msg.put("message", msgText);
+		
+		tokens.forEach(token -> {
+			pushService.push(token, msg);
+		});
+	}
+	
 	/**
 	 * 입금번호로 상점 검색하여 유효한 입금번호인지 확인
 	 * @param depositNo
@@ -119,38 +145,31 @@ public class DepositService extends CodeService {
 	}
 	
 	/**
-	 * 취소 요청 바디 받아서 예치금 임시 차감 및 결제 취소 로그 기록 
+	 * 상점ID, 환불할 주문의 결제정보 받아서 예치금 임시 차감 및 결제 취소 로그 기록 
 	 * @param cancelBody
 	 * @throws Exception
 	 */
-	public void tryRefund(KspayCancelBody cancel) throws Exception {
+	public void tryRefund(String storeId, KsnetPayResult paidResult) throws Exception {
 		
 		// 예치금 차감할 상점 검색
-		StoreId storeId = storeIdRepo.findById(cancel.getStoreid()).orElse(null);
-		Store store = storeRepo.findByStoreIds(storeId).orElse(null);
-		
+		Store store = storeService.getStoreByStoreId(storeId);
+				
 		if (store == null) {
 			throw new Exception("상점 정보를 찾을 수 없음");
 		}
 		
-		// 주문번호, 상점ID로 결제금액 검색
-		Optional<KsnetPayResult> oPayResult = ksnetPayResultRepo.findByTrnoAndStoreIdAndAuthyn(cancel.getTrno(), cancel.getStoreid(), "O");
-		if (!oPayResult.isPresent()) {
-			throw new Exception("결제 정보를 찾을 수 없음");
-		}
-		
-		int paidAmount = oPayResult.get().getAmt();
+		int paidAmount = paidResult.getAmt();
 		if (store.getDeposit() < paidAmount) {
 			throw new Exception("취소예치금 부족");
 		}
 		
 		store.setDeposit(store.getDeposit() - paidAmount);
 		storeRepo.save(store);
-		writeLog(store, null, null, DepositService.TYPE_WITHDRAW, cancel.getTrno(), DepositService.STATUS_TRY, paidAmount);
+		writeLog(store, null, null, DepositService.TYPE_WITHDRAW, paidResult.getTrno(), DepositService.STATUS_TRY, paidAmount);
 	}
 	
 	
-	public void completeRefund(KspayCancelBody cancel) throws Exception {
+	public void completeRefund(KsnetRefundBody cancel) throws Exception {
 		DepositLog log = depositLogRepo.findFirstByTrNoAndStatusCdOrderByCreatedDateDesc(cancel.getTrno(), DepositService.STATUS_TRY).orElse(null);
 		
 		if (log == null) {
@@ -178,7 +197,7 @@ public class DepositService extends CodeService {
 	 * 결제 취소 실패 시 보증금 원복
 	 * @param cancelBody
 	 */
-	public void resetDeposit(KspayCancelBody cancel) throws Exception {
+	public void resetDeposit(KsnetRefundBody cancel) throws Exception {
 		
 		// 예치금 복구할 상점 검색
 		Optional<StoreId> oStoreId = storeIdRepo.findById(cancel.getStoreid());

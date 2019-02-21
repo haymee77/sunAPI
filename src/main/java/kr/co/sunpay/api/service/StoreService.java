@@ -39,6 +39,9 @@ public class StoreService extends MemberService {
 	@Autowired
 	MemberService memberService;
 	
+	public static final String SERVICE_TYPE_INSTANT = "INSTANT";
+	public static final String SERVICE_TYPE_D2 = "D2";
+	
 	/**
 	 * 상점 데이터 검사기
 	 * @param store
@@ -387,9 +390,26 @@ public class StoreService extends MemberService {
 	 */
 	public boolean isInstantOn(String storeId) {
 
-		if (storeIdRepo.findByIdAndActivated(storeId, true).isPresent())
+		if (storeId != null && storeIdRepo.findByIdAndActivated(storeId, true).isPresent())
 			return true;
 
 		return false;
+	}
+	
+	/**
+	 * 상점 ID로 상점 리턴
+	 * @param storeId
+	 * @return
+	 */
+	public Store getStoreByStoreId(String storeId) {
+		
+		StoreId id = storeIdRepo.findById(storeId).orElse(null);
+		
+		if (id != null) {
+			Store store = storeRepo.findByStoreIds(id).orElse(null);
+			return store;
+		}
+		
+		return null;
 	}
 }

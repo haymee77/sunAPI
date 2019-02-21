@@ -11,10 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import kr.co.sunpay.api.domain.KsnetPay;
 import kr.co.sunpay.api.domain.KsnetPayResult;
+import kr.co.sunpay.api.domain.Store;
+import kr.co.sunpay.api.domain.StoreId;
 import kr.co.sunpay.api.repository.KsnetPayRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.service.PushService;
+import kr.co.sunpay.api.service.StoreService;
 import lombok.extern.java.Log;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -29,6 +32,9 @@ public class KsnetWrapperController {
 
 	@Autowired
 	KsnetPayResultRepository ksnetPayResultRepo;
+	
+	@Autowired
+	StoreService storeService;
 
 	@Autowired
 	StoreIdRepository storeIdRepo;
@@ -44,17 +50,42 @@ public class KsnetWrapperController {
 	 */
 	@RequestMapping("/init")
 	public void init(KsnetPay ksnetPay, Model model) {
-		log.info("-- KsnetWrapperController.init called...");
+		log.info("-- KsnetWrapperController.init called...123");
+		// 결제요청 저장
 		KsnetPay newPay = ksnetPayRepo.save(ksnetPay);
-
-		// TODO ksnetPay.getSndStoreid() 검증 - 썬페이에서 가지고 있는 상점 ID가 맞는지, 예치금확인, 최소결제금액 확인,
-		// 결제한도 확인
-		System.out.println(ksnetPay.getSndStoreid());
-		if (!storeIdRepo.findByIdAndActivated(ksnetPay.getSndStoreid(), true).isPresent()) {
-			model.addAttribute("err", "Can not find Store ID.");
-		} else {
-			model.addAttribute("uid", newPay.getUid());
+		
+		// ksnetPay.getSndStoreid() > 상점을 확인하기 위한 상점ID, 실제 결제는 현재 상점 Activated ID로 진행함
+		// 단 예치금 부족하거나 결제한도 초과 시 일반정산으로 결제
+		
+		// 상점ID로 상점 검색하여 현재 Activated 상태인 상점ID 구함
+		Store store = storeService.getStoreByStoreId(ksnetPay.getSndStoreid());
+		if (store == null) {
+			model.addAttribute("err", "상점정보를 찾을 수 없습니다. 관리자에게 문의해주시기 바랍니다.[1]");
+			return;
 		}
+		
+		StoreId activatedId = null;
+		
+		for (StoreId sId : store.getStoreIds()) {
+			if (sId.getActivated()) {
+				activatedId = sId;
+				newPay.setSndStoreid(activatedId.getId());
+				ksnetPayRepo.save(newPay);
+				break;
+			}
+		}
+		
+		if (activatedId == null) {
+			model.addAttribute("err", "상점정보를 찾을 수 없습니다. 관리자에게 문의해주시기 바랍니다.[2]");
+			return;
+		}
+		
+		if (activatedId.getServiceTypeCode().equals(StoreService.SERVICE_TYPE_INSTANT)) {
+			// TODO: 순간결제라면 예치금, 결제한도 확인 후 진행
+
+		}
+		
+		model.addAttribute("uid", newPay.getUid());
 	}
 
 	/**
@@ -86,7 +117,7 @@ public class KsnetWrapperController {
 		KsnetPay ksnetPay = ksnetPayRepo.findByUid(Integer.parseInt(request.getParameter("uid")));
 		KsnetPayResult ksnetPayResult = new KsnetPayResult();
 
-		if (!storeIdRepo.findByIdAndActivated(ksnetPay.getSndStoreid(), true).isPresent()) {
+		if (!storeIdRepo.findById(ksnetPay.getSndStoreid()).isPresent()) {
 			throw new EntityNotFoundException("사용가능한 상점 ID가 없습니다.");
 		}
 
@@ -94,7 +125,7 @@ public class KsnetWrapperController {
 		ksnetPayResult.setKsnetPay(ksnetPay);
 		ksnetPayResult.setStoreId(ksnetPay.getSndStoreid());
 		ksnetPayResult.setServiceTypeCd(
-				storeIdRepo.findByIdAndActivated(ksnetPay.getSndStoreid(), true).get().getServiceTypeCode());
+				storeIdRepo.findById(ksnetPay.getSndStoreid()).get().getServiceTypeCode());
 
 		String rcid = request.getParameter("reCommConId");
 		String authyn = "";

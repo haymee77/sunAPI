@@ -17,7 +17,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 
 import kr.co.sunpay.api.domain.FcmToken;
-import kr.co.sunpay.api.domain.KsnetCancelLog;
+import kr.co.sunpay.api.domain.KsnetRefundLog;
 import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
@@ -75,7 +75,10 @@ public class PushService {
 		return true;
 	}
 
-	// KSNET 결제 결과 PUSH
+	/**
+	 * KSNET 결제 결과 PUSH
+	 * @param ksnetPayResult
+	 */
 	public void sendPush(KsnetPayResult ksnetPayResult) {
 
 		// 상점 ID로 수신자 조회
@@ -94,19 +97,18 @@ public class PushService {
 
 	/**
 	 * 결제 취소 시 PUSH
-	 * 
-	 * @param cancel
+	 * @param refundLog
 	 */
-	public void sendPush(KsnetCancelLog cancel) {
+	public void sendPush(KsnetRefundLog refundLog) {
 
 		// 상점 ID로 수신자 조회
-		List<String> tokens = getTokensByStoreId(cancel.getStoreId());
+		List<String> tokens = getTokensByStoreId(refundLog.getStoreId());
 
 		Map<String, String> msg = new HashMap<String, String>();
 		msg.put("cate", "refund");
 		msg.put("isDisplay", "Y");
 		msg.put("title", "환불알림");
-		msg.put("message", cancel.msgGenerator());
+		msg.put("message", refundLog.msgGenerator());
 
 		tokens.forEach(token -> {
 			push(token, msg);
@@ -134,9 +136,6 @@ public class PushService {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-
-		// FCM PUSH(devstore1)
-//		fcmToken = "ekTcwkuwJjk:APA91bEA6IGknujJJN_xJG_8ZZLwiCAxXX_FGU2-K5l7kbRKslJtiuzAP6cSyyp6QTTzT3ou1zLzbmdp9gVijTsNcxx4fLb0l0hrbtBgN2tykC09uFukXpXx7ATvWcZMLS_q_kcHDjPF1";
 
 		// Message 작성
 		Message message = Message.builder().putAllData(msg).setToken(fcmToken).build();

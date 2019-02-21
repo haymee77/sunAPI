@@ -22,7 +22,7 @@ import lombok.Setter;
 @Where(clause = "DELETED<>1")
 @SQLDelete(sql = "UPDATE SP_STORE_IDS SET DELETED=1 WHERE UID=?")
 public class StoreId extends BaseEntity {
-
+	
 	@ApiModelProperty(notes="KSNet 상점 ID")
 	@Column(name="ID", length=20)
 	private String id;

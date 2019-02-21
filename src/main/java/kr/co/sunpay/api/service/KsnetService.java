@@ -6,23 +6,26 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import kr.co.sunpay.api.domain.KsnetCancelLog;
+import kr.co.sunpay.api.domain.KsnetRefundLog;
 import kr.co.sunpay.api.domain.KsnetPayResult;
-import kr.co.sunpay.api.model.KspayCancelBody;
-import kr.co.sunpay.api.model.KspayCancelReturns;
+import kr.co.sunpay.api.model.KsnetRefundBody;
+import kr.co.sunpay.api.model.KspayRefundReturns;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
-import kr.co.sunpay.api.repository.KspayCancelLogRepository;
+import kr.co.sunpay.api.repository.KspayRefundLogRepository;
 import ksnet.kspay.KSPayApprovalCancelBean;
+import lombok.extern.java.Log;
 
+@Log
 @Service
 public class KsnetService {
 
 	@Autowired
-	KspayCancelLogRepository cancelLogRepo;
+	KspayRefundLogRepository cancelLogRepo;
 	
 	@Autowired
 	KsnetPayResultRepository ksnetPayResultRepo;
 
+	// 소켓통신(KSPAY 소켓 설치된 서버의 IP, PORT) 
 	public static final String IPG_IP_ADDR = "13.209.200.120";
 	public static final int IPG_PORT = 29991;
 
@@ -30,16 +33,18 @@ public class KsnetService {
 	public static final String KSPAY_AUTHTY_BANK_CANCEL = "2010";
 	public static final String KSPAY_AUTHTY_BANK_REFUND = "2030";
 	public static final String KSPAY_AUTHTY_MOBILE = "M110";
+	
+	public static final String KSPAY_CANCEL_RSTATUS_TRUE = "O";
 
 	/**
 	 * 결제 취소 요청건 저장
 	 * 
 	 * @param cancelBody
 	 */
-	public KsnetCancelLog saveCancelLog(KspayCancelBody cancel) {
+	public KsnetRefundLog saveRefundLog(KsnetRefundBody refund) {
 
-		KsnetCancelLog log = new KsnetCancelLog(cancel.getStoreid(), cancel.getStorepasswd(), cancel.getTrno(),
-				cancel.getAuthty());
+		KsnetRefundLog log = new KsnetRefundLog(refund.getStoreid(), refund.getStorepasswd(), refund.getTrno(),
+				refund.getAuthty());
 
 		return cancelLogRepo.save(log);
 	};
@@ -50,14 +55,23 @@ public class KsnetService {
 	 * @param log
 	 * @param result
 	 */
-	public void updateCancelLog(KsnetCancelLog log, KspayCancelReturns result) {
+	public void updateRefundLog(KsnetRefundLog log, KspayRefundReturns result) {
 
 		log.setResult(result);
 		cancelLogRepo.save(log);
 	}
 
-	public boolean hasCancelSuccessLog(KspayCancelBody cancel) {
+	/**
+	 * 기취소건인지 확인
+	 * @param cancel
+	 * @return
+	 */
+	public boolean hasCancelSuccessLog(KsnetRefundBody cancel) {
 
+		if (cancelLogRepo.findByTrNoAndRStatus(cancel.getTrno(), KSPAY_CANCEL_RSTATUS_TRUE).isPresent()) {
+			return true;
+		}
+		
 		return false;
 	}
 
@@ -68,15 +82,20 @@ public class KsnetService {
 	 * @return
 	 */
 	public KsnetPayResult getPaidResult(String trNo, String storeId) {
+		
+		if (trNo == null || storeId == null) {
+			log.info("-- getPaidResult: null passed..");
+			return null;
+		} 
 
 		Optional<KsnetPayResult> oPayResult = ksnetPayResultRepo.findByTrnoAndStoreIdAndAuthyn(trNo, storeId, "O");
 		
 		return oPayResult.orElse(null);
 	}
 
-	public KspayCancelReturns sendKSPay(KspayCancelBody cancel) {
+	public KspayRefundReturns sendKSPay(KsnetRefundBody cancel) {
 
-		KspayCancelReturns returns = new KspayCancelReturns("", "X", "", "", "취소거절", "지원X");
+		KspayRefundReturns returns = new KspayRefundReturns("", "X", "", "", "취소거절", "지원X");
 
 		switch (cancel.getAuthty()) {
 		// 신용카드 결제 취소
@@ -111,7 +130,7 @@ public class KsnetService {
 		return returns;
 	}
 
-	public KspayCancelReturns kspayCancelPostBank(KspayCancelBody cancel) {
+	public KspayRefundReturns kspayCancelPostBank(KsnetRefundBody cancel) {
 		// Header부 Data --------------------------------------------------
 		String EncType = "2"; // 0: 암화안함, 1:ssl, 2: seed
 		String Version = "0603"; // 전문버전
@@ -163,7 +182,7 @@ public class KsnetService {
 		String rACMessage2 = "C잠시후재시도"; // 오류 message 2
 		String rACFiller = ""; // 예비
 		
-		KspayCancelReturns returns = new KspayCancelReturns(rACTransactionNo, rACStatus, rACTradeDate, rACTradeTime,
+		KspayRefundReturns returns = new KspayRefundReturns(rACTransactionNo, rACStatus, rACTradeDate, rACTradeTime,
 				rACMessage1, rACMessage2);
 
 		try {
@@ -213,7 +232,7 @@ public class KsnetService {
 		return returns;
 	}
 
-	public KspayCancelReturns kspayCancelPostMobile(KspayCancelBody cancel) {
+	public KspayRefundReturns kspayCancelPostMobile(KsnetRefundBody cancel) {
 
 		// Default(수정항목이 아님)-------------------------------------------------------
 		String EncType = "2"; // 0: 암화안함, 1:openssl, 2: seed
@@ -260,7 +279,7 @@ public class KsnetService {
 		String rCompCode = ""; // 서비스업체구분
 		String rFiller = "";
 
-		KspayCancelReturns returns = new KspayCancelReturns(rTransactionNo, rStatus, rTradeDate, rTradeTime, rRespCode,
+		KspayRefundReturns returns = new KspayRefundReturns(rTransactionNo, rStatus, rTradeDate, rTradeTime, rRespCode,
 				rRespMsg);
 
 		try {
@@ -328,7 +347,7 @@ public class KsnetService {
 		return returns;
 	}
 
-	public KspayCancelReturns kspayCancelPostCredit(KspayCancelBody cancel) {
+	public KspayRefundReturns kspayCancelPostCredit(KsnetRefundBody cancel) {
 		// Default(수정항목이 아님)-------------------------------------------------------
 		String EncType = "0"; // 0: 암화안함, 1:openssl, 2: seed
 		String Version = "0210"; // 전문버전
@@ -389,7 +408,7 @@ public class KsnetService {
 		String rMPIReUseType = ""; // Y : 재사용, N : 재사용아님
 		String rEncData = ""; // MPI, ISP 데이터
 
-		KspayCancelReturns returns = new KspayCancelReturns(rTransactionNo, rStatus, rTradeDate, rTradeTime, rMessage1,
+		KspayRefundReturns returns = new KspayRefundReturns(rTransactionNo, rStatus, rTradeDate, rTradeTime, rMessage1,
 				rMessage2);
 
 		try {
