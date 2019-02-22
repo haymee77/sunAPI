@@ -44,6 +44,9 @@ public class PushService {
 
 	@Autowired
 	FcmTokenRepository fcmTokenRepo;
+	
+	@Autowired
+	StoreService storeService;
 
 	// FCM 토큰 테스트
 	public boolean sendTest(String fcmToken, Map<String, String> msg) {
@@ -103,12 +106,18 @@ public class PushService {
 
 		// 상점 ID로 수신자 조회
 		List<String> tokens = getTokensByStoreId(refundLog.getStoreId());
+		
+		// 상점 조회
+		Store store = storeService.getStoreByStoreId(refundLog.getStoreId());
 
 		Map<String, String> msg = new HashMap<String, String>();
+		String msgText = refundLog.msgGenerator()
+				+ "\n예치금 잔액: " +  store.getDeposit();
+		
 		msg.put("cate", "refund");
 		msg.put("isDisplay", "Y");
 		msg.put("title", "환불알림");
-		msg.put("message", refundLog.msgGenerator());
+		msg.put("message", msgText);
 
 		tokens.forEach(token -> {
 			push(token, msg);

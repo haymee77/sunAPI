@@ -131,6 +131,10 @@ public class DepositService extends CodeService {
 		});
 	}
 	
+	public void pushDepositLack(String storeId) {
+//		pushService.get
+	}
+	
 	/**
 	 * 입금번호로 상점 검색하여 유효한 입금번호인지 확인
 	 * @param depositNo
@@ -243,7 +247,7 @@ public class DepositService extends CodeService {
 		if (!storeService.hasStoreQualification(memberUid, store)) throw new BadCredentialsException("Permission Denied.");
 		
 		// DepositNo 로 검색하여 리턴
-		logs = depositLogRepo.findByDepositNo(depositNo);
+		logs = depositLogRepo.findByDepositNoOrderByCreatedDateDesc(depositNo);
 		for (DepositLog log : logs) {
 			wrappingLog(log);
 		}
@@ -283,8 +287,8 @@ public class DepositService extends CodeService {
 		log.setStatus(STATUS_MAP.get(log.getStatusCd()));
 		
 		// 금액 천단위 표기
-		log.setFormatAmt(NumberFormat.getNumberInstance(Locale.US).format(log.getAmt()));
-		log.setFormatTotal(NumberFormat.getNumberInstance(Locale.US).format(log.getTotal()));
+		log.setFormatAmt(NumberFormat.getNumberInstance(Locale.US).format(log.getAmt()) + "원");
+		log.setFormatTotal(NumberFormat.getNumberInstance(Locale.US).format(log.getTotal()) + "원");
 		
 		return log;
 	}

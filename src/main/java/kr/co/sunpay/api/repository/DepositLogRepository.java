@@ -11,6 +11,8 @@ public interface DepositLogRepository extends JpaRepository<DepositLog, Integer>
 
 	List<DepositLog> findByDepositNo(String depositNo);
 	
+	List<DepositLog> findByDepositNoOrderByCreatedDateDesc(String depositNo);
+	
 	Optional<DepositLog> findFirstByTrNoAndStatusCdOrderByCreatedDateDesc(String trNo, String statusCode);
 	
 	Optional<DepositLog> findOneByTrNoAndStatusCdOrderByCreatedDateDesc(String trNo, String statusCode);

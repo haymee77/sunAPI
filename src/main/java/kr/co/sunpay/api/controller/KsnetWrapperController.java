@@ -13,6 +13,7 @@ import kr.co.sunpay.api.domain.KsnetPay;
 import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
+import kr.co.sunpay.api.model.DepositService;
 import kr.co.sunpay.api.repository.KsnetPayRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.StoreIdRepository;
@@ -41,6 +42,9 @@ public class KsnetWrapperController {
 	
 	@Autowired
 	PushService pushService;
+	
+	@Autowired
+	DepositService depositService;
 
 	/**
 	 * 결제데이터 받아서 저장 및 KSNet 통신 시작
@@ -50,7 +54,7 @@ public class KsnetWrapperController {
 	 */
 	@RequestMapping("/init")
 	public void init(KsnetPay ksnetPay, Model model) {
-		log.info("-- KsnetWrapperController.init called...123");
+		log.info("-- KsnetWrapperController.init called...");
 		// 결제요청 저장
 		KsnetPay newPay = ksnetPayRepo.save(ksnetPay);
 		
@@ -82,6 +86,11 @@ public class KsnetWrapperController {
 		
 		if (activatedId.getServiceTypeCode().equals(StoreService.SERVICE_TYPE_INSTANT)) {
 			// TODO: 순간결제라면 예치금, 결제한도 확인 후 진행
+			// 예치금이 현재 상품 금액보다 적은 경우
+			if (store.getDeposit() < ksnetPay.getSndAmount()) {
+//				storeService.offInstantService(store);
+//				depositService.pushDepositLack(activatedId);
+			}
 
 		}
 		
