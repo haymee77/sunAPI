@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -63,7 +64,7 @@ public class StoreIdController {
 		return ResponseEntity.created(location).build();
 	}
 	
-	@DeleteMapping("/{memberUid}/{storeUid}/{storeId}")
+	@DeleteMapping("/{memberUid}/{storeUid}/{storeId}/{storeId}")
 	public void deleteStoreId(@PathVariable("memberUid") int memberUid, @PathVariable("storeUid") int storeUid, @PathVariable("storeId") String storeId) {
 		
 		if (!storeService.hasStoreQualification(memberUid, storeUid)) {
@@ -71,5 +72,28 @@ public class StoreIdController {
 		}
 		
 		storeService.deleteStoreId(storeUid, storeId);
+	}
+	
+	@PutMapping("/activate/{memberUid}/{storeUid}/{storeId}")
+	@ApiOperation(value="상점ID 활성화", notes="상점ID 활성화")
+	public void activate(@PathVariable("memberUid") int memberUid, @PathVariable("storeUid") int storeUid, @PathVariable("storeId") String storeId) {
+		
+		if (!storeService.hasStoreQualification(memberUid, storeUid)) {
+			throw new BadCredentialsException("상점 조회 권한이 없습니다.");
+		}
+		
+		storeService.activateStoreId(storeUid, storeId);
+	}
+	
+	@PutMapping("/instantOn/{memberUid}/{storeUid}")
+	@ApiOperation(value="순간정산 상점ID 활성화", notes="순간정산 활성화")
+	public void instantOn(@PathVariable("memberUid") int memberUid, @PathVariable("storeUid") int storeUid) {
+		
+		if (!storeService.hasStoreQualification(memberUid, storeUid)) {
+			throw new BadCredentialsException("상점 조회 권한이 없습니다.");
+		}
+
+		if (!storeService.instantOn(storeUid))
+			throw new IllegalArgumentException("순간정산ID를 찾을 수 없습니다.");
 	}
 }

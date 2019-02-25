@@ -68,6 +68,12 @@ public class KsnetWrapperController {
 			return;
 		}
 		
+		// 상점ID 미등록 상태
+		if (store.getStoreIds() == null || store.getStoreIds().size() < 1) {
+			model.addAttribute("err", "상점정보를 찾을 수 없습니다. 관리자에게 문의해주시기 바랍니다.[2]");
+			return;
+		}
+		
 		StoreId activatedId = null;
 		
 		for (StoreId sId : store.getStoreIds()) {
@@ -79,8 +85,9 @@ public class KsnetWrapperController {
 			}
 		}
 		
+		// 활성화상태의 상점ID가 없음
 		if (activatedId == null) {
-			model.addAttribute("err", "상점정보를 찾을 수 없습니다. 관리자에게 문의해주시기 바랍니다.[2]");
+			model.addAttribute("err", "상점정보를 찾을 수 없습니다. 관리자에게 문의해주시기 바랍니다.[3]");
 			return;
 		}
 		

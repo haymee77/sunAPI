@@ -70,21 +70,6 @@ public class StoreService extends MemberService {
 			}
 		}
 
-		// 상점 ID 검사
-		if (store.getStoreIds() == null || store.getStoreIds().size() < 1) {
-			throw new IllegalArgumentException("At least one store ID is required.");
-		} else if (store.getStoreIds().size() > 2) {
-		throw new IllegalArgumentException("Can not create store ID more than 2.");
-		} else {
-			int activeCnt = 0;
-			for (StoreId id : store.getStoreIds()) {
-				if (id.getActivated()) activeCnt++;
-				if (activeCnt > 1) {
-					throw new IllegalArgumentException("Activated store ID should be one.");
-				}
-			}
-		}
-		
 		return true;
 	}
 	
@@ -189,6 +174,9 @@ public class StoreService extends MemberService {
 		
 		// 상점 데이터 셋팅
 		store.setDeposit(0);
+		
+		// 상점ID는 상점ID 등록 API를 이용해야 함
+		store.setStoreIds(null);
 		
 		// OWNER 멤버 등록
 		List<Member> members = new ArrayList<Member>();
@@ -456,6 +444,11 @@ public class StoreService extends MemberService {
 		return store;
 	}
 	
+	/**
+	 * 상점ID 삭제
+	 * @param storeUid
+	 * @param storeId
+	 */
 	public void deleteStoreId(int storeUid, String storeId) {
 		
 		Store store = getStore(storeUid);
@@ -471,6 +464,62 @@ public class StoreService extends MemberService {
 		}
 		
 		storeRepo.save(store);
+	}
+	
+	/**
+	 * 상점ID 활성화
+	 * @param storeUid
+	 * @param storeId
+	 */
+	public void activateStoreId(int storeUid, String storeId) {
+		
+		Store store = getStore(storeUid);
+		
+		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
+		
+		if (!storeIdRepo.findByIdAndStore(storeId, store).isPresent()) throw new IllegalArgumentException("상점ID를 찾을 수 없습니다.");
+		
+		Iterator<StoreId> iter = store.getStoreIds().iterator();
+		while (iter.hasNext()) {
+			StoreId id = iter.next();
+			if (storeId.equals(id.getId())) {
+				id.setActivated(true);
+			} else {
+				id.setActivated(false);
+			}
+		}
+		
+		storeRepo.save(store);
+	}
+	
+	/**
+	 * 순간정산 활성화, 성공 시 true 리턴
+	 * @param storeUid
+	 */
+	public boolean instantOn(int storeUid) {
+		
+		Store store = getStore(storeUid);
+		boolean isInstantOn = false;
+		
+		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
+		
+		Iterator<StoreId> iter = store.getStoreIds().iterator();
+		while (iter.hasNext()) {
+			StoreId id = iter.next();
+			if (id.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
+				id.setActivated(true);
+				isInstantOn = true;
+			} else {
+				id.setActivated(false);
+			}
+		}
+		
+		// 순간정산ID 찾았을 경우에만 저장
+		if (isInstantOn) {
+			storeRepo.save(store);
+		} 
+		
+		return isInstantOn;
 	}
 	
 	public StoreId getStoreId(String id) {
