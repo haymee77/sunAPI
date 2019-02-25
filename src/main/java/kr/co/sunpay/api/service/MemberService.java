@@ -336,6 +336,18 @@ public class MemberService {
 		Member member = getMember(memberUid);
 		return hasStoreQualification(member, store);
 	}
+	
+	/**
+	 * member가 store에 대해 자격이 있는지 확인(store 매니저 또는 상위그룹의 멤버) 
+	 * @param memberUid
+	 * @param storeUid
+	 * @return
+	 */
+	public boolean hasStoreQualification(int memberUid, int storeUid) {
+		Member member = getMember(memberUid);
+		Store store = storeService.getStore(storeUid);
+		return hasStoreQualification(member, store);
+	}
 
 	/**
 	 * member가 store에 대해 자격이 있는지 확인(store 매니저 또는 상위그룹의 멤버) 

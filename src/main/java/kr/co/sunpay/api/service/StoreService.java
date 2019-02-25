@@ -1,6 +1,7 @@
 package kr.co.sunpay.api.service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -73,7 +74,7 @@ public class StoreService extends MemberService {
 		if (store.getStoreIds() == null || store.getStoreIds().size() < 1) {
 			throw new IllegalArgumentException("At least one store ID is required.");
 		} else if (store.getStoreIds().size() > 2) {
-			throw new IllegalArgumentException("Can not create store ID more than 2.");
+		throw new IllegalArgumentException("Can not create store ID more than 2.");
 		} else {
 			int activeCnt = 0;
 			for (StoreId id : store.getStoreIds()) {
@@ -411,5 +412,89 @@ public class StoreService extends MemberService {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * 상점ID 리스트 리턴
+	 * @param storeUid
+	 * @return
+	 */
+	public List<StoreId> getStoreIds(int storeUid) {
+		Store store = getStore(storeUid);
+		return store.getStoreIds();
+	}
+	
+	public Store createStoreIds(int storeUid, List<StoreId> ids) {
+
+		List<StoreId> nIds = new ArrayList<StoreId>();
+		
+		// 중복 ID 확인
+		for (StoreId id : ids) {
+			if (getStoreId(id.getId()) != null) {
+				throw new DuplicateKeyException("상점ID는 중복될 수 없습니다.");
+			}
+			
+			// 상점ID 생성 시 ID, ServiceTypeCode 값만 받아서 생성함
+			StoreId nId = new StoreId();
+			nId.setId(id.getId());
+			nId.setServiceTypeCode(id.getServiceTypeCode());
+			nIds.add(nId);
+		}
+		
+		// 상점 정보 가져오기
+		Store store = getStore(storeUid);
+		
+		// 새 상점ID 리스트 추가
+		store.getStoreIds().addAll(nIds);
+		
+		// ServiceTypeCode 중복 체크
+		if (isStoreIdTypeDuplicated(store.getStoreIds()))
+			throw new DuplicateKeyException("정산타입이 중복됩니다.");
+		
+		// 상점 정보 저장
+		storeRepo.save(store);
+		return store;
+	}
+	
+	public void deleteStoreId(int storeUid, String storeId) {
+		
+		Store store = getStore(storeUid);
+		
+		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
+		
+		for (Iterator<StoreId> iter = store.getStoreIds().iterator(); iter.hasNext();) {
+			StoreId id = iter.next();
+			
+			if (id.getId().equals(storeId)) {
+				iter.remove();
+			}
+		}
+		
+		storeRepo.save(store);
+	}
+	
+	public StoreId getStoreId(String id) {
+		
+		return storeIdRepo.findById(id).orElse(null);
+	}
+	
+	/**
+	 * 상점ID 리스트중 정산타입 중복이 있으면 true 리턴
+	 * @param store
+	 * @return
+	 */
+	public boolean isStoreIdTypeDuplicated(List<StoreId> ids) {
+		
+		String typeList = "";
+		
+		for (StoreId id : ids) {
+			if (typeList.indexOf(id.getServiceTypeCode()) < 0) {
+				typeList += id.getServiceTypeCode();
+			} else {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }
