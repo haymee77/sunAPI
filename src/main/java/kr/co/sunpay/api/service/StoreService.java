@@ -71,6 +71,11 @@ public class StoreService extends MemberService {
 				throw new IllegalArgumentException("Store member should have STORE role.");
 			}
 		}
+		
+		// 최소예치금 검사
+		if (!(store.getMinDeposit() > 0)) {
+			throw new IllegalArgumentException("Minimum depoist required.");
+		}
 
 		return true;
 	}
@@ -540,6 +545,12 @@ public class StoreService extends MemberService {
 		Store store = getStore(storeUid);
 		
 		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
+		
+		// 예치금이 최소예치금보다 작은 경우 활성화 안됨, 리턴
+		if (store.getDeposit() < store.getMinDeposit()) {
+			instantOff(storeUid, sendPush);
+			throw new IllegalArgumentException("예치금이 부족합니다.");
+		}
 		
 		// 순간정산인 경우 리턴함
 		StoreId nowId = store.getActivatedId();

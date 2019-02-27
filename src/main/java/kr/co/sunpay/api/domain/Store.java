@@ -54,6 +54,10 @@ public class Store extends BaseEntity {
 	@Column(name="DEPOSIT")
 	private int deposit;
 	
+	@ApiModelProperty(notes="최소취소예치금")
+	@Column(name="MIN_DEPOSIT")
+	private int minDeposit;
+	
 	@ApiModelProperty(notes="취소예치금 입금번호")
 	@Column(name="DEPOSIT_NO", length=10)
 	private String depositNo;
