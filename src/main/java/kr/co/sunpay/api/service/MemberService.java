@@ -19,6 +19,7 @@ import kr.co.sunpay.api.domain.MemberRole;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.MemberRepository;
+import kr.co.sunpay.api.util.Sunpay;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
@@ -27,7 +28,7 @@ import lombok.extern.java.Log;
 @Getter
 @Setter
 @Service
-public class MemberService {
+public class MemberService extends Sunpay {
 
 	@Autowired
 	MemberRepository memberRepo;

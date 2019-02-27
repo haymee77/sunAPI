@@ -82,19 +82,56 @@ public class StoreService extends MemberService {
 	 */
 	public Store update(int storeUid, Store store, int memberUid) {
 		
-		if (!isAdminable(memberUid, store) && !isStoreManager(memberUid, store)) {
-			throw new IllegalArgumentException("memberUid의 권한으로 수정할 수 없는 그룹 소속입니다.");
-		}
-
 		Store updatedStore = getStore(storeUid);
 
+		// 상점 수정 정보 검사
+		updateValidator(store);
+		
 		// 수정 가능한 항목만 수정함
+		// 사업자정보
+		updatedStore.setBizOwner(store.getBizOwner());
+		updatedStore.setBizOwnerRegiNo(store.getBizOwnerRegiNo());
 		updatedStore.setBizName(store.getBizName());
-
+		updatedStore.setBizAddressBasic(store.getBizAddressBasic());
+		updatedStore.setBizAddressDetail(store.getBizAddressDetail());
+		updatedStore.setBizContact(store.getBizContact());
+		
+		// 설치비
+		updatedStore.setInstallationFeeAgency(store.getInstallationFeeAgency());
+		updatedStore.setInstallationFeeBranch(store.getInstallationFeeBranch());
+		updatedStore.setInstallationFeeHead(store.getInstallationFeeHead());
+		// 가입비
+		updatedStore.setMembershipFeeAgency(store.getMembershipFeeAgency());
+		updatedStore.setMembershipFeeBranch(store.getMembershipFeeBranch());
+		updatedStore.setMembershipFeeHead(store.getMembershipFeeHead());
+		// 관리비
+		updatedStore.setMaintenanceFeeAgency(store.getMaintenanceFeeAgency());
+		updatedStore.setMaintenanceFeeBranch(store.getMaintenanceFeeBranch());
+		updatedStore.setMaintenanceFeeHead(store.getMaintenanceFeeHead());
+		
 		storeRepo.save(updatedStore);
 
 		return updatedStore;
 		
+	}
+	
+	/**
+	 * 상점 정보 수정 시 데이터 점검, 문제 시 throws exception
+	 * @param store
+	 */
+	public void updateValidator(Store store) {
+		
+		if (isEmpty(store.getBizOwner())) {
+			throw new IllegalArgumentException("필수정보 미입력(사업자정보 - 성명)");
+		}
+		
+		if (isEmpty(store.getBizOwnerRegiNo())) {
+			throw new IllegalArgumentException("필수정보 미입력(사업자정보 - 주민번호)");
+		}
+		
+		if (isEmpty(store.getBizName())) {
+			throw new IllegalArgumentException("필수정보 미입력(사업자정보 - 사업장명)");
+		}
 	}
 	
 	/**
@@ -520,6 +557,38 @@ public class StoreService extends MemberService {
 		} 
 		
 		return isInstantOn;
+	}
+	
+	public boolean instantOff(int storeUid) {
+		
+		Store store = getStore(storeUid);
+		boolean isInstantOff = false;
+		
+		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
+		
+		Iterator<StoreId> iter = store.getStoreIds().iterator();
+		while (iter.hasNext()) {
+			StoreId id = iter.next();
+			if (id.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
+				id.setActivated(false);
+			} else {
+				// TODO: Default로 설정된 일반정산ID를 사용하도록 변경해야 함
+				// 현재: 처음으로 가져오는 일반정산ID 활성화함
+				if (!isInstantOff) {
+					id.setActivated(true);
+					isInstantOff = true;
+				} else {
+					id.setActivated(false);
+				}
+			}
+		}
+		
+		// 순간정산ID 찾았을 경우에만 저장
+		if (isInstantOff) {
+			storeRepo.save(store);
+		} 
+		
+		return isInstantOff;
 	}
 	
 	public StoreId getStoreId(String id) {

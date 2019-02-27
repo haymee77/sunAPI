@@ -96,4 +96,16 @@ public class StoreIdController {
 		if (!storeService.instantOn(storeUid))
 			throw new IllegalArgumentException("순간정산ID를 찾을 수 없습니다.");
 	}
+	
+	@PutMapping("/instantOff/{memberUid}/{storeUid}")
+	@ApiOperation(value="순간정산 상점ID 비활성화", notes="순간정산 비활성화, 일반정산으로 전환")
+	public void instantOff(@PathVariable("memberUid") int memberUid, @PathVariable("storeUid") int storeUid) {
+		
+		if (!storeService.hasStoreQualification(memberUid, storeUid)) {
+			throw new BadCredentialsException("상점 조회 권한이 없습니다.");
+		}
+
+		if (!storeService.instantOff(storeUid))
+			throw new IllegalArgumentException("일반정산ID를 찾을 수 없습니다.");
+	}
 }

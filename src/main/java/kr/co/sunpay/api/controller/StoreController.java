@@ -137,6 +137,10 @@ public class StoreController {
 	public ResponseEntity<Object> updateStoreByManager(@PathVariable("memberUid") int memberUid,
 			@PathVariable("storeUid") int storeUid, @RequestBody Store store) throws Exception {
 		
+		if (!storeService.hasStoreQualification(memberUid, storeUid)) {
+			throw new IllegalArgumentException("memberUid의 권한으로 수정할 수 없는 그룹 소속입니다.");
+		}
+		
 		storeService.update(storeUid, store, memberUid);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
 		
