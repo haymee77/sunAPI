@@ -18,6 +18,7 @@ import kr.co.sunpay.api.domain.DepositLog;
 import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
+import kr.co.sunpay.api.exception.DepositException;
 import kr.co.sunpay.api.repository.DepositLogRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.StoreIdRepository;
@@ -110,7 +111,7 @@ public class DepositService extends CodeService {
 	 * 예치금 부족 PUSH 발송
 	 * @param refundBody
 	 */
-	public void pushRefundLack(String storeId, KsnetPayResult paidResult) {
+	public void pushRefundCancel(String storeId, KsnetPayResult paidResult) {
 		
 		if (storeId == null || storeId.isEmpty()) return;
 		
@@ -131,10 +132,6 @@ public class DepositService extends CodeService {
 		});
 	}
 	
-	public void pushDepositLack(String storeId) {
-//		pushService.get
-	}
-	
 	/**
 	 * 입금번호로 상점 검색하여 유효한 입금번호인지 확인
 	 * @param depositNo
@@ -149,27 +146,29 @@ public class DepositService extends CodeService {
 	}
 	
 	/**
-	 * 상점ID, 환불할 주문의 결제정보 받아서 예치금 임시 차감 및 결제 취소 로그 기록 
+	 * 상점ID, 환불할 주문의 결제정보 받아서 예치금 임시 차감 및 결제 취소 로그 기록
+	 * 
 	 * @param cancelBody
 	 * @throws Exception
 	 */
 	public void tryRefund(String storeId, KsnetPayResult paidResult) throws Exception {
-		
+
 		// 예치금 차감할 상점 검색
 		Store store = storeService.getStoreByStoreId(storeId);
-				
+
 		if (store == null) {
 			throw new Exception("상점 정보를 찾을 수 없음");
 		}
-		
+
 		int paidAmount = paidResult.getAmt();
 		if (store.getDeposit() < paidAmount) {
-			throw new Exception("취소예치금 부족");
+			throw new DepositException("취소예치금 부족", DepositException.CODE_DEPOSIT_LACK);
 		}
-		
+
 		store.setDeposit(store.getDeposit() - paidAmount);
 		storeRepo.save(store);
-		writeLog(store, null, null, DepositService.TYPE_WITHDRAW, paidResult.getTrno(), DepositService.STATUS_TRY, paidAmount);
+		writeLog(store, null, null, DepositService.TYPE_WITHDRAW, paidResult.getTrno(), DepositService.STATUS_TRY,
+				paidAmount);
 	}
 	
 	

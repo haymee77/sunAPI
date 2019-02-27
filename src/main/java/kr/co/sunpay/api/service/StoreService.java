@@ -1,8 +1,10 @@
 package kr.co.sunpay.api.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -38,7 +40,7 @@ public class StoreService extends MemberService {
 	GroupService groupService;
 	
 	@Autowired
-	MemberService memberService;
+	PushService pushService;
 	
 	public static final String SERVICE_TYPE_INSTANT = "INSTANT";
 	public static final String SERVICE_TYPE_D2 = "D2";
@@ -65,7 +67,7 @@ public class StoreService extends MemberService {
 				throw new IllegalArgumentException("Store member has no role.");
 			}
 			
-			if (!memberService.hasRole(owner, MemberService.ROLE_STORE)) {
+			if (!hasRole(owner, ROLE_STORE)) {
 				throw new IllegalArgumentException("Store member should have STORE role.");
 			}
 		}
@@ -171,9 +173,9 @@ public class StoreService extends MemberService {
 	 */
 	public boolean isStoreManager(int memberUid, Store store) {
 		
-		Member manager = memberService.getMember(memberUid);
+		Member manager = getMember(memberUid);
 		
-		if (memberService.hasRole(manager, MemberService.ROLE_MANAGER)) {
+		if (hasRole(manager, ROLE_MANAGER)) {
 			if (manager.getStoreUid() == store.getUid()) {
 				return true;
 			}
@@ -222,7 +224,7 @@ public class StoreService extends MemberService {
 		Member owner = store.getMembers().get(0);
 		
 		// 아이디 중복검사
-		if (memberService.hasMember(owner.getId())) {
+		if (hasMember(owner.getId())) {
 			throw new DuplicateKeyException("아이디 중복");
 		}
 		
@@ -230,8 +232,8 @@ public class StoreService extends MemberService {
 		owner.setPassword(pwEncoder.encode(owner.getPassword()));
 		
 		// OWNER 권한 확인(상점 생성 시 멤버는 STORE, MANAGER, OWNER 권한을 default로 갖는다)
-		if (!memberService.hasRole(owner, MemberService.ROLE_MANAGER)
-				|| !memberService.hasRole(owner, MemberService.ROLE_OWNER)) {
+		if (!hasRole(owner, ROLE_MANAGER)
+				|| !hasRole(owner, ROLE_OWNER)) {
 			throw new IllegalArgumentException("Store owner member should have OWNER and MANAGER roles.");
 		}
 		members.add(store.getMembers().get(0));
@@ -380,24 +382,24 @@ public class StoreService extends MemberService {
 		List<Store> stores = new ArrayList<Store>();
 		
 		// 최고관리자 또는 본사 멤버인 경우 모든 상점리스트 반환
-		if (memberService.hasRole(member, MemberService.ROLE_TOP)
-				|| memberService.hasRole(member, MemberService.ROLE_HEAD)) {
+		if (hasRole(member, ROLE_TOP)
+				|| hasRole(member, ROLE_HEAD)) {
 			stores = getStoresByGroup(member.getGroup());
 		}
 		
 		// 상점 멤버인 경우 해당 상점만 반환 
-		if (memberService.hasRole(member, MemberService.ROLE_STORE)) {
+		if (hasRole(member, ROLE_STORE)) {
 			stores.add(getStore(member.getStoreUid()));
 			return stores;
 		}
 		
 		// 대리점 멤버인 경우 해당 대리점의 상점리스트 반환
-		if (memberService.hasRole(member, MemberService.ROLE_AGENCY)) {
+		if (hasRole(member, ROLE_AGENCY)) {
 			stores = groupService.getGroup(member.getGroupUid()).getStores();
 		}
 		
 		// 지사 멤버인 경우 해당 지사와 하위 대리점 소속의 상점리스트 반환
-		if (memberService.hasRole(member, MemberService.ROLE_BRANCH)) {
+		if (hasRole(member, ROLE_BRANCH)) {
 			stores = getStoresByGroup(member.getGroup());
 		}
 		
@@ -533,13 +535,20 @@ public class StoreService extends MemberService {
 	 * 순간정산 활성화, 성공 시 true 리턴
 	 * @param storeUid
 	 */
-	public boolean instantOn(int storeUid) {
+	public boolean instantOn(int storeUid, boolean sendPush) {
 		
 		Store store = getStore(storeUid);
-		boolean isInstantOn = false;
 		
 		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
 		
+		// 순간정산인 경우 리턴함
+		StoreId nowId = store.getActivatedId();
+		
+		if (!isEmpty(nowId) && nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
+			return true;
+		}
+		
+		boolean isInstantOn = false;
 		Iterator<StoreId> iter = store.getStoreIds().iterator();
 		while (iter.hasNext()) {
 			StoreId id = iter.next();
@@ -554,18 +563,34 @@ public class StoreService extends MemberService {
 		// 순간정산ID 찾았을 경우에만 저장
 		if (isInstantOn) {
 			storeRepo.save(store);
+			
+			if (sendPush) pushInstantOn(store);
 		} 
 		
 		return isInstantOn;
 	}
 	
-	public boolean instantOff(int storeUid) {
+	/**
+	 * 순간정산 비활성화, 일반정산으로 변경
+	 * PUSH 알람 발송됨
+	 * 
+	 * @param store
+	 * @param sendPush
+	 * @return
+	 */
+	public boolean instantOff(Store store, boolean sendPush) {
+
+		if (store == null)
+			throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
 		
-		Store store = getStore(storeUid);
+		// 순간정산이 아닌경우 리턴함
+		StoreId nowId = store.getActivatedId();
+		
+		if (!isEmpty(nowId) && !nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
+			return true;
+		}
+
 		boolean isInstantOff = false;
-		
-		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
-		
 		Iterator<StoreId> iter = store.getStoreIds().iterator();
 		while (iter.hasNext()) {
 			StoreId id = iter.next();
@@ -582,13 +607,75 @@ public class StoreService extends MemberService {
 				}
 			}
 		}
-		
+
 		// 순간정산ID 찾았을 경우에만 저장
 		if (isInstantOff) {
 			storeRepo.save(store);
-		} 
-		
+			
+			// 순간 > 일반 전환 PUSH 발송
+			if (sendPush) pushInstantOff(store);
+
+		}
+
 		return isInstantOff;
+	}
+	
+	/**
+	 * 순간정산 비활성화, 일반정산으로 변경
+	 * 
+	 * @param storeUid
+	 * @param sendPush
+	 * @return
+	 */
+	public boolean instantOff(int storeUid, boolean sendPush) {
+
+		Store store = getStore(storeUid);
+		return instantOff(store, sendPush);
+
+	}
+	
+	/**
+	 * 순간정산 비활성화 PUSH 알림
+	 * @param store
+	 */
+	public void pushInstantOn(Store store) {
+		
+		List<String> tokens = pushService.getTokensByStore(store);
+		
+		// 순간정산 비활성화 메세지 작성 
+		Map<String, String> msg = new HashMap<String, String>();
+		String msgText = "순간정산이 활성화되었습니다.";
+		
+		msg.put("cate", "system");
+		msg.put("isDisplay", "Y");
+		msg.put("title", "순간정산 ON");
+		msg.put("message", msgText);
+		
+		for (String token : tokens) {
+			pushService.push(token, msg);
+		}
+	}
+	
+	/**
+	 * 순간정산 비활성화 PUSH 알림
+	 * @param store
+	 */
+	public void pushInstantOff(Store store) {
+		
+		List<String> tokens = pushService.getTokensByStore(store);
+		
+		// 순간정산 비활성화 메세지 작성 
+		Map<String, String> msg = new HashMap<String, String>();
+		String msgText = "순간정산이 비활성화되었습니다.";
+		
+		msg.put("cate", "system");
+		msg.put("isDisplay", "Y");
+		msg.put("title", "순간정산 OFF");
+		msg.put("message", msgText);
+		
+		for (String token : tokens) {
+			pushService.push(token, msg);
+		}
 	}
 	
 	public StoreId getStoreId(String id) {

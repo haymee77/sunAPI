@@ -93,7 +93,8 @@ public class StoreIdController {
 			throw new BadCredentialsException("상점 조회 권한이 없습니다.");
 		}
 
-		if (!storeService.instantOn(storeUid))
+		boolean sendPush = true;
+		if (!storeService.instantOn(storeUid, sendPush))
 			throw new IllegalArgumentException("순간정산ID를 찾을 수 없습니다.");
 	}
 	
@@ -104,8 +105,10 @@ public class StoreIdController {
 		if (!storeService.hasStoreQualification(memberUid, storeUid)) {
 			throw new BadCredentialsException("상점 조회 권한이 없습니다.");
 		}
+		
+		boolean sendPush = true;
 
-		if (!storeService.instantOff(storeUid))
+		if (!storeService.instantOff(storeUid, sendPush))
 			throw new IllegalArgumentException("일반정산ID를 찾을 수 없습니다.");
 	}
 }

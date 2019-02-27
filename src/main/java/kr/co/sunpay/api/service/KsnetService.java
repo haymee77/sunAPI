@@ -2,12 +2,17 @@ package kr.co.sunpay.api.service;
 
 import java.text.SimpleDateFormat;
 import java.util.Optional;
+import java.util.logging.Level;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import kr.co.sunpay.api.domain.KsnetRefundLog;
+import kr.co.sunpay.api.exception.DepositException;
 import kr.co.sunpay.api.domain.KsnetPayResult;
+import kr.co.sunpay.api.model.DepositService;
 import kr.co.sunpay.api.model.KsnetRefundBody;
 import kr.co.sunpay.api.model.KspayRefundReturns;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
@@ -19,6 +24,15 @@ import lombok.extern.java.Log;
 @Service
 public class KsnetService {
 
+	@Autowired
+	DepositService depositService;
+	
+	@Autowired
+	StoreService storeService;
+	
+	@Autowired
+	PushService pushService;
+	
 	@Autowired
 	KspayRefundLogRepository cancelLogRepo;
 	
@@ -462,5 +476,96 @@ public class KsnetService {
 		} // end of catch
 
 		return returns;
+	}
+	
+	public KspayRefundReturns refund(KsnetRefundBody refund) {
+		// Default 결과값 생성
+		KspayRefundReturns result = new KspayRefundReturns(refund.getTrno(), "X", "", "", "취소거절", "");
+		
+		// 결제 취소 요청 DB 저장
+		KsnetRefundLog refundLog = saveRefundLog(refund);
+		
+		// 주문정보 조회 
+		KsnetPayResult paidResult = getPaidResult(refund.getTrno(), refund.getStoreid());
+		if (paidResult == null) {
+			result.setRMessage2("주문정보 없음");
+			updateRefundLog(refundLog, result);
+			return result;
+		}
+		
+		// 기취소건 확인
+		if (hasCancelSuccessLog(refund)) {
+			result.setRMessage2("기취소거래건");
+			updateRefundLog(refundLog, result);
+			return result;
+		}
+		
+		// 순간정산으로 결제했는지 확인
+		boolean isInstantPaid = paidResult.getServiceTypeCd().equals("INSTANT") ? true : false;
+		refundLog.setAmt(paidResult.getAmt());
+
+		// (순간결제 + 카드결제)건의 취소요청 시 예치금 확인 및 차감
+		if (isInstantPaid && refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
+			try {
+				depositService.tryRefund(refund.getStoreid(), paidResult);
+			} catch (DepositException ex) {
+				
+				// 예치금 부족시 PUSH알림
+				if (ex.getErrCode() == DepositException.CODE_DEPOSIT_LACK) {
+					depositService.pushRefundCancel(refund.getStoreid(), paidResult);
+					
+					// 순간정산 > 일반정산 전환 & 전환 알림
+					try {
+						boolean sendPush = true;
+						storeService.instantOff(storeService.getStoreByStoreId(refund.getStoreid()), sendPush);
+					} catch (Exception e) {
+						log.log(Level.WARNING, "[환불요청]순간정산 > 일반정산 전환 실패(trNo: " + refund.getTrno() + ")");
+					}
+				}
+				
+				// 환불 중단
+				result.setRMessage2(ex.getMessage());
+				updateRefundLog(refundLog, result);
+				return result;
+				
+			} catch (Exception ex) {
+				
+				// 환불 중단
+				result.setRMessage2(ex.getMessage());
+				updateRefundLog(refundLog, result);
+				return result;
+				
+			}
+		} 
+
+		// KSPay 통신 시작
+		result = sendKSPay(refund);
+		
+		// 순간정산 환불 시 처리
+		if (isInstantPaid) {
+			try {
+				// KSPay 통신 성공, 환불 완료 처리
+				if (result.getRStatus().equals("O")) {
+					System.out.println("-- 통신 성공");
+					// 임시 차감된 예치금의 상태를 완료로 업데이트
+					depositService.completeRefund(refund);
+					
+				// 통신 결과에 문제가 있는 경우
+				} else {
+					// 예치금 원복
+					depositService.resetDeposit(refund);
+				}
+			} catch (Exception e) {
+				log.log(Level.WARNING, "DepositError: trNo - " + refund.getTrno());
+			}
+			
+		}
+		
+		updateRefundLog(refundLog, result);
+		
+		// 취소 결과 PUSH 발송
+		pushService.sendPush(refundLog);
+		
+		return result;
 	}
 }

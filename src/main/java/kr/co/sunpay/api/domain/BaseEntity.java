@@ -12,13 +12,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import io.swagger.annotations.ApiModelProperty;
+import kr.co.sunpay.api.util.Sunpay;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @MappedSuperclass
-public abstract class BaseEntity {
+public abstract class BaseEntity extends Sunpay {
 
 	@ApiModelProperty(hidden=true)
 	@Id

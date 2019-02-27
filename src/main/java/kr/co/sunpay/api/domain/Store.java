@@ -246,4 +246,23 @@ public class Store extends BaseEntity {
 		
 		return this;
 	}
+
+	/**
+	 * 현재 활성화된 상점ID
+	 * @return
+	 */
+	public StoreId getActivatedId() {
+		
+		List<StoreId> ids = getStoreIds();
+		
+		if (!isEmpty(ids)) {
+			for (StoreId id : ids) {
+				if (id.getActivated()) {
+					return id;
+				}
+			}
+		}
+		
+		return null;
+	}
 }
