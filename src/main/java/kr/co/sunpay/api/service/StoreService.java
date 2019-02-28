@@ -15,6 +15,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import kr.co.sunpay.api.domain.FcmToken;
 import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
@@ -651,7 +652,7 @@ public class StoreService extends MemberService {
 	 */
 	public void pushInstantOn(Store store) {
 		
-		List<String> tokens = pushService.getTokensByStore(store);
+		List<FcmToken> tokens = pushService.getTokensByStore(store);
 		
 		// 순간정산 비활성화 메세지 작성 
 		Map<String, String> msg = new HashMap<String, String>();
@@ -662,9 +663,11 @@ public class StoreService extends MemberService {
 		msg.put("title", "순간정산 ON");
 		msg.put("message", msgText);
 		
-		for (String token : tokens) {
-			pushService.push(token, msg);
-		}
+		tokens.forEach(token -> {
+			msg.put("user", token.getId());
+			pushService.push(token.getFcmToken(), msg);
+		});
+		
 	}
 	
 	/**
@@ -673,7 +676,7 @@ public class StoreService extends MemberService {
 	 */
 	public void pushInstantOff(Store store) {
 		
-		List<String> tokens = pushService.getTokensByStore(store);
+		List<FcmToken> tokens = pushService.getTokensByStore(store);
 		
 		// 순간정산 비활성화 메세지 작성 
 		Map<String, String> msg = new HashMap<String, String>();
@@ -684,9 +687,11 @@ public class StoreService extends MemberService {
 		msg.put("title", "순간정산 OFF");
 		msg.put("message", msgText);
 		
-		for (String token : tokens) {
-			pushService.push(token, msg);
-		}
+		tokens.forEach(token -> {
+			msg.put("user", token.getId());
+			pushService.push(token.getFcmToken(), msg);
+		});
+		
 	}
 	
 	public StoreId getStoreId(String id) {

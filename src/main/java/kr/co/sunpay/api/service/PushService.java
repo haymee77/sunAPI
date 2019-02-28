@@ -85,7 +85,7 @@ public class PushService {
 	public void sendPush(KsnetPayResult ksnetPayResult) {
 
 		// 상점 ID로 수신자 조회
-		List<String> tokens = getTokensByStoreId(ksnetPayResult.getStoreId());
+		List<FcmToken> tokens = getTokensByStoreId(ksnetPayResult.getStoreId());
 		
 		Map<String, String> msg = new HashMap<String, String>();
 		msg.put("cate", "paid");
@@ -94,7 +94,8 @@ public class PushService {
 		msg.put("message", ksnetPayResult.msgGenerator());
 		
 		tokens.forEach(token -> {
-			push(token, msg);
+			msg.put("user", token.getId());
+			push(token.getFcmToken(), msg);
 		});
 	}
 
@@ -105,7 +106,7 @@ public class PushService {
 	public void sendPush(KsnetRefundLog refundLog) {
 
 		// 상점 ID로 수신자 조회
-		List<String> tokens = getTokensByStoreId(refundLog.getStoreId());
+		List<FcmToken> tokens = getTokensByStoreId(refundLog.getStoreId());
 		
 		// 상점 조회
 		Store store = storeService.getStoreByStoreId(refundLog.getStoreId());
@@ -120,7 +121,8 @@ public class PushService {
 		msg.put("message", msgText);
 
 		tokens.forEach(token -> {
-			push(token, msg);
+			msg.put("user", token.getId());
+			push(token.getFcmToken(), msg);
 		});
 	}
 
@@ -146,6 +148,9 @@ public class PushService {
 			ex.printStackTrace();
 		}
 
+		
+		System.out.println("## PUSH --");
+		System.out.println(msg.get("user"));
 		// Message 작성
 		Message message = Message.builder().putAllData(msg).setToken(fcmToken).build();
 
@@ -159,7 +164,7 @@ public class PushService {
 		return true;
 	}
 
-	public List<String> getTokensByStoreId(String id) {
+	public List<FcmToken> getTokensByStoreId(String id) {
 		
 		System.out.println("## PushService");
 		System.out.println("상점ID로 조회: " + id);
@@ -171,9 +176,9 @@ public class PushService {
 		return getTokensByStore(store);
 	}
 	
-	public List<String> getTokensByStore(Store store) {
+	public List<FcmToken> getTokensByStore(Store store) {
 		
-		List<String> tokens = new ArrayList<String>();
+		List<FcmToken> tokens = new ArrayList<FcmToken>();
 
 		FcmToken fcmToken;
 
@@ -181,7 +186,7 @@ public class PushService {
 			fcmToken = fcmTokenRepo.findById(member.getId()).orElse(null);
 
 			if (fcmToken != null) {
-				tokens.add(fcmToken.getFcmToken());
+				tokens.add(fcmToken);
 			}
 
 		}

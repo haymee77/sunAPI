@@ -15,6 +15,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import kr.co.sunpay.api.domain.DepositLog;
+import kr.co.sunpay.api.domain.FcmToken;
 import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
@@ -88,7 +89,7 @@ public class DepositService extends CodeService {
 		Store store = storeRepo.findByDepositNo(depositNo).orElse(null);
 		
 		if (store != null) {
-			List<String> tokens = pushService.getTokensByStore(store);
+			List<FcmToken> tokens = pushService.getTokensByStore(store);
 			
 			if (tokens.size() > 0) {
 				Map<String, String> msg = new HashMap<String, String>();
@@ -101,7 +102,8 @@ public class DepositService extends CodeService {
 				msg.put("message", msgText);
 
 				tokens.forEach(token -> {
-					pushService.push(token, msg);
+					msg.put("user", token.getId());
+					pushService.push(token.getFcmToken(), msg);
 				});
 			}
 		}
@@ -116,7 +118,7 @@ public class DepositService extends CodeService {
 		if (storeId == null || storeId.isEmpty()) return;
 		
 		Store store = storeService.getStoreByStoreId(storeId);
-		List<String> tokens = pushService.getTokensByStoreId(storeId);
+		List<FcmToken> tokens = pushService.getTokensByStoreId(storeId);
 		
 		Map<String, String> msg = new HashMap<String, String>();
 		String msgText = "예치금이 부족하여 환불이 취소되었습니다."
@@ -128,7 +130,8 @@ public class DepositService extends CodeService {
 		msg.put("message", msgText);
 		
 		tokens.forEach(token -> {
-			pushService.push(token, msg);
+			msg.put("user", token.getId());
+			pushService.push(token.getFcmToken(), msg);
 		});
 	}
 	
