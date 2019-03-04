@@ -30,8 +30,9 @@ public class StoreIdController {
 	@Autowired
 	private StoreService storeService;
 	
-	@GetMapping("/{memberUid}")
-	public List<StoreId>retrieveStoreIds(@PathVariable("memberUid") int memberUid, @RequestParam("storeUid") int storeUid) {
+	@GetMapping("/{memberUid}/{storeUid}")
+	@ApiOperation(value="상점ID 조회")
+	public List<StoreId>retrieveStoreIds(@PathVariable("memberUid") int memberUid, @PathVariable("storeUid") int storeUid) {
 		
 		if (!storeService.hasStoreQualification(memberUid, storeUid)) {
 			throw new BadCredentialsException("상점 조회 권한이 없습니다.");
@@ -64,7 +65,33 @@ public class StoreIdController {
 		return ResponseEntity.created(location).build();
 	}
 	
-	@DeleteMapping("/{memberUid}/{storeUid}/{storeId}/{storeId}")
+	@PutMapping("/{memberUid}/{storeUid}")
+	@ApiOperation(value="상점ID 수정", notes="등록된 ServiceTypeCode에 대해서만 수정됩니다.")
+	public ResponseEntity<Object> updateStoreId(@PathVariable("memberUid") int memberUid,
+			@PathVariable("storeUid") int storeUid,
+			@ApiParam(value = "* store 정보는 입력하지 않습니다.") @RequestBody StoreId id) {
+		
+		Store store = storeService.getStore(storeUid);
+		
+		if (!storeService.hasStoreQualification(memberUid, store)) {
+			throw new BadCredentialsException("상점 조회 권한이 없습니다.");
+		}
+	
+		try {
+			store = storeService.updateStoreId(store, id);
+			
+			URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/store/{memberUid}/{uid}")
+							.buildAndExpand(memberUid, store.getUid()).toUri();
+			
+			return ResponseEntity.created(location).build();
+			
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e.getMessage());
+		}
+
+	}
+	
+	@DeleteMapping("/{memberUid}/{storeUid}/{storeId}")
 	public void deleteStoreId(@PathVariable("memberUid") int memberUid, @PathVariable("storeUid") int storeUid, @PathVariable("storeId") String storeId) {
 		
 		if (!storeService.hasStoreQualification(memberUid, storeUid)) {

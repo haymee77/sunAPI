@@ -718,4 +718,45 @@ public class StoreService extends MemberService {
 		
 		return false;
 	}
+
+	/**
+	 * 기존 상점ID를 uId로 업데이트(ServiceTypeCode가 맞을때만)
+	 * @param storeUid
+	 * @param id
+	 * @return
+	 */
+	public Store updateStoreId(Store store, StoreId uId) {
+		
+		// 상점정보 확인 
+		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
+		
+		// 상점ID 중복여부 확인
+		StoreId xId = getStoreId(uId.getId());
+		
+		if (xId != null) {
+			
+			if (xId.getStore().getUid() == store.getUid()) {
+				throw new IllegalArgumentException("기존 ID와 같습니다.");
+			}
+			
+			throw new DuplicateKeyException("상점ID는 중복될 수 없습니다.");
+		}
+			
+		boolean isUpdated = false;
+		
+		for (Iterator<StoreId> iter = store.getStoreIds().iterator(); iter.hasNext();) {
+			StoreId oId = iter.next();
+			
+			if (oId.getServiceTypeCode().equals(uId.getServiceTypeCode())) {
+				oId.setId(uId.getId());
+				isUpdated = true;
+			}
+		}
+
+		if (isUpdated) {
+			storeRepo.save(store);
+		} 
+		
+		return store;
+	}
 }
