@@ -58,6 +58,9 @@ public class ContactOto extends BaseEntity {
 	@Column(name="ANSWER", columnDefinition="TEXT")
 	private String answer;
 	
+	@Column(name="ANSWERER_UID")
+	private Integer answererUid;
+	
 	public ContactOto() {}
 	
 	public ContactOto(String writer, String contact, String duty, String company, String mail, String url,

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.ContactOto;
+import kr.co.sunpay.api.model.ContactOtoAnswerRequest;
 import kr.co.sunpay.api.model.ContactOtoRequest;
 import kr.co.sunpay.api.model.ContactOtoResponse;
 import kr.co.sunpay.api.service.ContactOtoService;
@@ -63,6 +64,18 @@ public class ContactOtoController {
 			throw new IllegalArgumentException("Cannot regist inquery.");
 		}
 
+		return ResponseEntity.ok().build();
+	}
+	
+	@PostMapping("/answer/{memberUid}/{uid}")
+	@ApiOperation(value="1:1 문의 답변, 성공 시 자동 메일 발송")
+	public ResponseEntity<Object> registAnswer(
+			@ApiParam("작성자 UID") @PathVariable(value="memberUid") int memberUid,
+			@ApiParam("문의글 UID") @PathVariable(value="uid") int uid,
+			@RequestBody @Valid ContactOtoAnswerRequest contactOtoAnswerRequest) {
+		
+		contactOtoService.updateAnswer(memberUid, uid, contactOtoAnswerRequest);
+		
 		return ResponseEntity.ok().build();
 	}
 }

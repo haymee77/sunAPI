@@ -54,6 +54,9 @@ public class ContactOtoResponse {
 	@ApiModelProperty(notes="답변 내용")
 	private String answer;
 	
+	@ApiModelProperty(notes="답변 작성인 UID")
+	private Integer answererUid;
+	
 	public ContactOtoResponse() {}
 	
 	public ContactOtoResponse(ContactOto contactOto) {
@@ -72,5 +75,6 @@ public class ContactOtoResponse {
 		statusCode = contactOto.getStatusCode();
 		title = contactOto.getTitle();
 		answer = contactOto.getAnswer();
+		answererUid = contactOto.getAnswererUid();
 	}
 }
