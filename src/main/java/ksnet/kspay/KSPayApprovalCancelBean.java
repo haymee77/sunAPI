@@ -2,8 +2,8 @@ package ksnet.kspay;
 
 import java.io.*;
 import java.util.*;
-import java.net.*;
 import ksnet.kspay.KSPaySocketBean;
+import lombok.ToString;
 
 /*
 	Class Name    : KSPayApprovalCancelBean
@@ -16,6 +16,7 @@ import ksnet.kspay.KSPaySocketBean;
 	Version       : V1.3
 */
 
+@ToString
 public class KSPayApprovalCancelBean{
 	
 	private static final String MSG_ENCODING = "ksc5601";

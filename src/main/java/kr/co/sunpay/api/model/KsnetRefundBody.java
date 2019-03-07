@@ -2,6 +2,7 @@ package kr.co.sunpay.api.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModelProperty.AccessMode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,4 +23,8 @@ public class KsnetRefundBody {
 	
 	@ApiModelProperty(notes="승인구분(신용카드:1010)", example="1010", required=true)
 	private String authty;
+	
+	@ApiModelProperty(accessMode=AccessMode.READ_ONLY)
+	private String statusCode;
+	
 }

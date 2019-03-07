@@ -1,9 +1,19 @@
 package kr.co.sunpay.api.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.sunpay.api.domain.ContactOto;
+import kr.co.sunpay.api.model.ContactOtoRequest;
+import kr.co.sunpay.api.model.ContactOtoResponse;
 import kr.co.sunpay.api.repository.ContactOtoRepository;
 
 @Service
@@ -15,29 +25,39 @@ public class ContactOtoService {
 	@Autowired
 	private ContactOtoRepository contactOtoRepo;
 
-	public ContactOto regist(ContactOto contactOto) {
+	@Transactional
+	public ContactOto regist(ContactOtoRequest contactOtoRequest) {
 	
-		if (!registValidator(contactOto)) return null;
-		
 		// Default 정보 설정
-		contactOto.setAnswer("");
-		contactOto.setStatusCode(STATUS_WAITING);
+		contactOtoRequest.setAnswer("");
+		contactOtoRequest.setStatusCode(STATUS_WAITING);
 		
-		return contactOtoRepo.save(contactOto);
+		return contactOtoRepo.save(contactOtoRequest.toEntity());
 	}
 	
-	public boolean registValidator(ContactOto contactOto) {
+	@Transactional(readOnly=true)
+	public ContactOtoResponse findByUid(int uid) {
 		
-		// Company 검사
-		// Contact 검사
-		// Duty 검사
-		// Mail 검사
-		// Query 검사
-		// Title 검사
-		// TypeCode 검사
-		// URL 검사
-		// Writer 검사
+		ContactOtoResponse response = contactOtoRepo.findByUid(uid).map(ContactOtoResponse::new).orElse(null);
 		
-		return true;
+		if (response == null) throw new EntityNotFoundException("Not Found."); 
+		
+		return response; 
+	}
+	
+	@Transactional(readOnly=true)
+	public List<ContactOtoResponse> findByDate(LocalDate sDate, LocalDate eDate) {
+		
+		LocalDateTime sDateTime = sDate.atStartOfDay();
+		LocalDateTime eDateTime = eDate.atTime(23, 59, 59);
+		
+		System.out.println(sDateTime);
+		System.out.println(eDateTime);
+		
+		return contactOtoRepo
+				.findByCreatedDateBetween(sDateTime, eDateTime)
+				.stream()
+				.map(ContactOtoResponse::new)
+				.collect(Collectors.toList());
 	}
 }

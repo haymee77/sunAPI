@@ -72,6 +72,7 @@ public class StoreIdController {
 			@ApiParam(value = "* store 정보는 입력하지 않습니다.") @RequestBody StoreId id) {
 		
 		Store store = storeService.getStore(storeUid);
+		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
 		
 		if (!storeService.hasStoreQualification(memberUid, store)) {
 			throw new BadCredentialsException("상점 조회 권한이 없습니다.");

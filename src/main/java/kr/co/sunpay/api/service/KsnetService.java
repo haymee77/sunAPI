@@ -1,12 +1,11 @@
 package kr.co.sunpay.api.service;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import kr.co.sunpay.api.domain.KsnetRefundLog;
@@ -34,7 +33,7 @@ public class KsnetService {
 	PushService pushService;
 	
 	@Autowired
-	KspayRefundLogRepository cancelLogRepo;
+	KspayRefundLogRepository refundLogRepo;
 	
 	@Autowired
 	KsnetPayResultRepository ksnetPayResultRepo;
@@ -60,9 +59,25 @@ public class KsnetService {
 		KsnetRefundLog log = new KsnetRefundLog(refund.getStoreid(), refund.getStorepasswd(), refund.getTrno(),
 				refund.getAuthty());
 
-		return cancelLogRepo.save(log);
+		return refundLogRepo.save(log);
 	};
 
+	/**
+	 * 취소로그 상태값 수정
+	 * - 환불 완료된 경우 해당 주문번호의 환불오류건 업데이트 
+	 * @param trNo
+	 * @param status
+	 */
+	public void updateRefundLogStatus(String trNo, String status) {
+		
+		List<KsnetRefundLog> logs = refundLogRepo.findByTrNoAndStatusCodeNot(trNo, KsnetRefundLog.STATUS_COMPLETED);
+		
+		logs.forEach(log -> {
+			log.setStatusCode(KsnetRefundLog.STATUS_FINISH);
+			refundLogRepo.save(log);
+		});
+	}
+	
 	/**
 	 * 결제 취소 요청건 결과 저장
 	 * 
@@ -72,7 +87,7 @@ public class KsnetService {
 	public void updateRefundLog(KsnetRefundLog log, KspayRefundReturns result) {
 
 		log.setResult(result);
-		cancelLogRepo.save(log);
+		refundLogRepo.save(log);
 	}
 
 	/**
@@ -82,7 +97,7 @@ public class KsnetService {
 	 */
 	public boolean hasCancelSuccessLog(KsnetRefundBody cancel) {
 
-		if (cancelLogRepo.findByTrNoAndRStatus(cancel.getTrno(), KSPAY_CANCEL_RSTATUS_TRUE).isPresent()) {
+		if (refundLogRepo.findByTrNoAndRStatus(cancel.getTrno(), KSPAY_CANCEL_RSTATUS_TRUE).isPresent()) {
 			return true;
 		}
 		
@@ -468,6 +483,7 @@ public class KsnetService {
 				returns.setRTradeTime(rTradeTime);
 				returns.setRMessage1(rMessage1);
 				returns.setRMessage2(rMessage2);
+				
 			}
 		} catch (Exception e) {
 			rMessage2 = "P잠시후재시도(" + e.toString() + ")"; // 메시지2
@@ -483,23 +499,30 @@ public class KsnetService {
 		KspayRefundReturns result = new KspayRefundReturns(refund.getTrno(), "X", "", "", "취소거절", "");
 		
 		// 결제 취소 요청 DB 저장
+		refund.setStatusCode(KsnetRefundLog.STATUS_TRY);
 		KsnetRefundLog refundLog = saveRefundLog(refund);
 		
 		// 주문정보 조회 
 		KsnetPayResult paidResult = getPaidResult(refund.getTrno(), refund.getStoreid());
+		
 		if (paidResult == null) {
+			refundLog.setStatusCode(KsnetRefundLog.STATUS_ERROR);
 			result.setRMessage2("주문정보 없음");
 			updateRefundLog(refundLog, result);
 			return result;
 		}
 		
+		// 결제건의 정산타입 저장
+		refundLog.setServiceTypeCd(paidResult.getServiceTypeCd());
+		
 		// 기취소건 확인
 		if (hasCancelSuccessLog(refund)) {
+			refundLog.setStatusCode(KsnetRefundLog.STATUS_FINISH);
 			result.setRMessage2("기취소거래건");
 			updateRefundLog(refundLog, result);
 			return result;
 		}
-		
+
 		// 순간정산으로 결제했는지 확인
 		boolean isInstantPaid = paidResult.getServiceTypeCd().equals("INSTANT") ? true : false;
 		refundLog.setAmt(paidResult.getAmt());
@@ -524,6 +547,7 @@ public class KsnetService {
 				}
 				
 				// 환불 중단
+				refundLog.setStatusCode(KsnetRefundLog.STATUS_ERROR);
 				result.setRMessage2(ex.getMessage());
 				updateRefundLog(refundLog, result);
 				return result;
@@ -531,6 +555,7 @@ public class KsnetService {
 			} catch (Exception ex) {
 				
 				// 환불 중단
+				refundLog.setStatusCode(KsnetRefundLog.STATUS_ERROR);
 				result.setRMessage2(ex.getMessage());
 				updateRefundLog(refundLog, result);
 				return result;
@@ -540,27 +565,38 @@ public class KsnetService {
 
 		// KSPay 통신 시작
 		result = sendKSPay(refund);
+		// KSPay 통신 오류 시
+		if (!result.getRStatus().equals("O")) {
+			
+			// 순간정산이었다면 예치금원복
+			if (isInstantPaid) {
+				try {
+					depositService.resetDeposit(refund);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					log.log(Level.WARNING, "DepositError: trNo - " + refund.getTrno());
+				}
+			}
+			
+			refundLog.setStatusCode(KsnetRefundLog.STATUS_ERROR);
+			updateRefundLog(refundLog, result);
+			return result;
+		}
 		
+		// KSPay 통신 성공, 환불 완료 처리
 		// 순간정산 환불 시 처리
 		if (isInstantPaid) {
 			try {
-				// KSPay 통신 성공, 환불 완료 처리
-				if (result.getRStatus().equals("O")) {
-					System.out.println("-- 통신 성공");
-					// 임시 차감된 예치금의 상태를 완료로 업데이트
-					depositService.completeRefund(refund);
-					
-				// 통신 결과에 문제가 있는 경우
-				} else {
-					// 예치금 원복
-					depositService.resetDeposit(refund);
-				}
+				depositService.completeRefund(refund);
 			} catch (Exception e) {
 				log.log(Level.WARNING, "DepositError: trNo - " + refund.getTrno());
 			}
-			
 		}
 		
+		refundLog.setStatusCode(KsnetRefundLog.STATUS_COMPLETED);
+		
+		// 환불 완료 시 기존 환불 시도/실패건들 모두 완료상태로 업데이트
+		updateRefundLogStatus(refundLog.getTrNo(), KsnetRefundLog.STATUS_FINISH);
 		updateRefundLog(refundLog, result);
 		
 		// 취소 결과 PUSH 발송

@@ -36,6 +36,7 @@ public class KsnetController {
 	public ResponseEntity<Object> refund(@RequestBody KsnetRefundBody refund) {
 		
 		System.out.println("-- /kspay/refund start");
+		System.out.println(refund);
 		KspayRefundReturns result;
 		
 		try {
@@ -43,10 +44,11 @@ public class KsnetController {
 			return new ResponseEntity<Object>(result, HttpStatus.FOUND);
 			
 		} catch (Exception e) {
-			result = new KspayRefundReturns("", "X", "", "", "취소거절", "취소할 수 없는 주문건입니다.");
+			result = new KspayRefundReturns(refund.getTrno(), "X", "", "", "취소거절", "취소할 수 없는 주문건입니다.");
 			
 			// 환불요청정보 저장, 결과 업데이트
 			KsnetRefundLog log = ksnetService.saveRefundLog(refund);
+			log.setStatusCode(KsnetRefundLog.STATUS_ERROR);
 			ksnetService.updateRefundLog(log, result);
 			return new ResponseEntity<Object>(result, HttpStatus.FOUND);
 		}

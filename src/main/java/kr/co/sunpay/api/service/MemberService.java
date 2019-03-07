@@ -67,13 +67,9 @@ public class MemberService extends Sunpay {
 	
 	public Member getMember(int uid) {
 		
-		Member member;
-		Optional<Member> getMember = memberRepo.findByUid(uid);
+		Member member = memberRepo.findByUid(uid).orElse(null);
 		
-		if (!getMember.isPresent())
-			throw new EntityNotFoundException("There is no Member(uid:" + uid + ")");
-		
-		member = getMember.get();
+		if (member == null) return null;
 		
 		if (member.getStore() != null) {
 			member.setStoreName(member.getStore().getBizName());
@@ -359,6 +355,9 @@ public class MemberService extends Sunpay {
 	public boolean hasStoreQualification(Member member, Store store) {
 
 		boolean qualified = false;
+		
+		if (member == null) return false;
+		if (store == null) return false;
 		
 		// 해당 상점의 멤버인 경우
 		if (member.getStore() != null && member.getStore().getUid() == store.getUid()) {

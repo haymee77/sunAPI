@@ -1,21 +1,31 @@
 package kr.co.sunpay.api.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.ContactOto;
+import kr.co.sunpay.api.model.ContactOtoRequest;
+import kr.co.sunpay.api.model.ContactOtoResponse;
 import kr.co.sunpay.api.service.ContactOtoService;
 
 /**
- * 고객센터 > 1:1 문의 API 
+ * 고객센터 > 1:1 문의 API
+ * 
  * @author himeepark
  *
  */
@@ -23,32 +33,36 @@ import kr.co.sunpay.api.service.ContactOtoService;
 @RestController
 @RequestMapping("/contact/oto")
 public class ContactOtoController {
-	
+
 	@Autowired
 	private ContactOtoService contactOtoService;
-	
-	@GetMapping("")
-	public List<ContactOto> retrieveContactOto() {
-		
-		return null;
+
+	@GetMapping("/{uid}")
+	@ApiOperation(value = "1:1 문의 리턴")
+	public ContactOtoResponse retrieveContactOto(@PathVariable(value = "uid") int uid) {
+
+		return contactOtoService.findByUid(uid);
 	}
-	
+
+	@GetMapping("")
+	@ApiOperation(value = "1:1 문의 리스트 리턴")
+	public List<ContactOtoResponse> retrieveContactOto(
+			@ApiParam(name = "sDate", value = "Format: YYYY-MM-DD", required = true) @RequestParam(value = "sDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate sDate,
+			@ApiParam(name = "eDate", value = "Format: YYYY-MM-DD", required = true) @RequestParam(name = "eDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate eDate) {
+
+		return contactOtoService.findByDate(sDate, eDate);
+	}
+
 	@PostMapping("")
-	@ApiOperation(value="1:1 문의 등록")
-	public ResponseEntity<Object> createContactOto(@RequestBody ContactOto contactOto) {
-		
-		try {
-			contactOtoService.registValidator(contactOto);
-		} catch (Exception e) {
-			throw new IllegalArgumentException(e.getMessage());
-		}
-		
-		ContactOto newContactOto = contactOtoService.regist(contactOto);
-		
+	@ApiOperation(value = "1:1 문의 등록")
+	public ResponseEntity<Object> createContactOto(@RequestBody @Valid ContactOtoRequest contactOtoRequest) {
+
+		ContactOto newContactOto = contactOtoService.regist(contactOtoRequest);
+
 		if (newContactOto == null) {
 			throw new IllegalArgumentException("Cannot regist inquery.");
 		}
-		
+
 		return ResponseEntity.ok().build();
 	}
 }

@@ -147,10 +147,7 @@ public class PushService {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-
 		
-		System.out.println("## PUSH --");
-		System.out.println(msg.get("user"));
 		// Message 작성
 		Message message = Message.builder().putAllData(msg).setToken(fcmToken).build();
 
@@ -165,9 +162,6 @@ public class PushService {
 	}
 
 	public List<FcmToken> getTokensByStoreId(String id) {
-		
-		System.out.println("## PushService");
-		System.out.println("상점ID로 조회: " + id);
 		
 		// 상점ID로 상점 조회 > 상점의 멤버 > FCM TOKEN 조회
 		StoreId storeId = storeIdRepo.findById(id).orElse(null);

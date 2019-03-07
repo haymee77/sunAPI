@@ -91,6 +91,7 @@ public class StoreService extends MemberService {
 	public Store update(int storeUid, Store store, int memberUid) {
 		
 		Store updatedStore = getStore(storeUid);
+		if (updatedStore == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
 
 		// 상점 수정 정보 검사
 		updateValidator(store);
@@ -316,20 +317,24 @@ public class StoreService extends MemberService {
 		
 		return String.valueOf(randNo);
 	}
-	
+
+	/**
+	 * 상점 리턴, 없는 경우 null 리턴
+	 * @param storeUid
+	 * @return
+	 */
 	public Store getStore(int storeUid) {
 		
-		Optional<Store> oStore = storeRepo.findByUid(storeUid);
+		Store store = storeRepo.findByUid(storeUid).orElse(null);
 		
-		if (!oStore.isPresent()) {
-			throw new EntityNotFoundException("There is no Store available");
+		if (store == null) {
+			return null;
 		}
 		
-		Store store = oStore.get();
 		store.setGroupName(store.getGroup().getBizName());
 		store.setGroupUid(store.getGroup().getUid());
 		
-		return oStore.get();
+		return store;
 	}
 
 	/**
@@ -454,6 +459,8 @@ public class StoreService extends MemberService {
 	 */
 	public List<StoreId> getStoreIds(int storeUid) {
 		Store store = getStore(storeUid);
+		if (store == null) return null;
+		
 		return store.getStoreIds();
 	}
 	
@@ -476,6 +483,7 @@ public class StoreService extends MemberService {
 		
 		// 상점 정보 가져오기
 		Store store = getStore(storeUid);
+		if (store == null) throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
 		
 		// 새 상점ID 리스트 추가
 		store.getStoreIds().addAll(nIds);
