@@ -2,6 +2,7 @@ package kr.co.sunpay.api.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,12 +48,16 @@ public class ContactOtoService {
 	
 	@Transactional(readOnly=true)
 	public List<ContactOtoResponse> findByDate(LocalDate sDate, LocalDate eDate) {
-		
+
+		// 날짜 변환(LocalDate > LocalDateTime) 
 		LocalDateTime sDateTime = sDate.atStartOfDay();
 		LocalDateTime eDateTime = eDate.atTime(23, 59, 59);
 		
-		System.out.println(sDateTime);
-		System.out.println(eDateTime);
+		// 시작일, 종료일 검사
+		if (sDateTime.isAfter(eDateTime)) throw new IllegalArgumentException("종료일이 시작일보다 먼저일 수 없습니다.");
+		
+		// 시작일 - 종료일이 90일 이내인지 검사
+		if (ChronoUnit.DAYS.between(sDateTime, eDateTime) > 90) throw new IllegalArgumentException("검색기간은 90일이내만 가능합니다.");
 		
 		return contactOtoRepo
 				.findByCreatedDateBetween(sDateTime, eDateTime)
