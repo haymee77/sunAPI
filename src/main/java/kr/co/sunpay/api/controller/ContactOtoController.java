@@ -49,9 +49,11 @@ public class ContactOtoController {
 	@ApiOperation(value = "1:1 문의 리스트 리턴")
 	public List<ContactOtoResponse> retrieveContactOto(
 			@ApiParam(name = "sDate", value = "Format: YYYY-MM-DD", required = true) @RequestParam(value = "sDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate sDate,
-			@ApiParam(name = "eDate", value = "Format: YYYY-MM-DD", required = true) @RequestParam(name = "eDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate eDate) {
+			@ApiParam(name = "eDate", value = "Format: YYYY-MM-DD", required = true) @RequestParam(name = "eDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate eDate,
+			@ApiParam(name = "writer", value = "작성자", required = false) @RequestParam(name = "writer", required = false) String writer,
+			@ApiParam(name = "type", value = "문의유형", required = false) @RequestParam(name = "type", required = false) String typeCode) {
 
-		return contactOtoService.findByDate(sDate, eDate);
+		return contactOtoService.findFiltering(sDate, eDate, writer, typeCode);
 	}
 
 	@PostMapping("")

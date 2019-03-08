@@ -12,4 +12,7 @@ public interface ContactOtoRepository extends JpaRepository<ContactOto, Integer>
 
 	Optional<ContactOto> findByUid(int uid);
 	List<ContactOto> findByCreatedDateBetween(LocalDateTime createdDateStart, LocalDateTime createdDateEnd);
+	List<ContactOto> findByCreatedDateBetweenAndTypeCode(LocalDateTime createdDateStart, LocalDateTime createdDateEnd, String typeCode);
+	List<ContactOto> findByCreatedDateBetweenAndWriterContaining(LocalDateTime createdDateStart, LocalDateTime createdDateEnd, String writer);
+	List<ContactOto> findByCreatedDateBetweenAndWriterContainingAndTypeCode(LocalDateTime createdDateStart, LocalDateTime createdDateEnd, String writer, String typeCode);
 }

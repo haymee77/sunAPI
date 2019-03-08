@@ -19,6 +19,7 @@ import kr.co.sunpay.api.model.ContactOtoAnswerRequest;
 import kr.co.sunpay.api.model.ContactOtoRequest;
 import kr.co.sunpay.api.model.ContactOtoResponse;
 import kr.co.sunpay.api.repository.ContactOtoRepository;
+import kr.co.sunpay.api.util.Sunpay;
 
 @Service
 public class ContactOtoService {
@@ -53,17 +54,79 @@ public class ContactOtoService {
 	}
 	
 	@Transactional(readOnly=true)
-	public List<ContactOtoResponse> findByDate(LocalDate sDate, LocalDate eDate) {
+	public List<ContactOtoResponse> findFiltering(LocalDate sDate, LocalDate eDate, String writer, String typeCode) {
 
-		// 날짜 변환(LocalDate > LocalDateTime) 
+		// 날짜 변환(LocalDate > LocalDateTime)
 		LocalDateTime sDateTime = sDate.atStartOfDay();
 		LocalDateTime eDateTime = eDate.atTime(23, 59, 59);
-		
+
 		// 시작일, 종료일 검사
-		if (sDateTime.isAfter(eDateTime)) throw new IllegalArgumentException("종료일이 시작일보다 먼저일 수 없습니다.");
-		
+		if (sDateTime.isAfter(eDateTime))
+			throw new IllegalArgumentException("종료일이 시작일보다 먼저일 수 없습니다.");
+
 		// 시작일 - 종료일이 90일 이내인지 검사
-		if (ChronoUnit.DAYS.between(sDateTime, eDateTime) > 90) throw new IllegalArgumentException("검색기간은 90일이내만 가능합니다.");
+		if (ChronoUnit.DAYS.between(sDateTime, eDateTime) > 90)
+			throw new IllegalArgumentException("검색기간은 90일이내만 가능합니다.");
+
+		// 작성자 없이 검색
+		if (Sunpay.isEmpty(writer)) {
+			return findByDateAndType(sDateTime, eDateTime, typeCode);
+		}
+		
+		// 타입 없이 검색
+		if (Sunpay.isEmpty(typeCode)) {
+			return findByDateAndWriter(sDateTime, eDateTime, writer);
+		}
+		
+		return findByDateAndWriterAndType(sDateTime, eDateTime, writer, typeCode);
+	}
+	
+	@Transactional(readOnly=true)
+	private List<ContactOtoResponse> findByDateAndWriterAndType(LocalDateTime sDateTime, LocalDateTime eDateTime, String writer, String typeCode) {
+
+		try {
+			return contactOtoRepo
+					.findByCreatedDateBetweenAndWriterContainingAndTypeCode(sDateTime, eDateTime, writer, typeCode)
+					.stream()
+					.map(ContactOtoResponse::new)
+					.collect(Collectors.toList());
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	@Transactional(readOnly = true)
+	private List<ContactOtoResponse> findByDateAndWriter(LocalDateTime sDateTime, LocalDateTime eDateTime, String writer) {
+		
+		// 작성자 없이 검색
+		if (Sunpay.isEmpty(writer)) {
+			return findByDate(sDateTime, eDateTime);
+		}
+		
+		return contactOtoRepo
+				.findByCreatedDateBetweenAndWriterContaining(sDateTime, eDateTime, writer)
+				.stream()
+				.map(ContactOtoResponse::new)
+				.collect(Collectors.toList());
+	}
+	
+	@Transactional(readOnly = true)
+	private List<ContactOtoResponse> findByDateAndType(LocalDateTime sDateTime, LocalDateTime eDateTime, String typeCode) {
+		
+		// 작성자 없이 검색
+		if (Sunpay.isEmpty(typeCode)) {
+			return findByDate(sDateTime, eDateTime);
+		}
+		
+		return contactOtoRepo
+				.findByCreatedDateBetweenAndTypeCode(sDateTime, eDateTime, typeCode)
+				.stream()
+				.map(ContactOtoResponse::new)
+				.collect(Collectors.toList());
+	}
+	
+	@Transactional(readOnly = true) 
+	private List<ContactOtoResponse> findByDate(LocalDateTime sDateTime, LocalDateTime eDateTime) {
 		
 		return contactOtoRepo
 				.findByCreatedDateBetween(sDateTime, eDateTime)
