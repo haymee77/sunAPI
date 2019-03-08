@@ -44,7 +44,7 @@ public class ContactOtoRequest {
 	private String mail;
 	
 	@NotBlank(message="홈페이지/쇼핑몰 주소를 작성해주세요.")
-	@Pattern(regexp="^(http:\\/\\/|https:\\/\\/)?(www.)?([a-zA-Z0-9]+).[a-zA-Z0-9]*.[a-z]{3}.?([a-z]+)?$", message="URL 형식을 지켜주세요.")
+	@Pattern(regexp="^(http:\\/\\/|https:\\/\\/)?(www.)?([a-zA-Z0-9]+).[a-zA-Z0-9]*.[a-z]{2,3}.?([a-z]+)?$", message="URL 형식을 지켜주세요.")
 	@ApiModelProperty(notes="홈페이지/쇼핑몰 주소")
 	private String url;
 	
