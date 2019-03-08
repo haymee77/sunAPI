@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import kr.co.sunpay.api.model.ContactOtoAnswerRequest;
 import kr.co.sunpay.api.model.ContactOtoRequest;
 import kr.co.sunpay.api.model.ContactOtoResponse;
 import kr.co.sunpay.api.repository.ContactOtoRepository;
+import kr.co.sunpay.api.util.Mail;
 import kr.co.sunpay.api.util.Sunpay;
 
 @Service
@@ -27,12 +29,23 @@ public class ContactOtoService {
 	public final static String STATUS_WAITING = "WAITING";
 	public final static String STATUS_FINISH = "FINISH";
 	
+	public final static String SUPPORT_QUERY_TEMPLATE = "mail/contactOto/queryTemplate";
+	public final static String SUPPORT_ANSWER_TEMPLATE = "mail/contactOto/answerTemplate";
+	
+	public final static String CONTACT_MANAGE_BASE = "/db/custom";
+	
+	@Value("${config.hostname.sunpay}")
+	private String hostname;
+	
 	@Autowired
 	private ContactOtoRepository contactOtoRepo;
 	
 	@Autowired
 	private MemberService memberService;
 
+	@Autowired
+	private MailService mailService;
+	
 	@Transactional
 	public ContactOto regist(ContactOtoRequest contactOtoRequest) {
 	
@@ -136,7 +149,7 @@ public class ContactOtoService {
 	}
 	
 	@Transactional
-	public void updateAnswer(int memberUid, int uid, ContactOtoAnswerRequest answerRequest) {
+	public ContactOto updateAnswer(int memberUid, int uid, ContactOtoAnswerRequest answerRequest) {
 		
 		// 멤버 검사
 		Member answerer = memberService.getMember(memberUid);
@@ -162,6 +175,25 @@ public class ContactOtoService {
 		query.setAnswererUid(memberUid);
 		query.setStatusCode(STATUS_FINISH);
 		
-		contactOtoRepo.save(query);
+		return contactOtoRepo.save(query);
+	}
+	
+	public void sendQueryMailToSupport(ContactOto contactOto) {
+		
+		String subject = "[1:1 문의] 새로운 문의가 등록되었습니다.";
+		String answerLink = hostname + CONTACT_MANAGE_BASE + "/answerOto?id=" + contactOto.getUid();
+		String content = mailService.mailContentBuilder.build(SUPPORT_QUERY_TEMPLATE, contactOto.getTitle(), contactOto.getQuery(), contactOto.getWriter(), contactOto.getContact(), answerLink);
+		Mail mail = new Mail(MailService.SUPPORT_RECEIVER, subject, content);
+		
+		mailService.sendMail(mail);
+	}
+	
+	public void sendAnswerMail(ContactOto contactOto) {
+		
+		String subject = "[썬페이]1:1 문의에 대한 답변드립니다.";
+		String content = mailService.mailContentBuilder.build(SUPPORT_ANSWER_TEMPLATE, contactOto.getTitle(), contactOto.getAnswer());
+		Mail mail = new Mail(contactOto.getMail(), subject, content);
+		
+		mailService.sendMail(mail);
 	}
 }

@@ -65,6 +65,9 @@ public class ContactOtoController {
 		if (newContactOto == null) {
 			throw new IllegalArgumentException("Cannot regist inquery.");
 		}
+		
+		// 문의 등록 알림 메일 발송
+		contactOtoService.sendQueryMailToSupport(newContactOto);
 
 		return ResponseEntity.ok().build();
 	}
@@ -76,7 +79,9 @@ public class ContactOtoController {
 			@ApiParam("문의글 UID") @PathVariable(value="uid") int uid,
 			@RequestBody @Valid ContactOtoAnswerRequest contactOtoAnswerRequest) {
 		
-		contactOtoService.updateAnswer(memberUid, uid, contactOtoAnswerRequest);
+		ContactOto contactOto = contactOtoService.updateAnswer(memberUid, uid, contactOtoAnswerRequest);
+		
+		contactOtoService.sendAnswerMail(contactOto);
 		
 		return ResponseEntity.ok().build();
 	}
