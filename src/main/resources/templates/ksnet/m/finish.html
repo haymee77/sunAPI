@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>결제완료</title>
+</head>
+<body>
+	<!-- 결제결과 -->
+	<section class="cart bgwhite p-t-70 p-b-100">
+		<div class="container">
+			<form name="resultForm" method="post" th:action="${sndReply}">
+				<input type="hidden" name="reCommConId" th:value="${reCommConId}">
+				<input type="hidden" name="reCommType" th:value="${reCommType}">
+				<input type="hidden" name="reHash" th:value="${reHash}">
+			</form>
+		</div>
+		<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td valign="middle" align="center">
+					<table width="450" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td>
+								<img src="//kspay.ksnet.to/store/KSPayFlashV1.3/mall/imgs/processing.gif" width="450" height="141">
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<img src="//kspay.ksnet.to/store/KSPayFlashV1.3/mall/imgs/process_step.gif" width="456" height="20">
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</section>
+	<script>
+		var goBack = function() {
+			document.resultForm.submit();
+		}
+
+		goBack();
+	</script>
+</body>
+</html>

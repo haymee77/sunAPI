@@ -52,7 +52,7 @@ public class KsnetWrapperController {
 	 * @param ksnetPay
 	 * @param model
 	 */
-	@RequestMapping("/init")
+	@RequestMapping({"/init", "/m/init"})
 	public void init(KsnetPay ksnetPay, Model model) {
 		log.info("-- KsnetWrapperController.init called...");
 		// 결제요청 저장
@@ -131,6 +131,69 @@ public class KsnetWrapperController {
 		log.info("-- KsnetWrapperController.finish called...");
 
 		KsnetPay ksnetPay = ksnetPayRepo.findByUid(Integer.parseInt(request.getParameter("uid")));
+		KsnetPayResult ksnetPayResult = new KsnetPayResult();
+
+		if (!storeIdRepo.findById(ksnetPay.getSndStoreid()).isPresent()) {
+			throw new EntityNotFoundException("사용가능한 상점 ID가 없습니다.");
+		}
+
+		// Dashboard에 노출될 내용
+		ksnetPayResult.setKsnetPay(ksnetPay);
+		ksnetPayResult.setStoreId(ksnetPay.getSndStoreid());
+		ksnetPayResult.setServiceTypeCd(
+				storeIdRepo.findById(ksnetPay.getSndStoreid()).get().getServiceTypeCode());
+
+		String rcid = request.getParameter("reCommConId");
+		String authyn = "";
+		String authno = "";
+
+		ksnet.kspay.KSPayWebHostBean ipg = new ksnet.kspay.KSPayWebHostBean(rcid);
+
+		// KSNET 결제결과 중 아래에 나타나지 않은 항목이 필요한 경우 Null 대신 필요한 항목명을 설정할 수 있습니다.
+		if (ipg.kspay_send_msg("1")) {
+			authyn = ipg.kspay_get_value("authyn");
+			authno = ipg.kspay_get_value("authno");
+
+			ksnetPayResult.setAuthyn(authyn); // 성공여부
+			ksnetPayResult.setAuthno(authno);
+
+			ksnetPayResult.setTrno(ipg.kspay_get_value("trno")); // 거래번호(KSNet 고유번호)
+			ksnetPayResult.setTrddt(ipg.kspay_get_value("trddt"));
+			ksnetPayResult.setTrdtm(ipg.kspay_get_value("trdtm"));
+			ksnetPayResult.setAmt(Integer.parseInt(ipg.kspay_get_value("amt")));
+			ksnetPayResult.setMsg1(ipg.kspay_get_value("msg1"));
+			ksnetPayResult.setMsg2(ipg.kspay_get_value("msg2"));
+			ksnetPayResult.setOrdno(ipg.kspay_get_value("ordno"));
+			ksnetPayResult.setResult(ipg.kspay_get_value("result"));
+			ksnetPayResult.setIsscd(ipg.kspay_get_value("isscd"));
+			ksnetPayResult.setAqucd(ipg.kspay_get_value("aqucd"));
+			ksnetPayResult.setHalbu(ipg.kspay_get_value("halbu"));
+			ksnetPayResult.setCbtrno(ipg.kspay_get_value("cbtrno"));
+		}
+
+		ksnetPayResult = ksnetPayResultRepo.save(ksnetPayResult);
+
+		// 결제 결과 PUSH 발송
+		pushService.sendPush(ksnetPayResult);
+
+		model.addAttribute("sndReply", ksnetPay.getSndReply());
+		model.addAttribute("reCommConId", rcid);
+		model.addAttribute("reCommType", request.getParameter("reCommType"));
+		model.addAttribute("reHash", request.getParameter("reHash"));
+
+	}
+	
+	/**
+	 * KSNet에서 받은 키값으로 결제 마무리 및 쇼핑몰 페이지로 돌아감
+	 * 
+	 * @param request
+	 * @param model
+	 */
+	@RequestMapping("/m/finish/{uid}")
+	public void mFinish(@PathVariable int uid, HttpServletRequest request, Model model) {
+		log.info("-- KsnetWrapperController.mFinish called...");
+
+		KsnetPay ksnetPay = ksnetPayRepo.findByUid(uid);
 		KsnetPayResult ksnetPayResult = new KsnetPayResult();
 
 		if (!storeIdRepo.findById(ksnetPay.getSndStoreid()).isPresent()) {

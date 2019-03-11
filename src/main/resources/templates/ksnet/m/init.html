@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
 <head>
 <meta charset="UTF-8">
-<title>Sunpay - KSNet</title>
+<title>Sunpay - KSNet Mobile</title>
 </head>
 <body>
 
@@ -33,6 +33,13 @@
 				<input type="text" name="sndServicePeriod" th:value="${param.sndServicePeriod}">
 				<br> sndReply
 				<input type="text" name="sndReply" th:value="${param.sndReply}">
+				
+				<!-- 모바일 결제 시 필요한 추가 데이터 -->
+				<input type="text" name="sndCurrencytype" size=30 maxlength=3 value="WON">
+				<input type="text" name="sndInstallmenttype" size=30 maxlength=30 value="0:2:3:4:5:6:7:8:9:10:11:12">
+				<input type="text" name="sndInteresttype" size=30 maxlength=30 value="2:3:4">
+				<input type="text" name="sndStoreName" value="썬페이">
+				<input type="text" name="sndRtApp" value="">
 			</form>
 		</div>
 	</div>
@@ -44,9 +51,9 @@
 		// KSNet._pay
 		function _pay(_frm) {
 			if (document.getElementsByName("uid")[0] != null) {
-				_frm.sndReply.value = window.location.origin + "/ksnet/payment/" + document.getElementsByName("uid")[0].value;
+				_frm.sndReply.value = window.location.origin + "/ksnet/m/finish/" + document.getElementsByName("uid")[0].value;
 				_frm.target = "_self";
-				_frm.action = "https://kspay.ksnet.to/store/KSPayFlashV1.3/KSPayPWeb.jsp?sndCharSet=utf-8";
+				_frm.action = "http://kspay.ksnet.to/store/mb2/KSPayPWeb_utf8.jsp";
 				
 				_frm.submit();	
 			}
