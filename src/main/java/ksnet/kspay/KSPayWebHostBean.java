@@ -13,6 +13,7 @@ public class KSPayWebHostBean {
 	}
 
 	static String KSPAY_WEBHOST_URL = "http://kspay.ksnet.to/store/KSPayFlashV1.3/web_host/recv_post.jsp";
+	static String KSPAY_WEBHOST_URL_MOBILE = "http://kspay.ksnet.to/store/mb2/web_host/recv_post.jsp";		
 	// static String KSPAY_WEBHOST_URL =
 	// "http://210.181.28.116/store/KSPayFlashV1.3/web_host/recv_post.jsp";
 
@@ -86,7 +87,7 @@ public class KSPayWebHostBean {
 					.append(this.mtype).append("&sndRpyParams=").append(URLEncoder.encode(this.rparams, "euc-kr"))
 					.toString();
 
-			httpConn = new URL(KSPAY_WEBHOST_URL).openConnection();
+			httpConn = new URL(KSPAY_WEBHOST_URL_MOBILE).openConnection();
 			httpConn.setDoOutput(true);
 			httpConn.setUseCaches(false);
 			pout = new PrintStream(httpConn.getOutputStream(), false, "euc-kr");
