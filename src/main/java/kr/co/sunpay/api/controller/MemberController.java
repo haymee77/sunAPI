@@ -3,8 +3,8 @@ package kr.co.sunpay.api.controller;
 import java.net.URI;
 import java.util.List;
 
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -96,25 +96,25 @@ public class MemberController {
 		return ResponseEntity.created(location).build();
 	}
 	
-	@PostMapping("/check/id")
-	@ApiOperation(value="ID 중복검사", notes="")
-	public ResponseEntity<Object> checkId(@RequestParam("checkId") String checkId) {
+	@GetMapping("/check/id")
+	@ApiOperation(value="ID 유무검사", notes="")
+	public ResponseEntity<Object> checkId(@RequestParam("checkId") String checkId) throws NotFoundException {
 		
 		if (memberService.hasMember(checkId)) {
-			throw new DuplicateKeyException("아이디 중복");
+			return ResponseEntity.ok().build();
+		} else {
+			throw new NotFoundException("ID를 찾을 수 없습니다.");
 		}
-		
-		return ResponseEntity.ok().build();
 	}
 	
-	@PostMapping("/check/mail")
-	@ApiOperation(value="Mail 중복검사", notes="")
-	public ResponseEntity<Object> checkMail(@RequestParam("checkMail") String checkMail) {
+	@GetMapping("/check/mail")
+	@ApiOperation(value="Mail 유무검사", notes="")
+	public ResponseEntity<Object> checkMail(@RequestParam("checkMail") String checkMail) throws NotFoundException {
 	
 		if (!Sunpay.isEmpty(memberService.getMemberByMail(checkMail))) {
-			throw new DuplicateKeyException("이메일 중복");
+			return ResponseEntity.ok().build();
+		} else {
+			throw new NotFoundException("이메일을 찾을 수 없습니다.");
 		}
-		
-		return ResponseEntity.ok().build();
 	}
 }
