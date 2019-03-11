@@ -64,21 +64,30 @@ public class MemberService extends Sunpay {
 
 	private Member member;
 	
+	/**
+	 * 멤버UID로 멤버 정보 리턴
+	 * @param uid
+	 * @return
+	 */
 	public Member getMember(int uid) {
 		
 		Member member = memberRepo.findByUid(uid).orElse(null);
 		
-		if (member == null) return null;
+		if (!Sunpay.isEmpty(member)) member.setResponse();
 		
-		if (member.getStore() != null) {
-			member.setStoreName(member.getStore().getBizName());
-			member.setStoreUid(member.getStore().getUid());
-		}
+		return member;
+	}
+	
+	/**
+	 * 메일로 멤버 정보 리턴
+	 * @param mail
+	 * @return
+	 */
+	public Member getMemberByMail(String mail) {
 		
-		if (member.getGroup() != null) {
-			member.setGroupName(member.getGroup().getBizName());
-			member.setGroupUid(member.getGroup().getUid());
-		}
+		Member member = memberRepo.findByEmail(mail).orElse(null);
+		
+		if (!Sunpay.isEmpty(member)) member.setResponse();
 		
 		return member;
 	}
@@ -175,6 +184,10 @@ public class MemberService extends Sunpay {
 		log.info("-- MemberService.createMember called..");
 		if (hasMember(member.getId())) {
 			throw new DuplicateKeyException("아이디 중복");
+		}
+		
+		if (!Sunpay.isEmpty(member.getEmail()) && !Sunpay.isEmpty(getMemberByMail(member.getEmail()))) {
+			throw new DuplicateKeyException("이메일 중복");
 		}
 
 		Member newMem = new Member();

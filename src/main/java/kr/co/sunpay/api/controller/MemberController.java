@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.repository.MemberRepository;
 import kr.co.sunpay.api.service.MemberService;
+import kr.co.sunpay.api.util.Sunpay;
 import lombok.extern.java.Log;
 
 @Log
@@ -95,13 +96,23 @@ public class MemberController {
 		return ResponseEntity.created(location).build();
 	}
 	
-	@PostMapping("/id/{memberUid}")
+	@PostMapping("/check/id")
 	@ApiOperation(value="ID 중복검사", notes="")
-	public ResponseEntity<Object> hasMember(@ApiParam("API 요청 멤버의 UID") @PathVariable int memberUid,
-			@RequestParam("checkId") String checkId) {
+	public ResponseEntity<Object> checkId(@RequestParam("checkId") String checkId) {
 		
 		if (memberService.hasMember(checkId)) {
 			throw new DuplicateKeyException("아이디 중복");
+		}
+		
+		return ResponseEntity.ok().build();
+	}
+	
+	@PostMapping("/check/mail")
+	@ApiOperation(value="Mail 중복검사", notes="")
+	public ResponseEntity<Object> checkMail(@RequestParam("checkMail") String checkMail) {
+	
+		if (!Sunpay.isEmpty(memberService.getMemberByMail(checkMail))) {
+			throw new DuplicateKeyException("이메일 중복");
 		}
 		
 		return ResponseEntity.ok().build();

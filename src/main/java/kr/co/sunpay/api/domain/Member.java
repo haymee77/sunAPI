@@ -84,4 +84,16 @@ public class Member extends BaseEntity {
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, orphanRemoval=true)
 	@JoinColumn(name="MEMBER_UID_FK")
 	private List<MemberRole> roles;
+	
+	public void setResponse() {
+		if (getStore() != null) {
+			setStoreName(getStore().getBizName());
+			setStoreUid(getStore().getUid());
+		}
+		
+		if (getGroup() != null) {
+			setGroupName(getGroup().getBizName());
+			setGroupUid(getGroup().getUid());
+		}
+	}
 }
