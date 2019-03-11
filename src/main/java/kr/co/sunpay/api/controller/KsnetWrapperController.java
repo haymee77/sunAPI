@@ -190,7 +190,7 @@ public class KsnetWrapperController {
 	 * @param model
 	 */
 	@RequestMapping("/m/finish/{uid}")
-	public void mFinish(@PathVariable int uid, HttpServletRequest request, Model model) {
+	public String mFinish(@PathVariable int uid, HttpServletRequest request, Model model) {
 		log.info("-- KsnetWrapperController.mFinish called...");
 
 		KsnetPay ksnetPay = ksnetPayRepo.findByUid(uid);
@@ -244,5 +244,6 @@ public class KsnetWrapperController {
 		model.addAttribute("reCommType", request.getParameter("reCommType"));
 		model.addAttribute("reHash", request.getParameter("reHash"));
 
+		return "ksnet/m/finish";
 	}
 }
