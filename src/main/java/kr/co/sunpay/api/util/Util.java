@@ -19,4 +19,18 @@ public class Util {
 			return null;
 		}
 	}
+
+	/**
+	 * 서버에 접속한 클라이언트의 Hostname
+	 * @param req
+	 * @return
+	 */
+	public static String getClientHost(HttpServletRequest req) {
+		try {
+			String referer = req.getHeader("origin");
+			return referer;
+		} catch (Exception e) {
+			return null;
+		}
+	}
 }

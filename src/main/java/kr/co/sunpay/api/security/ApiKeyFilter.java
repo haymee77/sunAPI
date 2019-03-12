@@ -21,9 +21,7 @@ import com.google.gson.GsonBuilder;
 import kr.co.sunpay.api.exception.ErrorDetails;
 import kr.co.sunpay.api.util.Util;
 import kr.co.sunpay.common.LocalDateTimeJsonConverter;
-import lombok.extern.java.Log;
 
-@Log
 public class ApiKeyFilter extends GenericFilterBean {
 
 	private String headerKeyName;
@@ -45,8 +43,6 @@ public class ApiKeyFilter extends GenericFilterBean {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-
-		log.info("## ApiKeyFilter...");
 
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -81,25 +77,30 @@ public class ApiKeyFilter extends GenericFilterBean {
 	 */
 	private boolean authApiKey(HttpServletRequest request) {
 	
-		List<String> allowedDomain = Arrays.asList(
-				"sunpay.co.kr", 
-				"test.sunpay.co.kr", 
-				"m.sunpay.co.kr", 
-				"m.test.sunpay.co.kr", 
-				"shop.sunpay.co.kr", 
-				"dev.sunpay.co.kr");
+		List<String> allowedClient = Arrays.asList(
+				"http://sunpay.co.kr",
+				"https://sunpay.co.kr",
+				"http://test.sunpay.co.kr",
+				"https://test.sunpay.co.kr",
+				"http://m.sunpay.co.kr",
+				"https://m.sunpay.co.kr",
+				"http://m.test.sunpay.co.kr",
+				"https://m.test.sunpay.co.kr",
+				"http://shop.sunpay.co.kr",
+				"https://shop.sunpay.co.kr",
+				"http://dev.sunpay.co.kr",
+				"https://dev.sunpay.co.kr");
 		String apiKey = request.getHeader(headerKeyName);
-		String hostname = Util.getHost(request);
-		
-		System.out.println("## api hostname check");
-		System.out.println(hostname);
-		
-		// TODO: 검증 로직에 대한 설계 필요.. 일단 임시로 하드코딩해둠..
-		if ("qscEsZ56WE@#55ygwu7*65tGskek@ejK".equals(apiKey) || "iSunp".equals(apiKey) || "1111".equals(apiKey)) {
+		String client = Util.getClientHost(request);
+
+		// 자사 서비스는 DB확인 없이 Bypass
+		if (allowedClient.contains(client)) {
+			
 			return true;
 		}
 		
-		if (allowedDomain.contains(hostname)) {
+		// TODO: 검증 로직에 대한 설계 필요.. 일단 임시로 하드코딩해둠..
+		if ("qscEsZ56WE@#55ygwu7*65tGskek@ejK".equals(apiKey) || "iSunp".equals(apiKey)) {
 			return true;
 		}
 		
