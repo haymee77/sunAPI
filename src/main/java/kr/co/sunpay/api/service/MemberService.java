@@ -256,24 +256,26 @@ public class MemberService extends Sunpay {
 
 		// 권한 변경 적용
 		// 새로운 권한 추가
-		for (MemberRole role : member.getRoles()) {
-			if (UNAMENDABLE_ROLES.contains(role.getRoleName())) continue;
-			if (!dbMember.getRoles().contains(role)) {
-				dbMember.getRoles().add(role);
+		if (Sunpay.isEmpty(member.getRoles()) && member.getRoles().size() > 0) {
+			for (MemberRole role : member.getRoles()) {
+				if (UNAMENDABLE_ROLES.contains(role.getRoleName())) continue;
+				if (!dbMember.getRoles().contains(role)) {
+					dbMember.getRoles().add(role);
+				}
+			}
+			
+			// 제거된 권한 삭제
+			Iterator<MemberRole> iRoles = dbMember.getRoles().iterator();
+			while (iRoles.hasNext()) {
+				MemberRole role = iRoles.next();
+
+				if (UNAMENDABLE_ROLES.contains(role.getRoleName())) continue;
+				if (!member.getRoles().contains(role)) {
+					iRoles.remove();
+				}
 			}
 		}
 		
-		// 제거된 권한 삭제
-		Iterator<MemberRole> iRoles = dbMember.getRoles().iterator();
-		while (iRoles.hasNext()) {
-			MemberRole role = iRoles.next();
-
-			if (UNAMENDABLE_ROLES.contains(role.getRoleName())) continue;
-			if (!member.getRoles().contains(role)) {
-				iRoles.remove();
-			}
-		}
-
 		// 상점ID, 그룹ID 수정 불가 - 소속 변경은 불가능함. 
 		// TODO 소속변경에 대한 요청 시 다방면으로 고려해볼 것.
 
