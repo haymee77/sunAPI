@@ -62,7 +62,7 @@ public class DepositController {
 			apiResponseBody.setSuccess(true);
 			apiResponseBody.setMessage("입금번호: " + depositNo + ", 입금액: " + amt + ", 예치금 증액 완료");
 			
-			depositService.sendDepositAddPush(depositNo, amt);
+			depositService.pushDepositCharge(depositNo, amt);
 		}
 		
 		log.info("-- return: " + apiResponseBody.toString());

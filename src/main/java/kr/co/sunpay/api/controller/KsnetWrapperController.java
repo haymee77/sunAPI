@@ -95,8 +95,15 @@ public class KsnetWrapperController {
 			// TODO: 순간결제라면 예치금, 결제한도 확인 후 진행
 			// 예치금이 현재 상품 금액보다 적은 경우
 			if (store.getDeposit() < ksnetPay.getSndAmount()) {
-//				storeService.offInstantService(store);
-//				depositService.pushDepositLack(activatedId);
+				boolean sendPush = false;
+				
+				// 순간정산 OFF
+				storeService.instantOff(store.getUid(), sendPush);
+				
+				// 결제 상점 ID를 일반결제 ID로 전환
+				ksnetPay.setSndStoreid(storeService.getActivatedId(store));
+				ksnetPayRepo.save(ksnetPay);
+				depositService.pushDepositLack(store);
 			}
 
 		}

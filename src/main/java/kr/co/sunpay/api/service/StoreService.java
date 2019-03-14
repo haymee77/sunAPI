@@ -22,6 +22,7 @@ import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
+import kr.co.sunpay.api.util.Sunpay;
 import lombok.extern.java.Log;
 
 @Log
@@ -433,6 +434,21 @@ public class StoreService extends MemberService {
 			return true;
 
 		return false;
+	}
+	
+	/**
+	 * 현재 활성상태의 상점ID 리턴
+	 * @param store
+	 * @return
+	 */
+	public String getActivatedId(Store store) {
+		
+		StoreId storeId = storeIdRepo.findByStoreAndActivated(store, true).orElse(null);
+		if (!Sunpay.isEmpty(storeId)) {
+			return storeId.getId();
+		}
+		
+		return null;
 	}
 	
 	/**

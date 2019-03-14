@@ -11,5 +11,6 @@ public interface StoreIdRepository extends CrudRepository<StoreId, Integer> {
 
 	public Optional<StoreId> findById(String id);
 	public Optional<StoreId> findByIdAndActivated(String id, Boolean activated);
+	public Optional<StoreId> findByStoreAndActivated(Store store, Boolean activated);
 	public Optional<StoreId> findByIdAndStore(String id, Store store);
 }

@@ -27,6 +27,7 @@ import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.service.CodeService;
 import kr.co.sunpay.api.service.PushService;
 import kr.co.sunpay.api.service.StoreService;
+import kr.co.sunpay.api.util.Sunpay;
 
 @Service
 public class DepositService extends CodeService {
@@ -84,7 +85,7 @@ public class DepositService extends CodeService {
 	 * @param depositNo
 	 * @param depositAmt
 	 */
-	public void sendDepositAddPush(String depositNo, int depositAmt) {
+	public void pushDepositCharge(String depositNo, int depositAmt) {
 		
 		Store store = storeRepo.findByDepositNo(depositNo).orElse(null);
 		
@@ -129,6 +130,29 @@ public class DepositService extends CodeService {
 		msg.put("title", "예치금을 충전해주세요.");
 		msg.put("message", msgText);
 		
+		tokens.forEach(token -> {
+			msg.put("user", token.getId());
+			pushService.push(token.getFcmToken(), msg);
+		});
+	}
+	
+	/**
+	 * 예치금 부족 Default PUSH 발송
+	 * @param storeId
+	 */
+	public void pushDepositLack(Store store) {
+		if (Sunpay.isEmpty(store)) return;
+		
+		List<FcmToken> tokens = pushService.getTokensByStore(store);
+
+		Map<String, String> msg = new HashMap<String, String>();
+		String msgText = "예치금이 부족합니다." + "\n예치금 잔액: "
+				+ NumberFormat.getInstance(Locale.US).format(store.getDeposit()) + "원";
+		msg.put("cate", "deposit");
+		msg.put("isDisplay", "Y");
+		msg.put("title", "예치금을 충전해주세요.");
+		msg.put("message", msgText);
+
 		tokens.forEach(token -> {
 			msg.put("user", token.getId());
 			pushService.push(token.getFcmToken(), msg);

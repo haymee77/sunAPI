@@ -87,7 +87,8 @@ public class KSPayWebHostBean {
 					.append(this.mtype).append("&sndRpyParams=").append(URLEncoder.encode(this.rparams, "euc-kr"))
 					.toString();
 
-			httpConn = new URL(KSPAY_WEBHOST_URL_MOBILE).openConnection();
+//			httpConn = new URL(KSPAY_WEBHOST_URL_MOBILE).openConnection();
+			httpConn = new URL(KSPAY_WEBHOST_URL).openConnection();
 			httpConn.setDoOutput(true);
 			httpConn.setUseCaches(false);
 			pout = new PrintStream(httpConn.getOutputStream(), false, "euc-kr");

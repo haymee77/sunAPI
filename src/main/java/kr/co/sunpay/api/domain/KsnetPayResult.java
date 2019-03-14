@@ -117,7 +117,8 @@ public class KsnetPayResult {
 		String msg = "";
 		
 		msg = "상품명: " + this.ksnetPay.getSndGoodname() 
-				+ "\n결제금액: " + getAmt();
+				+ "\n결제금액: " + getAmt()
+				+ "\n정산방식: " + getServiceTypeCd();
 		
 		if (getAuthyn().equals("O")) {
 			msg += "\n결제완료";
