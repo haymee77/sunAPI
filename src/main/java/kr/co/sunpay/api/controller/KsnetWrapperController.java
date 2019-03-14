@@ -219,28 +219,31 @@ public class KsnetWrapperController {
 		String authyn = "";
 		String authno = "";
 
-		ksnet.kspay.KSPayWebHostBean ipg = new ksnet.kspay.KSPayWebHostBean(rcid);
+		ksnet.kspay.KSPayWebHostMobileBean ipg = new ksnet.kspay.KSPayWebHostMobileBean(rcid);
+		
 
 		// KSNET 결제결과 중 아래에 나타나지 않은 항목이 필요한 경우 Null 대신 필요한 항목명을 설정할 수 있습니다.
-		if (ipg.kspay_send_msg("1")) {
-			authyn = ipg.kspay_get_value("authyn");
-			authno = ipg.kspay_get_value("authno");
+		if (ipg.send_msg("1")) {
+			authyn = ipg.getValue("authyn");
+			authno = ipg.getValue("authno");
 
 			ksnetPayResult.setAuthyn(authyn); // 성공여부
 			ksnetPayResult.setAuthno(authno);
 
-			ksnetPayResult.setTrno(ipg.kspay_get_value("trno")); // 거래번호(KSNet 고유번호)
-			ksnetPayResult.setTrddt(ipg.kspay_get_value("trddt"));
-			ksnetPayResult.setTrdtm(ipg.kspay_get_value("trdtm"));
-			ksnetPayResult.setAmt(Integer.parseInt(ipg.kspay_get_value("amt")));
-			ksnetPayResult.setMsg1(ipg.kspay_get_value("msg1"));
-			ksnetPayResult.setMsg2(ipg.kspay_get_value("msg2"));
-			ksnetPayResult.setOrdno(ipg.kspay_get_value("ordno"));
-			ksnetPayResult.setResult(ipg.kspay_get_value("result"));
-			ksnetPayResult.setIsscd(ipg.kspay_get_value("isscd"));
-			ksnetPayResult.setAqucd(ipg.kspay_get_value("aqucd"));
-			ksnetPayResult.setHalbu(ipg.kspay_get_value("halbu"));
-			ksnetPayResult.setCbtrno(ipg.kspay_get_value("cbtrno"));
+			ksnetPayResult.setTrno(ipg.getValue("trno")); // 거래번호(KSNet 고유번호)
+			ksnetPayResult.setTrddt(ipg.getValue("trddt"));
+			ksnetPayResult.setTrdtm(ipg.getValue("trdtm"));
+			ksnetPayResult.setAmt(Integer.parseInt(ipg.getValue("amt")));
+			ksnetPayResult.setMsg1(ipg.getValue("msg1"));
+			ksnetPayResult.setMsg2(ipg.getValue("msg2"));
+			ksnetPayResult.setOrdno(ipg.getValue("ordno"));
+			ksnetPayResult.setResult(ipg.getValue("result"));
+			ksnetPayResult.setIsscd(ipg.getValue("isscd"));
+			ksnetPayResult.setAqucd(ipg.getValue("aqucd"));
+			
+			if (null != authyn && 1 == authyn.length()) {
+//				ipg.send_msg("3");
+			}
 		}
 
 		ksnetPayResult = ksnetPayResultRepo.save(ksnetPayResult);
