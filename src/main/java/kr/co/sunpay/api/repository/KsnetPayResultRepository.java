@@ -25,4 +25,5 @@ public interface KsnetPayResultRepository extends JpaRepository<KsnetPayResult, 
 	List<KsnetPayResult> findByStoreIdAndtrddtAndserviceTypeCd(@Param("storeIds") List<String> storeIds, @Param("trdStartDt") String trdStartDt, @Param("trdEndDt") String trdEndDt, @Param("serviceTypeCodes") List<String> serviceTypeCodes);
 	
 	Optional<KsnetPayResult> findByTrnoAndStoreIdAndAuthyn(String trno, String storeId, String Authyn);
+	Optional<KsnetPayResult> findByTrnoAndAuthyn(String trno, String Authyn);
 }

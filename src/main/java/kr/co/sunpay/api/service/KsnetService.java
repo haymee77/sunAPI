@@ -16,6 +16,7 @@ import kr.co.sunpay.api.model.KsnetRefundBody;
 import kr.co.sunpay.api.model.KspayRefundReturns;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.KspayRefundLogRepository;
+import kr.co.sunpay.api.util.Sunpay;
 import ksnet.kspay.KSPayApprovalCancelBean;
 import lombok.extern.java.Log;
 
@@ -110,14 +111,14 @@ public class KsnetService {
 	 * @param trNo
 	 * @return
 	 */
-	public KsnetPayResult getPaidResult(String trNo, String storeId) {
+	public KsnetPayResult getPaidResult(String trNo) {
 		
-		if (trNo == null || storeId == null) {
+		if (Sunpay.isEmpty(trNo)) {
 			log.info("-- getPaidResult: null passed..");
 			return null;
 		} 
 
-		Optional<KsnetPayResult> oPayResult = ksnetPayResultRepo.findByTrnoAndStoreIdAndAuthyn(trNo, storeId, "O");
+		Optional<KsnetPayResult> oPayResult = ksnetPayResultRepo.findByTrnoAndAuthyn(trNo, "O");
 		
 		return oPayResult.orElse(null);
 	}
@@ -503,7 +504,7 @@ public class KsnetService {
 		KsnetRefundLog refundLog = saveRefundLog(refund);
 		
 		// 주문정보 조회 
-		KsnetPayResult paidResult = getPaidResult(refund.getTrno(), refund.getStoreid());
+		KsnetPayResult paidResult = getPaidResult(refund.getTrno());
 		
 		if (paidResult == null) {
 			refundLog.setStatusCode(KsnetRefundLog.STATUS_ERROR);

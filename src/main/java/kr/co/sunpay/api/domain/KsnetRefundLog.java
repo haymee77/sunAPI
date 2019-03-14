@@ -101,6 +101,7 @@ public class KsnetRefundLog {
 	public String msgGenerator() {
 		String msg = "[결제취소]"
 				+ "\n주문번호: " + getTrNo()
+				+ "\n정산타입: " + getServiceTypeCd()
 				+ "\n환불금액: " + getAmt()
 				+ "\n결과: " + getRMsg1() + "-" + getRMsg2();
 		
