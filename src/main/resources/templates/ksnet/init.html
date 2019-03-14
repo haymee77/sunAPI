@@ -11,7 +11,7 @@
 		<div class="container">
 			<input type="hidden" id="err" th:value="${err}">
 			
-			<form th:if="(${err} == null) AND (${uid} != null)" name="payForm" method="post">
+			<form th:if="(${err} == null) AND (${uid} != null)" name="payForm" method="post" style="display:none;">
 				<input type="hidden" name="uid" th:value="${uid}">
 				sndPaymethod
 				<input type="text" name="sndPaymethod" th:value="${param.sndPaymethod}">
@@ -52,7 +52,7 @@
 			}
 		}
 		
-		//_pay(document.payForm);
+		_pay(document.payForm);
 		
 		$(function () {
 			
