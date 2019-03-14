@@ -11,12 +11,12 @@
 		<div class="container">
 			<input type="hidden" id="err" th:value="${err}">
 			
-			<form th:if="(${err} == null) AND (${uid} != null)" name="payForm" method="post" style="display:none">
+			<form th:if="(${err} == null) AND (${uid} != null)" name="payForm" method="post">
 				<input type="hidden" name="uid" th:value="${uid}">
 				sndPaymethod
 				<input type="text" name="sndPaymethod" th:value="${param.sndPaymethod}">
 				<br> sndStoreid
-				<input type="text" name="sndStoreid" th:value="${param.sndStoreid}">
+				<input type="text" name="sndStoreid" th:value="${storeId}">
 				<br> sndOrdernumber
 				<input type="text" name="sndOrdernumber" th:value="${param.sndOrdernumber}">
 				<br> sndGoodname
@@ -52,7 +52,7 @@
 			}
 		}
 		
-		_pay(document.payForm);
+		//_pay(document.payForm);
 		
 		$(function () {
 			

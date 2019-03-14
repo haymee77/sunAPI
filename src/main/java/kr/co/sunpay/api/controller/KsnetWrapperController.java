@@ -108,6 +108,8 @@ public class KsnetWrapperController {
 
 		}
 		
+		// 상점ID는 예치금 확인 후 변경된 ID로 적용
+		model.addAttribute("storeId", ksnetPay.getSndStoreid());
 		model.addAttribute("uid", newPay.getUid());
 	}
 
