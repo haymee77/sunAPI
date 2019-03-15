@@ -27,12 +27,17 @@ public class GitHookController {
 	@PostMapping("/push/{project}")
 	public ResponseEntity<Object> pushListener(@PathVariable("project") String project,
 			@RequestBody Map<String, Object> body) throws IOException {
-
-		System.out.println("pushListener...");
-		String command = "sh";
-		String path = "/home/ubuntu/app/" + project + "/deploy.sh";
-		ProcessBuilder pb = new ProcessBuilder(command, path);
-		pb.start();
+		
+		try {
+			System.out.println("pushListener...");
+			String command = "sh";
+			String path = "/home/ubuntu/app/" + project + "/deploy.sh";
+			ProcessBuilder pb = new ProcessBuilder(command, path);
+			pb.start();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 
 		return ResponseEntity.ok().build();
 	}
