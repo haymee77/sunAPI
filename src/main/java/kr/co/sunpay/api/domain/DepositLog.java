@@ -53,7 +53,7 @@ public class DepositLog {
 	private String trNo;
 	
 	@Column(name="TYPE_CD")
-	private String typeCd;
+	private String typeCode;
 	
 	@Transient
 	@ApiModelProperty(notes="구분값(사용/충전)")
@@ -88,7 +88,7 @@ public class DepositLog {
 		this.store = store;
 		this.originalDepositNo = originalDepositNo;
 		this.depositNo = depositNo;
-		this.typeCd = typeCd;
+		this.typeCode = typeCd;
 		this.trNo = trNo;
 		this.statusCd = statusCd;
 		this.amt = amt;

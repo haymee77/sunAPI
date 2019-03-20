@@ -1,9 +1,11 @@
 package kr.co.sunpay.api.controller;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.DepositLog;
 import kr.co.sunpay.api.model.ApiResponseBody;
 import kr.co.sunpay.api.model.DepositMessage;
@@ -74,8 +77,10 @@ public class DepositController {
 	public List<DepositLog> getDepositLogs(
 			@PathVariable(value="memberUid") int memberUid, 
 			@PathVariable(value="depositNo") String depositNo,
+			@ApiParam(name = "sDate", value = "Format: YYYY-MM-DD", required = true) @RequestParam(value = "sDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate sDate,
+			@ApiParam(name = "eDate", value = "Format: YYYY-MM-DD", required = true) @RequestParam(name = "eDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate eDate,
 			@RequestParam(value="type", required=false) String type) {
 
-		return depositService.getLogs(memberUid, depositNo, type);
+		return depositService.getLogs(memberUid, depositNo, sDate, eDate, type);
 	}
 }

@@ -1,6 +1,9 @@
 package kr.co.sunpay.api.model;
 
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -257,14 +260,16 @@ public class DepositService extends CodeService {
 				paidAmount);
 		
 	}
-	
+
 	/**
 	 * 예치금 내역 리턴
 	 * @param memberUid
 	 * @param depositNo
+	 * @param sDate
+	 * @param eDate
 	 * @return
 	 */
-	public List<DepositLog> getLogs(int memberUid, String depositNo) {
+	public List<DepositLog> getLogs(int memberUid, String depositNo, LocalDateTime sDate, LocalDateTime eDate) {
 		List<DepositLog> logs = new ArrayList<DepositLog>();
 		
 		// memberUid 권한 확인
@@ -273,7 +278,7 @@ public class DepositService extends CodeService {
 		if (!storeService.hasStoreQualification(memberUid, store)) throw new BadCredentialsException("Permission Denied.");
 		
 		// DepositNo 로 검색하여 리턴
-		logs = depositLogRepo.findByDepositNoOrderByCreatedDateDesc(depositNo);
+		logs = depositLogRepo.findByDepositNoAndCreatedDateBetweenOrderByCreatedDateDesc(depositNo, sDate, eDate);
 		for (DepositLog log : logs) {
 			wrappingLog(log);
 		}
@@ -285,15 +290,35 @@ public class DepositService extends CodeService {
 	 * 예치금 내역 리턴
 	 * @param memberUid
 	 * @param depositNo
+	 * @param sDate
+	 * @param eDate
 	 * @param type
 	 * @return
 	 */
-	public List<DepositLog> getLogs(int memberUid, String depositNo, String type) {
+	public List<DepositLog> getLogs(int memberUid, String depositNo, LocalDate sDate, LocalDate eDate, String type) {
 		
-		List<DepositLog> logs = new ArrayList<DepositLog>();
-		List<DepositLog> filteredLogs = new ArrayList<DepositLog>();
+		// 날짜 변환(LocalDate > LocalDateTime)
+		LocalDateTime sDateTime = sDate.atStartOfDay();
+		LocalDateTime eDateTime = eDate.atTime(23, 59, 59);
+
+		// 시작일, 종료일 검사
+		if (sDateTime.isAfter(eDateTime))
+			throw new IllegalArgumentException("종료일이 시작일보다 먼저일 수 없습니다.");
+
+		// 시작일 - 종료일이 90일 이내인지 검사
+		if (ChronoUnit.DAYS.between(sDateTime, eDateTime) > 90)
+			throw new IllegalArgumentException("검색기간은 90일이내만 가능합니다.");
 		
-		if (type == null || type.isEmpty()) return getLogs(memberUid, depositNo);
+		// 타입 없이 검색
+		if (Sunpay.isEmpty(type)) {
+			return getLogs(memberUid, depositNo, sDateTime, eDateTime);
+		}
+		
+		// DepositNo, type으로 검색하여 리턴
+		List<DepositLog> logs = depositLogRepo.findByDepositNoAndCreatedDateBetweenAndTypeCodeOrderByCreatedDateDesc(depositNo, sDateTime, eDateTime, type);
+		for (DepositLog log : logs) {
+			wrappingLog(log);
+		}
 		
 		return logs;
 	}
@@ -309,7 +334,7 @@ public class DepositService extends CodeService {
 		}
 	
 		// 코드값 변환
-		log.setType(TYPE_MAP.get(log.getTypeCd()));
+		log.setType(TYPE_MAP.get(log.getTypeCode()));
 		log.setStatus(STATUS_MAP.get(log.getStatusCd()));
 		
 		// 금액 천단위 표기
