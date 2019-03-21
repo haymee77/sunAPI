@@ -1,7 +1,9 @@
 package kr.co.sunpay.api.domain;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,11 +11,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -112,6 +120,12 @@ public class KsnetPayResult {
 	@OneToOne(fetch=FetchType.EAGER, optional=false)
 	@JoinColumn(name="KSNET_PAY_UID_FK")
 	private KsnetPay ksnetPay;
+	
+	@JsonManagedReference(value="ksnetPayResult")
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="ksnetPayResult")
+	@Fetch(FetchMode.SUBSELECT)
+	@OrderBy("UID DESC")
+	private List<KsnetRefundLog> ksnetRefundLogs;
 	
 	public String msgGenerator() {
 		String msg = "";

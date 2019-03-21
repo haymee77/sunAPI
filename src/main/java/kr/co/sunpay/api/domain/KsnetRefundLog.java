@@ -7,9 +7,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import kr.co.sunpay.api.model.KspayRefundReturns;
 import lombok.Getter;
@@ -53,10 +57,14 @@ public class KsnetRefundLog {
 	
 	// 정산서비스 타입(순간정산, D+2정산...)
 	@Column(name = "SERVICE_TYPE_CD", length = 20)
-	private String serviceTypeCd;
+	private String serviceTypeCode;
 	
+	// 결제수단(신용카드, 계좌이체...)
+	@Column(name = "KSNET_PAYMETHOD_CD", length = 20)
+	private String paymethodCode;
+
 	@Column(name="AMT")
-	private int amt;
+	private Integer amt;
 
 	@Column(name="AUTHTY")
 	private String authty;
@@ -78,6 +86,11 @@ public class KsnetRefundLog {
 	
 	@Column(name="R_MSG2")
 	private String rMsg2;
+	
+	@JsonBackReference(value="ksnetPayResult")
+	@ManyToOne
+	@JoinColumn(name="KSNET_PAY_RESULT_UID_FK")
+	private KsnetPayResult ksnetPayResult;
 	
 	public KsnetRefundLog() {
 	}
@@ -101,7 +114,7 @@ public class KsnetRefundLog {
 	public String msgGenerator() {
 		String msg = "[결제취소]"
 				+ "\n주문번호: " + getTrNo()
-				+ "\n정산타입: " + getServiceTypeCd()
+				+ "\n정산타입: " + getServiceTypeCode()
 				+ "\n환불금액: " + getAmt()
 				+ "\n결과: " + getRMsg1() + "-" + getRMsg2();
 		

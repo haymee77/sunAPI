@@ -15,7 +15,7 @@ import kr.co.sunpay.api.model.DepositService;
 import kr.co.sunpay.api.model.KsnetRefundBody;
 import kr.co.sunpay.api.model.KspayRefundReturns;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
-import kr.co.sunpay.api.repository.KspayRefundLogRepository;
+import kr.co.sunpay.api.repository.KsnetRefundLogRepository;
 import kr.co.sunpay.api.util.Sunpay;
 import ksnet.kspay.KSPayApprovalCancelBean;
 import lombok.extern.java.Log;
@@ -34,7 +34,7 @@ public class KsnetService {
 	PushService pushService;
 	
 	@Autowired
-	KspayRefundLogRepository refundLogRepo;
+	KsnetRefundLogRepository refundLogRepo;
 	
 	@Autowired
 	KsnetPayResultRepository ksnetPayResultRepo;
@@ -505,7 +505,6 @@ public class KsnetService {
 		
 		// 주문정보 조회 
 		KsnetPayResult paidResult = getPaidResult(refund.getTrno());
-		
 		if (paidResult == null) {
 			refundLog.setStatusCode(KsnetRefundLog.STATUS_ERROR);
 			result.setRMessage2("주문정보 없음");
@@ -513,8 +512,13 @@ public class KsnetService {
 			return result;
 		}
 		
+		refundLog.setKsnetPayResult(paidResult);
+		
 		// 결제건의 정산타입 저장
-		refundLog.setServiceTypeCd(paidResult.getServiceTypeCd());
+		refundLog.setServiceTypeCode(paidResult.getServiceTypeCd());
+		
+		// 결제건의 결제방법 저장
+		refundLog.setPaymethodCode(paidResult.getKsnetPay().getSndPaymethod());
 		
 		// 기취소건 확인
 		if (hasCancelSuccessLog(refund)) {

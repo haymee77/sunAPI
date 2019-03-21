@@ -5,10 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-
-import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -723,6 +720,22 @@ public class StoreService extends MemberService {
 		return storeIdRepo.findById(id).orElse(null);
 	}
 	
+	/**
+	 * 서비스타입코드값으로 상점의 상점ID 반환
+	 * @param store
+	 * @param serviceTypeCode
+	 * @return
+	 */
+	public String getStoreIdByServiceType(Store store, String serviceTypeCode) {
+	
+		for (StoreId storeId : store.getStoreIds()) {
+			if (storeId.getServiceTypeCode().equals(serviceTypeCode)) {
+				return storeId.getId();
+			}
+		}
+		
+		return null;
+	}
 	/**
 	 * 상점ID 리스트중 정산타입 중복이 있으면 true 리턴
 	 * @param store
