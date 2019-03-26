@@ -71,6 +71,7 @@ public class MemberResponse {
 		mobile = member.getMobile();
 		activate = member.getActivate();
 		agreeEventMail = member.getAgreeEventMail();
+		roles = member.getRoles();
 		
 		// 상점회원이면 상점데이터 가져오기
 		if (!Sunpay.isEmpty(member.getStore())) {

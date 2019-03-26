@@ -74,19 +74,6 @@ public class MemberController {
 		return ResponseEntity.created(location).build();
 	}
 	
-	@PostMapping("/old")
-	@ApiOperation(value="멤버 생성 요청", notes="멤버 생성 후 URL 반환")
-	public ResponseEntity<Object> createMember(@RequestBody Member member) {
-		
-		log.info("-- MemberController.createMember called...");
-		Member newMember = memberService.createMember(member);
-		
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{uid}")
-						.buildAndExpand(newMember.getUid()).toUri();
-		
-		return ResponseEntity.created(location).build();
-	}
-	
 	@DeleteMapping("/{uid}")
 	@ApiOperation(value="멤버 삭제 요청", notes="{uid} 멤버 삭제")
 	public void deleteMember(@ApiParam("삭제할 멤버의 uid") @PathVariable int uid) {
