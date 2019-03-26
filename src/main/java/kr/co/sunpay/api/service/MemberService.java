@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -16,6 +17,8 @@ import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.MemberRole;
 import kr.co.sunpay.api.domain.Store;
+import kr.co.sunpay.api.model.MemberRequest;
+import kr.co.sunpay.api.model.MemberResponse;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.MemberRepository;
 import kr.co.sunpay.api.util.Sunpay;
@@ -51,6 +54,9 @@ public class MemberService extends Sunpay {
 	public static final String ROLE_AGENCY = "AGENCY";
 	public static final String ROLE_STORE = "STORE";
 	
+	private final static String BELONG_TO_STORE = "STORE";
+	private final static String BELONG_TO_GROUP = "GROUP";
+	
 	public static final String ROLE_MANAGER = "MANAGER";
 	public static final String ROLE_STAFF = "STAFF";
 	public static final String ROLE_CS = "CS";
@@ -71,25 +77,22 @@ public class MemberService extends Sunpay {
 	 */
 	public Member getMember(int uid) {
 		
-		Member member = memberRepo.findByUid(uid).orElse(null);
-		
-		if (!Sunpay.isEmpty(member)) member.setResponse();
-		
-		return member;
+		return memberRepo.findByUid(uid).orElse(null);
 	}
 	
 	/**
-	 * 메일로 멤버 정보 리턴
-	 * @param mail
+	 * MemberResponse 객체로 회원정보 리턴
+	 * @param uid
 	 * @return
 	 */
-	public Member getMemberByMail(String mail) {
+	public MemberResponse getMemberResponse(int uid) {
 		
-		Member member = memberRepo.findByEmail(mail).orElse(null);
+		return memberRepo.findByUid(uid).map(MemberResponse::new).orElse(null);
+	}
+	
+	public int countMail(String mail) {
 		
-		if (!Sunpay.isEmpty(member)) member.setResponse();
-		
-		return member;
+		return memberRepo.countByEmail(mail);
 	}
 	
 	/**
@@ -97,14 +100,17 @@ public class MemberService extends Sunpay {
 	 * @param memberUid
 	 * @return
 	 */
-	public List<Member> getMembers(int memberUid) {
-		Member member = getMember(memberUid);
-		List<Member> members = new ArrayList<Member>();
+	public List<MemberResponse> getMembers(int memberUid) {
 		
+		Member member = getMember(memberUid);
+		List<MemberResponse> members = new ArrayList<MemberResponse>();
+		
+		// 본사권한인 경우 모든 멤버리스트 반환
 		if (hasRole(member, ROLE_TOP) || hasRole(member, ROLE_HEAD)) {
 			
 			members = getMembers();
-			
+		
+		// 지사, 대리점 권한인 경우 해당 그룹 하위의 멤버만 반환
 		} else if (hasRole(member, ROLE_BRANCH) || hasRole(member, ROLE_AGENCY)) {
 			
 			members = getMembers(member.getGroup());
@@ -115,30 +121,35 @@ public class MemberService extends Sunpay {
 	}
 	
 	/**
-	 * group의 멤버리스트 반환
+	 * group 소속의 멤버리스트 반환(하위 포함)
 	 * @param group
 	 * @return
 	 */
-	public List<Member> getMembers(Group group) {
+	public List<MemberResponse> getMembers(Group group) {
 		
-		List<Member> members = new ArrayList<Member>();
+		List<MemberResponse> members = new ArrayList<MemberResponse>();
 		
+		// 대리점인 경우 - 해당 대리점과 대리점 하위 상점의 멤버리스트 반환
 		if (group.getRoleCode().equals("AGENCY")) {
 			
-			members = group.getMembers();
+			members = group.getMembers().stream().map(MemberResponse::new).collect(Collectors.toList());
 			
 			for (Store store : group.getStores()) {
-				members.addAll(store.getMembers());
+				members.addAll(store.getMembers().stream().map(MemberResponse::new).collect(Collectors.toList()));
 			}
-			
+
+		// 지사의 경우 - 해당 지사와 하위 대리점, 상점의 멤버리스트 반환
 		} else if (group.getRoleCode().equals("BRANCH")) {
 			
-			members = group.getMembers();
+			// 지사의 회원 리스트
+			members = group.getMembers().stream().map(MemberResponse::new).collect(Collectors.toList());
 			
+			// 지사 소속 상점의 회원리스트
 			for (Store store : group.getStores()) {
-				members.addAll(store.getMembers());
+				members.addAll(store.getMembers().stream().map(MemberResponse::new).collect(Collectors.toList()));
 			}
 			
+			// 지사 소속 대리점의 회원리스트
 			List<Group> agencies = groupRepo.findByparentGroupUid(group.getUid());
 			for (Group agency : agencies) {
 				members.addAll(getMembers(agency));
@@ -148,26 +159,12 @@ public class MemberService extends Sunpay {
 		return members;
 	}
 	
-	public List<Member> getMembers() {
+	public List<MemberResponse> getMembers() {
 		
 		if (memberRepo.count() == 0)
 			throw new EntityNotFoundException("There is no availabel Member");
 		
-		List<Member> members = new ArrayList<Member>();
-		memberRepo.findAll().forEach(member -> {
-			
-			if (member.getStore() != null) {
-				member.setStoreName(member.getStore().getBizName());
-			}
-			
-			if (member.getGroup() != null) {
-				member.setGroupName(member.getGroup().getBizName());
-			}
-			
-			members.add(member);
-		});
-		
-		return members;
+		return memberRepo.findAll().stream().map(MemberResponse::new).collect(Collectors.toList());
 	}
 	
 	public boolean hasMember(String id) {
@@ -179,6 +176,75 @@ public class MemberService extends Sunpay {
 		return true;
 	}
 
+	/**
+	 * 멤버 생성
+	 * @param member
+	 * @return
+	 */
+	public Member regist(MemberRequest member) {
+	
+		// 아이디 중복 검사
+		if (hasMember(member.getId())) {
+			throw new DuplicateKeyException("아이디 중복");
+		}
+		
+		// 이메일 중복 검사
+		if (!Sunpay.isEmpty(member.getEmail()) && countMail(member.getEmail()) > 0) {
+			throw new DuplicateKeyException("이메일 중복");
+		}
+		
+		// 비밀번호 암호화
+		member.setPassword(pwEncoder.encode(member.getPassword()));
+		
+		// 상점 소속 회원
+		if (BELONG_TO_STORE.equals(member.getBelongTo())) {
+			
+			// 상점 권한 체크
+			if (!hasRole(member.getRoles(), ROLE_STORE)) {
+				throw new IllegalArgumentException("필수 권한 없음(상점회원 - 상점권한 필요)");
+			}
+			
+			// 상점 검색
+			if (Sunpay.isEmpty(member.getStoreUid())) {
+				throw new IllegalArgumentException("소속 상점 미기재");
+			}
+			
+			Store store = storeService.getStore(member.getStoreUid());
+			
+			if (Sunpay.isEmpty(store)) {
+				throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
+			}
+			
+			// 상점회원으로 등록
+			return memberRepo.save(member.toEntity(store));
+			
+		// 그룹 소속 회원	
+		} else if (BELONG_TO_GROUP.equals(member.getBelongTo())) {
+			
+			// 그룹 권한 체크
+			if (!hasRole(member.getRoles(), ROLE_HEAD) && !hasRole(member.getRoles(), ROLE_BRANCH) && !hasRole(member.getRoles(), ROLE_AGENCY)) {
+				throw new IllegalArgumentException("필수 권한 없음(그룹회원 - 본사, 지사, 대리점 권한 중 한가지 필요)");
+			}
+			
+			// 그룹 검색
+			if (Sunpay.isEmpty(member.getGroupUid())) {
+				throw new IllegalArgumentException("소속 그룹 미기재");
+			}
+			
+			Group group = groupService.getGroup(member.getGroupUid());
+			
+			if (Sunpay.isEmpty(group)) {
+				throw new IllegalArgumentException("그룹 정보를 찾을 수 없습니다.");
+			}
+			
+			// 그룹회원으로 등록
+			return memberRepo.save(member.toEntity(group));
+			
+		} else {
+			throw new IllegalArgumentException("가입 정보 오류");
+		}
+	}
+	
 	public Member createMember(Member member) {
 
 		log.info("-- MemberService.createMember called..");
@@ -186,10 +252,15 @@ public class MemberService extends Sunpay {
 			throw new DuplicateKeyException("아이디 중복");
 		}
 		
-		if (!Sunpay.isEmpty(member.getEmail()) && !Sunpay.isEmpty(getMemberByMail(member.getEmail()))) {
+		if (!Sunpay.isEmpty(member.getEmail()) && countMail(member.getEmail()) > 0) {
 			throw new DuplicateKeyException("이메일 중복");
 		}
+		
+		if (Sunpay.isEmpty(member.getAgreeEventMail())) {
+			throw new IllegalArgumentException("이벤트 메일 수신 동의 여부 미체크");
+		}
 
+		// 멤버 생성
 		Member newMem = new Member();
 		newMem.setActivate(true);
 		newMem.setEmail(member.getEmail());
@@ -197,6 +268,7 @@ public class MemberService extends Sunpay {
 		newMem.setName(member.getName());
 		newMem.setMobile(member.getMobile());
 		newMem.setPassword(pwEncoder.encode(member.getPassword()));
+		newMem.setAgreeEventMail(member.getAgreeEventMail());
 		
 		if (member.getGroup() == null && member.getStore() == null) {
 			throw new IllegalArgumentException("그룹, 상점 중 한가지 필수입력");
@@ -248,11 +320,19 @@ public class MemberService extends Sunpay {
 		if (member.getPassword() != null && member.getPassword().trim().length() > 0) {
 			dbMember.setPassword(pwEncoder.encode(member.getPassword()));
 		}
+		
+		if (Sunpay.isEmpty(member.getAgreeEventMail())) {
+			throw new IllegalArgumentException("이벤트 메일 수신 동의 여부 미체크");
+		}
 
 		dbMember.setActivate(member.getActivate());
 		dbMember.setEmail(member.getEmail());
 		dbMember.setMobile(member.getMobile());
 		dbMember.setName(member.getName());
+		dbMember.setAgreeEventMail(member.getAgreeEventMail());
+		
+		log.info("-- 멤버 수정");
+		log.info(dbMember.getAgreeEventMail() + "");
 
 		// 권한 변경 적용
 		// 새로운 권한 추가
@@ -332,9 +412,32 @@ public class MemberService extends Sunpay {
 		return roleNames;
 	}
 	
+	/**
+	 * 멤버가 특정 권한을 가졌는지 체크
+	 * @param member
+	 * @param roleName
+	 * @return
+	 */
 	public boolean hasRole(Member member, String roleName) {
 		
-		return getRoleNames(member).contains(roleName);
+		return hasRole(member.getRoles(), roleName);
+	}
+	
+	/**
+	 * 권한리스트에 특정 권한이 포함되었는지 체크
+	 * @param roles
+	 * @param roleName
+	 * @return
+	 */
+	public boolean hasRole(List<MemberRole> roles, String roleName) {
+		
+		for (MemberRole role : roles) {
+			if (role.getRoleName().equals(roleName)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/**

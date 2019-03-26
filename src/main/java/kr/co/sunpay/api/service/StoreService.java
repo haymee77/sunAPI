@@ -181,7 +181,7 @@ public class StoreService extends MemberService {
 		Member manager = getMember(memberUid);
 		
 		if (hasRole(manager, ROLE_MANAGER)) {
-			if (manager.getStoreUid() == store.getUid()) {
+			if (manager.getStore().getUid() == store.getUid()) {
 				return true;
 			}
 		}
@@ -398,13 +398,13 @@ public class StoreService extends MemberService {
 		
 		// 상점 멤버인 경우 해당 상점만 반환 
 		if (hasRole(member, ROLE_STORE)) {
-			stores.add(getStore(member.getStoreUid()));
+			stores.add(member.getStore());
 			return stores;
 		}
 		
 		// 대리점 멤버인 경우 해당 대리점의 상점리스트 반환
 		if (hasRole(member, ROLE_AGENCY)) {
-			stores = groupService.getGroup(member.getGroupUid()).getStores();
+			stores = member.getGroup().getStores();
 		}
 		
 		// 지사 멤버인 경우 해당 지사와 하위 대리점 소속의 상점리스트 반환

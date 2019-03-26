@@ -3,6 +3,8 @@ package kr.co.sunpay.api.controller;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import kr.co.sunpay.api.domain.Member;
+import kr.co.sunpay.api.model.MemberRequest;
+import kr.co.sunpay.api.model.MemberResponse;
 import kr.co.sunpay.api.repository.MemberRepository;
 import kr.co.sunpay.api.service.MemberService;
 import kr.co.sunpay.api.util.Sunpay;
@@ -40,28 +44,37 @@ public class MemberController {
 	@Autowired
 	MemberService memberService;
 	
-	@GetMapping("")
-	@ApiOperation(value="멤버 리스트 요청(삭제될 API)", notes="멤버 리스트 반환")
-	public List<Member> retrieveMembers() {
-		
-		return memberService.getMembers();
-	}
-	
 	@GetMapping("/{uid}")
 	@ApiOperation(value="특정 멤버 정보 요청", notes="{uid} 멤버에 대한 정보 반환")
-	public Member retrieveMember(@ApiParam("정보를 얻을 멤버의 UID") @PathVariable int uid) {
+	public MemberResponse retrieveMember(@ApiParam("정보를 얻을 멤버의 UID") @PathVariable int uid) {
 		
-		return memberService.getMember(uid);
+		return memberService.getMemberResponse(uid);
 	}
 	
 	@GetMapping("/list/{memberUid}")
 	@ApiOperation(value="멤버 리스트 요청", notes="멤버 권한으로 볼 수 있는 멤버 리스트 반환")
-	public List<Member> retrieveMembers(@ApiParam("요청자 UID") @PathVariable int memberUid) {
+	public List<MemberResponse> retrieveMembers(@ApiParam("요청자 UID") @PathVariable int memberUid) {
 		
 		return memberService.getMembers(memberUid);
 	}
 	
 	@PostMapping("")
+	@ApiOperation(value="멤버 생성 요청", notes="멤버 생성 후 GET URL 반환")
+	public ResponseEntity<Object> regist(@RequestBody @Valid MemberRequest member) {
+		
+		Member newMember = memberService.regist(member);
+		
+		if (Sunpay.isEmpty(newMember)) {
+			throw new IllegalArgumentException("Cannot regist inquery");
+		}
+		
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{uid}")
+				.buildAndExpand(newMember.getUid()).toUri();
+
+		return ResponseEntity.created(location).build();
+	}
+	
+	@PostMapping("/old")
 	@ApiOperation(value="멤버 생성 요청", notes="멤버 생성 후 URL 반환")
 	public ResponseEntity<Object> createMember(@RequestBody Member member) {
 		
@@ -103,18 +116,18 @@ public class MemberController {
 		if (memberService.hasMember(checkId)) {
 			return ResponseEntity.ok().build();
 		} else {
-			throw new NotFoundException("ID를 찾을 수 없습니다.");
+			return ResponseEntity.notFound().build();
 		}
 	}
 	
 	@GetMapping("/check/mail")
 	@ApiOperation(value="Mail 유무검사", notes="")
 	public ResponseEntity<Object> checkMail(@RequestParam("checkMail") String checkMail) throws NotFoundException {
-	
-		if (!Sunpay.isEmpty(memberService.getMemberByMail(checkMail))) {
+		
+		if (memberService.countMail(checkMail) > 0) {
 			return ResponseEntity.ok().build();
 		} else {
-			throw new NotFoundException("이메일을 찾을 수 없습니다.");
+			return ResponseEntity.notFound().build();
 		}
 	}
 }

@@ -11,7 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -54,6 +53,9 @@ public class Member extends BaseEntity {
 	@Column(name="ACTIVATE", columnDefinition="BIT(1)", insertable=false)
 	private Boolean activate;
 	
+	@Column(name="IS_AGREE_EVENT_MAIL", columnDefinition="BIT(1)")
+	private Boolean agreeEventMail;
+	
 	@JsonBackReference(value="store-members")
 	@ManyToOne
 	@JoinColumn(name="STORE_UID_FK")
@@ -64,36 +66,34 @@ public class Member extends BaseEntity {
 	@JoinColumn(name="GROUP_UID_FK")
 	private Group group;
 	
-	@ApiModelProperty(value="*[READ_ONLY]* 소속 상점 UID")
-	@Transient
-	private int storeUid;
-	
-	@ApiModelProperty(value="*[READ_ONLY]* 소속 상점 이름")
-	@Transient
-	private String storeName;
-	
-	@ApiModelProperty(value="*[READ_ONLY]* 소속 그룹 UID")
-	@Transient
-	private int groupUid;
-	
-	@ApiModelProperty(value="*[READ_ONLY]* 소속 그룹 이름")
-	@Transient
-	private String groupName;
-	
 	@ApiModelProperty(notes="TOP(최고관리자), HEAD(본사 권한), BRANCH(지사 권한),  AGENCY(대리점 권한), STORE(가맹점 권한), MANAGER(본사, 지사, 대리점, 상점의 대표/기본 계정), STAFF(본사, 지사, 대리점, 상점의 부계정), CS(고객관리 권한), DEV(개발자 권한)")
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, orphanRemoval=true)
 	@JoinColumn(name="MEMBER_UID_FK")
 	private List<MemberRole> roles;
 	
-	public void setResponse() {
-		if (getStore() != null) {
-			setStoreName(getStore().getBizName());
-			setStoreUid(getStore().getUid());
-		}
-		
-		if (getGroup() != null) {
-			setGroupName(getGroup().getBizName());
-			setGroupUid(getGroup().getUid());
-		}
+	public Member() {}
+	
+	public Member(String id, String password, String name, String email, String mobile, Boolean activate, Boolean agreeEventMail, List<MemberRole> roles, Store store) {
+		this.id = id;
+		this.password = password;
+		this.name = name;
+		this.email = email;
+		this.mobile = mobile;
+		this.activate = activate;
+		this.agreeEventMail = agreeEventMail;
+		this.roles = roles;
+		this.store = store;
+	}
+	
+	public Member(String id, String password, String name, String email, String mobile, Boolean activate, Boolean agreeEventMail, List<MemberRole> roles, Group group) {
+		this.id = id;
+		this.password = password;
+		this.name = name;
+		this.email = email;
+		this.mobile = mobile;
+		this.activate = activate;
+		this.agreeEventMail = agreeEventMail;
+		this.roles = roles;
+		this.group = group;
 	}
 }

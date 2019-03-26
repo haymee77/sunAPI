@@ -25,6 +25,7 @@ import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.service.GroupService;
 import kr.co.sunpay.api.service.MemberService;
 import kr.co.sunpay.api.service.StoreService;
+import kr.co.sunpay.api.util.Sunpay;
 
 @RestController
 @RequestMapping("/store")
@@ -54,8 +55,8 @@ public class StoreController {
 		Member member = memberService.getMember(memberUid);
 		List<Store> stores = new ArrayList<Store>();
 		
-		if (member.getStoreUid() > 0) {
-			stores.add(storeService.getStore(member.getStoreUid()));
+		if (!Sunpay.isEmpty(member.getStore())) {
+			stores.add(member.getStore());
 		} else {
 			stores = storeService.getStoresByMember(member);
 		}
