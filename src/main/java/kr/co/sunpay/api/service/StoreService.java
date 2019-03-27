@@ -102,19 +102,9 @@ public class StoreService extends MemberService {
 		updatedStore.setBizAddressBasic(store.getBizAddressBasic());
 		updatedStore.setBizAddressDetail(store.getBizAddressDetail());
 		updatedStore.setBizContact(store.getBizContact());
-		
-		// 설치비
-		updatedStore.setInstallationFeeAgency(store.getInstallationFeeAgency());
-		updatedStore.setInstallationFeeBranch(store.getInstallationFeeBranch());
-		updatedStore.setInstallationFeeHead(store.getInstallationFeeHead());
+
 		// 가입비
-		updatedStore.setMembershipFeeAgency(store.getMembershipFeeAgency());
-		updatedStore.setMembershipFeeBranch(store.getMembershipFeeBranch());
-		updatedStore.setMembershipFeeHead(store.getMembershipFeeHead());
-		// 관리비
-		updatedStore.setMaintenanceFeeAgency(store.getMaintenanceFeeAgency());
-		updatedStore.setMaintenanceFeeBranch(store.getMaintenanceFeeBranch());
-		updatedStore.setMaintenanceFeeHead(store.getMaintenanceFeeHead());
+		updatedStore.setMembershipFee(store.getMembershipFee());
 		
 		storeRepo.save(updatedStore);
 

@@ -176,41 +176,9 @@ public class Store extends BaseEntity {
 	@Column(name="TRANS_FEE_AGENCY")
 	private Integer transFeeAgency = 0;
 	
-	@ApiModelProperty(notes="본사 가입비")
-	@Column(name="MEMBERSHIP_FEE_HEAD")
-	private Integer membershipFeeHead = 0;
-	
-	@ApiModelProperty(notes="지사 가입비")
-	@Column(name="MEMBERSHIP_FEE_BRANCH")
-	private Integer membershipFeeBranch = 0;
-	
-	@ApiModelProperty(notes="대리점 가입비")
-	@Column(name="MEMBERSHIP_FEE_AGENCY")
-	private Integer membershipFeeAgency;
-	
-	@ApiModelProperty(notes="본사 설치비")
-	@Column(name="INSTALLATION_FEE_HEAD")
-	private Integer installationFeeHead = 0;
-	
-	@ApiModelProperty(notes="지사 설치비")
-	@Column(name="INSTALLATION_FEE_BRANCH")
-	private Integer installationFeeBranch = 0;
-	
-	@ApiModelProperty(notes="대리점 설치비")
-	@Column(name="INSTALLATION_FEE_AGENCY")
-	private Integer installationFeeAgency = 0;
-	
-	@ApiModelProperty(notes="본사 관리비")
-	@Column(name="MAINTENANCE_FEE_HEAD")
-	private Integer maintenanceFeeHead = 0;
-	
-	@ApiModelProperty(notes="지사 관리비")
-	@Column(name="MAINTENANCE_FEE_BRANCH")
-	private Integer maintenanceFeeBranch = 0;
-	
-	@ApiModelProperty(notes="대리점 관리비")
-	@Column(name="MAINTENANCE_FEE_AGENCY")
-	private Integer maintenanceFeeAgency = 0;
+	@ApiModelProperty(notes="가입비")
+	@Column(name="MEMBERSHIP_FEE")
+	private Integer membershipFee = 0;
 	
 	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
 	@JoinColumn(name="STORE_UID_FK")
