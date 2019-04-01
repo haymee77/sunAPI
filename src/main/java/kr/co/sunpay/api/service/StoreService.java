@@ -17,9 +17,11 @@ import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
+import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.util.Sunpay;
+
 import lombok.extern.java.Log;
 
 @Log
@@ -191,6 +193,26 @@ public class StoreService extends MemberService {
 			return create(store);
 		} else {
 			throw new IllegalArgumentException("memberUid의 권한으로 생성할 수 없는 그룹 소속입니다.");
+		}
+	}
+	
+	/**
+	 * StoreRequest로 상점생성
+	 * @param storeReq
+	 * @return
+	 */
+	public Store regist(StoreRequest storeReq) {
+		
+		Group group = groupService.getGroup(storeReq.getGroupUid());
+		
+		if (Sunpay.isEmpty(group)) {
+			throw new IllegalArgumentException("그룹정보를 찾을 수 없습니다.");
+		}
+		
+		try {
+			return storeRepo.save(storeReq.toEntity(group));
+		} catch (Exception e) {
+			throw new IllegalArgumentException("상점 생성 불가, 관리자 문의바람");
 		}
 	}
 

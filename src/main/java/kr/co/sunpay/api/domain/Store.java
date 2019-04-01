@@ -102,7 +102,8 @@ public class Store extends BaseEntity {
 	@Column(name="BIZ_STATUS", length=200)
 	private String bizStatus;
 	
-	// TODO BIZ_EXTRA_INFO > 필요한 데이터인지 확인..영수증에 표기될 상호명..결제데이터 넘길 때 상호명 넘길 수 있음..
+	@Column(name="BIZ_MAIL", length=200)
+	private String bizMail;
 	
 	@ApiModelProperty(notes="신용카드 결제 시 최대 할부 개월 수")
 	@Column(name="MAX_INSTALLMENT_LIMIT")
@@ -203,6 +204,55 @@ public class Store extends BaseEntity {
 	@ApiModelProperty(notes="*[READ_ONLY]* 소속 그룹 UID")
 	@Transient
 	private int groupUid;
+	
+	public Store() {}
+	
+	public Store(String bizTypeCode, String bizNo, String bizName, String bizOwner, String bizOwnerRegiNo,
+			String bizZipcode, String bizAddressBasic, String bizAddressDetail, String bizContact, String bizMail,
+			String bizIndustry, String bizStatus, String storeUrl, Boolean suretyInsurance, Integer suretyInsuranceAmt,
+			String bankCode, String bankAccountNo, String bankAccountName, Integer maxInstallmentLimit,
+			Integer minPaymentAmt, Integer paymentLimitOnce, Integer paymentLimitDaily, Integer paymentLimitMonthly,
+			Double feePg, Double feeHead, Double feeBranch, Double feeAgency, Integer transFeePg, Integer transFeeHead,
+			Integer transFeeBranch, Integer transFeeAgency, Integer minDeposit, String depositNo, Integer membershipFee,
+			Group group) {
+		
+		// 사업자정보 셋팅
+		this.bizTypeCode = bizTypeCode;
+		this.bizNo = bizNo;
+		this.bizName = bizName;
+		this.bizOwner = bizOwner;
+		this.bizOwnerRegiNo = bizOwnerRegiNo;
+		this.bizZipcode = bizZipcode;
+		this.bizAddressBasic = bizAddressBasic;
+		this.bizAddressDetail = bizAddressDetail;
+		this.bizContact = bizContact;
+		this.bizMail = bizMail;
+		this.bizIndustry = bizIndustry;
+		this.bizStatus = bizStatus;
+		this.storeUrl = storeUrl;
+		this.suretyInsurance = suretyInsurance;
+		this.suretyInsuranceAmt = suretyInsuranceAmt;
+		this.bankCode = bankCode;
+		this.bankAccountNo = bankAccountNo;
+		this.bankAccountName = bankAccountName;
+		this.maxInstallmentLimit = maxInstallmentLimit;
+		this.minPaymentAmt = minPaymentAmt;
+		this.paymentLimitOnce = paymentLimitOnce;
+		this.paymentLimitDaily = paymentLimitDaily;
+		this.paymentLimitMonthly = paymentLimitMonthly;
+		this.feePg = feePg;
+		this.feeHead = feeHead;
+		this.feeBranch = feeBranch;
+		this.feeAgency = feeAgency;
+		this.transFeePg = transFeePg;
+		this.transFeeHead = transFeeHead;
+		this.transFeeBranch = transFeeBranch;
+		this.transFeeAgency = transFeeAgency;
+		this.minDeposit = minDeposit;
+		this.depositNo = depositNo;
+		this.membershipFee = membershipFee;
+		this.group = group;
+	}
 
 	public Store hideFee() {
 		
