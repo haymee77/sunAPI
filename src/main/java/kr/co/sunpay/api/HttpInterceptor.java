@@ -38,6 +38,9 @@ public class HttpInterceptor extends HandlerInterceptorAdapter {
 	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 			ModelAndView modelAndView) throws Exception {
+		
+//		response.setHeader("Access-Control-Allow-Origin", "https://api.sunpay.co.kr");
+//		response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT");
 	}
 
 	@Override
