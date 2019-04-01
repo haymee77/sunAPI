@@ -15,4 +15,9 @@ public interface ContactOtoRepository extends JpaRepository<ContactOto, Integer>
 	List<ContactOto> findByCreatedDateBetweenAndTypeCode(LocalDateTime createdDateStart, LocalDateTime createdDateEnd, String typeCode);
 	List<ContactOto> findByCreatedDateBetweenAndWriterContaining(LocalDateTime createdDateStart, LocalDateTime createdDateEnd, String writer);
 	List<ContactOto> findByCreatedDateBetweenAndWriterContainingAndTypeCode(LocalDateTime createdDateStart, LocalDateTime createdDateEnd, String writer, String typeCode);
+	
+	List<ContactOto> findByCreatedDateBetweenOrderByStatusCodeDescCreatedDateDesc(LocalDateTime createdDateStart, LocalDateTime createdDateEnd);
+	List<ContactOto> findByCreatedDateBetweenAndTypeCodeOrderByStatusCodeDescCreatedDateDesc(LocalDateTime createdDateStart, LocalDateTime createdDateEnd, String typeCode);
+	List<ContactOto> findByCreatedDateBetweenAndWriterContainingOrderByStatusCodeDescCreatedDateDesc(LocalDateTime createdDateStart, LocalDateTime createdDateEnd, String writer);
+	List<ContactOto> findByCreatedDateBetweenAndWriterContainingAndTypeCodeOrderByStatusCodeDescCreatedDateDesc(LocalDateTime createdDateStart, LocalDateTime createdDateEnd, String writer, String typeCode);
 }

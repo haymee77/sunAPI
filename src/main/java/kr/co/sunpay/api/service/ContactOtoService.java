@@ -99,7 +99,7 @@ public class ContactOtoService {
 
 		try {
 			return contactOtoRepo
-					.findByCreatedDateBetweenAndWriterContainingAndTypeCode(sDateTime, eDateTime, writer, typeCode)
+					.findByCreatedDateBetweenAndWriterContainingAndTypeCodeOrderByStatusCodeDescCreatedDateDesc(sDateTime, eDateTime, writer, typeCode)
 					.stream()
 					.map(ContactOtoResponse::new)
 					.collect(Collectors.toList());
@@ -117,7 +117,7 @@ public class ContactOtoService {
 		}
 		
 		return contactOtoRepo
-				.findByCreatedDateBetweenAndWriterContaining(sDateTime, eDateTime, writer)
+				.findByCreatedDateBetweenAndWriterContainingOrderByStatusCodeDescCreatedDateDesc(sDateTime, eDateTime, writer)
 				.stream()
 				.map(ContactOtoResponse::new)
 				.collect(Collectors.toList());
@@ -132,7 +132,7 @@ public class ContactOtoService {
 		}
 		
 		return contactOtoRepo
-				.findByCreatedDateBetweenAndTypeCode(sDateTime, eDateTime, typeCode)
+				.findByCreatedDateBetweenAndTypeCodeOrderByStatusCodeDescCreatedDateDesc(sDateTime, eDateTime, typeCode)
 				.stream()
 				.map(ContactOtoResponse::new)
 				.collect(Collectors.toList());
@@ -142,7 +142,7 @@ public class ContactOtoService {
 	private List<ContactOtoResponse> findByDate(LocalDateTime sDateTime, LocalDateTime eDateTime) {
 		
 		return contactOtoRepo
-				.findByCreatedDateBetween(sDateTime, eDateTime)
+				.findByCreatedDateBetweenOrderByStatusCodeDescCreatedDateDesc(sDateTime, eDateTime)
 				.stream()
 				.map(ContactOtoResponse::new)
 				.collect(Collectors.toList());
