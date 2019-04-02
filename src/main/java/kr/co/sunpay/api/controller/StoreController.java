@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +15,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.swagger.annotations.ApiOperation;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
+import kr.co.sunpay.api.model.MemberRequest;
+import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.service.GroupService;
@@ -120,7 +125,7 @@ public class StoreController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping("")
+	@PostMapping("/old")
 	@ApiOperation(value="상점 생성", notes="본사 소속으로만 생성 가능")
 	public ResponseEntity<Object> createStore(@RequestBody Store store) throws Exception {
 		
@@ -130,6 +135,23 @@ public class StoreController {
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/" + storeOwner.getUid() + "/{uid}")
 				.buildAndExpand(newStore.getUid()).toUri();
 		
+		return ResponseEntity.created(location).build();
+	}
+	
+	/**
+	 * StoreRequest 로 상점 생성
+	 * 
+	 * @param storeRequest
+	 * @return
+	 */
+	@RequestMapping(value="", method=RequestMethod.POST)
+	@ApiOperation(value = "본사소속 상점 등록", notes = "")
+	public ResponseEntity<Object> regist(@RequestBody @Valid StoreRequest storeRequest) {
+
+		Store store = storeService.regist(storeRequest);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{memUid}/{uid}")
+				.buildAndExpand(store.getMembers().get(0).getUid(), store.getUid()).toUri();
+
 		return ResponseEntity.created(location).build();
 	}
 	

@@ -35,6 +35,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @SQLDelete(sql = "UPDATE SP_STORES SET DELETED=1 WHERE UID=?")
 @ToString
 public class Store extends BaseEntity {
+	
+	@Column(name="ACTIVATE", columnDefinition="BIT(1)", insertable=false)
+	private Boolean activate;
 
 	@ApiModelProperty(notes="사업자 종류(CODES.GROUP_NM='BIZ_TYPE')")
 	@Column(name="BIZ_TYPE_CD", length=20)
@@ -213,7 +216,51 @@ public class Store extends BaseEntity {
 	private int groupUid;
 	
 	public Store() {}
-
+	
+	public Store(String bizOwner, String bizOwnerRegiNo, String bizNo, String bizTypeCode, String bizName, String bizZipcode, String bizAddressBasic,
+		String bizAddressDetail, String bizMail, String bizContact, String bizStatus, String bizIndustry, String storeUrl, Boolean suretyInsurance,
+		Integer suretyInsuranceAmt, String depositNo, int minDeposit, int maxInstallmentLimit, Integer minPaymentAmt, String bankCode, String bankAccountNo,
+		String bankAccountName, Integer paymentLimitOnce, Integer paymentLimitDaily, Integer paymentLimitMonthly, Integer paymentLimitQuarterly,
+		Integer paymentLimitAnnual, Double feePg, Double feeHead, Double feeBranch, Double feeAgency, Integer transFeePg, Integer transFeeHead, Integer transFeeBranch,
+		Integer transFeeAgency, Integer membershipFee) {
+		
+		this.bizOwner = bizOwner;
+		this.bizOwnerRegiNo = bizOwnerRegiNo;
+		this.bizNo = bizNo;
+		this.bizTypeCode = bizTypeCode;
+		this.bizName = bizName;
+		this.bizAddressBasic = bizAddressBasic;
+		this.bizAddressDetail = bizAddressDetail;
+		this.bizMail = bizMail;
+		this.bizContact = bizContact;
+		this.bizStatus = bizStatus;
+		this.bizIndustry = bizIndustry;
+		this.storeUrl = storeUrl;
+		this.suretyInsurance = suretyInsurance;
+		this.suretyInsuranceAmt = suretyInsuranceAmt;
+		this.depositNo = depositNo;
+		this.minDeposit = minDeposit;
+		this.maxInstallmentLimit = maxInstallmentLimit;
+		this.minPaymentAmt = minPaymentAmt;
+		this.bankCode = bankCode;
+		this.bankAccountNo = bankAccountNo;
+		this.bankAccountName = bankAccountName;
+		this.paymentLimitOnce = paymentLimitOnce;
+		this.paymentLimitDaily = paymentLimitDaily;
+		this.paymentLimitMonthly = paymentLimitMonthly;
+		this.paymentLimitQuarterly = paymentLimitQuarterly;
+		this.paymentLimitAnnual = paymentLimitAnnual;
+		this.feePg = feePg;
+		this.feeHead = feeHead;
+		this.feeBranch = feeBranch;
+		this.feeAgency = feeAgency;
+		this.transFeePg = transFeePg;
+		this.transFeeHead = transFeeHead;
+		this.transFeeBranch = transFeeBranch;
+		this.transFeeAgency = transFeeAgency;
+		this.membershipFee = membershipFee;
+	}
+	
 	public Store hideFee() {
 		
 		setFeePg(getFeePg() + getFeeHead() + getFeeBranch() + getFeeAgency());
@@ -233,6 +280,7 @@ public class Store extends BaseEntity {
 	 * 현재 활성화된 상점ID
 	 * @return
 	 */
+	@ApiIgnore
 	public StoreId getActivatedId() {
 		
 		List<StoreId> ids = getStoreIds();

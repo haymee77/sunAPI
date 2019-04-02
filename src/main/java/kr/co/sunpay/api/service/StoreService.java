@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +20,8 @@ import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
+import kr.co.sunpay.api.model.MemberRequest;
+import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.util.Sunpay;
@@ -44,6 +49,10 @@ public class StoreService extends MemberService {
 
 	public static final String SERVICE_TYPE_INSTANT = "INSTANT";
 	public static final String SERVICE_TYPE_D2 = "D2";
+	
+	public static final String BIZ_TYPE_NONE = "NONE";
+	public static final String BIZ_TYPE_CORPORATION = "CORPORATION";
+	public static final String BIZ_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
 	/**
 	 * 상점 데이터 검사기
@@ -78,6 +87,59 @@ public class StoreService extends MemberService {
 			throw new IllegalArgumentException("Minimum depoist required.");
 		}
 
+		return true;
+	}
+	
+	/**
+	 * 상점 등록 시 담당자 정보 검사
+	 * @param owner
+	 * @return
+	 */
+	public boolean validatorOwner(Member owner) {
+		
+		// 권한 검사
+		if (Sunpay.isEmpty(owner.getRoles()) || !hasRole(owner, ROLE_STORE) || !hasRole(owner, ROLE_OWNER)
+				|| !hasRole(owner, ROLE_MANAGER)) {
+			throw new IllegalArgumentException("담당자 필수 권한이 누락되었습니다.");
+		}
+		
+		// 중복검사 - 아이디, 이메일, TODO:모바일
+		if (hasMember(owner.getId())) {
+			throw new DuplicateKeyException("담당자 아이디가 이미 사용중입니다.");
+		}
+		
+		if (countMail(owner.getEmail()) > 0) {
+			throw new DuplicateKeyException("담당자 이메일이 이미 사용중입니다.");
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * 상점 등록 시 사업자 정보 검사
+	 * @param store
+	 * @return
+	 */
+	public boolean validatorBiz(Store store) {
+		
+		// 비사업자 데이터 체크
+		if (store.getBizTypeCode().equals(BIZ_TYPE_NONE)) {
+			
+		// 개인사업자 데이터 체크
+		} else if (store.getBizTypeCode().equals(BIZ_TYPE_INDIVIDUAL)) {
+			
+			if (Sunpay.isEmpty(store.getBizNo())) {
+				throw new IllegalArgumentException("사업자등록번호가 누락되었습니다.");
+			}
+			
+		// 법인사업자 데이터 체크
+		} else if (store.getBizTypeCode().equals(BIZ_TYPE_CORPORATION)) {
+			
+			if (Sunpay.isEmpty(store.getBizNo())) {
+				throw new IllegalArgumentException("사업자등록번호가 누락되었습니다.");
+			}
+		}
+		
 		return true;
 	}
 
@@ -185,6 +247,113 @@ public class StoreService extends MemberService {
 
 		return false;
 	}
+	
+	/**
+	 * StoreRequest 받아서 Store Entity 생성
+	 * @param storeReq
+	 * @return
+	 */
+	@Transactional
+	public Store regist(StoreRequest storeReq) {
+		
+		Store store = storeReq.toEntity();
+		
+		// 사업자 구분에 따른 데이터 체크
+		validatorBiz(store);
+		
+		// 상위업체 정보 설정
+		Group group = groupService.getGroup(storeReq.getGroupUid());
+		
+		if (Sunpay.isEmpty(group)) {
+			throw new IllegalArgumentException("상위업체 정보를 찾을 수 없습니다.");
+		}
+		
+		store.setGroup(groupService.getGroup(storeReq.getGroupUid()));
+		
+		// 담당자 정보 설정
+		Member owner = storeReq.getMemberReq().toEntity(store);
+		
+		// 담당자 정보 체크
+		validatorOwner(owner);
+		
+		// 담당자 비밀번호 암호화
+		owner.setPassword(pwEncoder.encode(owner.getPassword()));
+		
+		List<Member> members = new ArrayList<Member>();
+		members.add(owner);
+		
+		store.setMembers(members);
+		
+		// 상위업체별 수수료 정보 설정
+		registFee(store);
+		
+		// 예치금 번호 없으면 랜덤으로 생성, 있으면 중복검사
+		if (Sunpay.isEmpty(store.getDepositNo())) {
+			store.setDepositNo(createDepositNo());
+		} else if (storeRepo.findByDepositNo(store.getDepositNo()).isPresent()) {
+			throw new DuplicateKeyException("예치금 입금번호가 이미 사용중입니다.");
+		}
+		
+		return storeRepo.save(store);
+	}
+	
+	/**
+	 * 상점 등록 시 상위업체별 수수료 설정
+	 * @param store
+	 */
+	public void registFee(Store store) {
+		
+		Group group = store.getGroup();
+		
+		// PG 수수료는 본사 설정값에서 가져옴
+		store.setFeePg(groupService.getConfig().getFeePg());
+		store.setTransFeePg(groupService.getConfig().getTransFeePg());
+
+		switch (group.getRoleCode()) {
+		case GroupService.ROLE_HEAD:
+			if (!(store.getFeeHead() > 0)) {
+				throw new IllegalArgumentException("수수료 미입력");
+			}
+
+			if (!(store.getTransFeeHead() > 0)) {
+				throw new IllegalArgumentException("순간정산수수료 미입력");
+			}
+
+			store.setFeeBranch(0.0);
+			store.setFeeAgency(0.0);
+			store.setTransFeeBranch(0);
+			store.setTransFeeAgency(0);
+			break;
+
+		case GroupService.ROLE_BRANCH:
+			if (!(store.getFeeBranch() > 0)) {
+				throw new IllegalArgumentException("수수료 미입력");
+			}
+			if (!(store.getTransFeeBranch() > 0)) {
+				throw new IllegalArgumentException("순간정산수수료 미입력");
+			}
+
+			store.setFeeHead(group.getFeeHead());
+			store.setFeeAgency(0.0);
+			store.setTransFeeHead(group.getTransFeeHead());
+			store.setTransFeeAgency(0);
+			break;
+
+		case GroupService.ROLE_AGENCY:
+			if (!(store.getFeeAgency() > 0)) {
+				throw new IllegalArgumentException("수수료 미입력");
+			}
+			if (!(store.getTransFeeAgency() > 0)) {
+				throw new IllegalArgumentException("순간정산수수료 미입력");
+			}
+
+			store.setFeeHead(group.getFeeHead());
+			store.setFeeBranch(group.getFeeBranch());
+			store.setTransFeeHead(group.getTransFeeHead());
+			store.setTransFeeBranch(group.getTransFeeBranch());
+			break;
+		}
+	}
 
 	/**
 	 * memberUid 하위 소속으로 상점 생성
@@ -239,7 +408,7 @@ public class StoreService extends MemberService {
 		if (!hasRole(owner, ROLE_MANAGER) || !hasRole(owner, ROLE_OWNER)) {
 			throw new IllegalArgumentException("Store owner member should have OWNER and MANAGER roles.");
 		}
-		members.add(store.getMembers().get(0));
+		members.add(owner);
 		store.setMembers(members);
 
 		// <- 상점 생성 시 수수료 데이터 셋팅 시작
