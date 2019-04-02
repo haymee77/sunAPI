@@ -21,9 +21,11 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.annotations.ApiModelProperty;
+import kr.co.sunpay.api.model.MemberRequest;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Getter
 @Setter
@@ -52,7 +54,7 @@ public class Store extends BaseEntity {
 	
 	@ApiModelProperty(notes="취소예치금 금액")
 	@Column(name="DEPOSIT")
-	private int deposit;
+	private Integer deposit = 0;
 	
 	@ApiModelProperty(notes="최소취소예치금")
 	@Column(name="MIN_DEPOSIT")
@@ -185,7 +187,7 @@ public class Store extends BaseEntity {
 	@JoinColumn(name="STORE_UID_FK")
 	private List<StoreId> storeIds;
 	
-	@ApiModelProperty(notes="소속 그룹")
+	@ApiModelProperty(notes="소속 그룹", hidden=true)
 	@JsonBackReference(value="group-stores")
 	@ManyToOne
 	@JoinColumn(name="GROUP_UID_FK")
@@ -195,7 +197,12 @@ public class Store extends BaseEntity {
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="store")
 	@Fetch(FetchMode.SUBSELECT)
 	@OrderBy("UID DESC")
+	@ApiModelProperty(hidden=true)
 	private List<Member> members;
+	
+	@ApiModelProperty(notes="[Transient] 담당자")
+	@Transient
+	private MemberRequest memberReq;
 	
 	@ApiModelProperty(notes="*[READ_ONLY]* 소속 그룹의 상호명")
 	@Transient
@@ -206,53 +213,6 @@ public class Store extends BaseEntity {
 	private int groupUid;
 	
 	public Store() {}
-	
-	public Store(String bizTypeCode, String bizNo, String bizName, String bizOwner, String bizOwnerRegiNo,
-			String bizZipcode, String bizAddressBasic, String bizAddressDetail, String bizContact, String bizMail,
-			String bizIndustry, String bizStatus, String storeUrl, Boolean suretyInsurance, Integer suretyInsuranceAmt,
-			String bankCode, String bankAccountNo, String bankAccountName, Integer maxInstallmentLimit,
-			Integer minPaymentAmt, Integer paymentLimitOnce, Integer paymentLimitDaily, Integer paymentLimitMonthly,
-			Double feePg, Double feeHead, Double feeBranch, Double feeAgency, Integer transFeePg, Integer transFeeHead,
-			Integer transFeeBranch, Integer transFeeAgency, Integer minDeposit, String depositNo, Integer membershipFee,
-			Group group) {
-		
-		// 사업자정보 셋팅
-		this.bizTypeCode = bizTypeCode;
-		this.bizNo = bizNo;
-		this.bizName = bizName;
-		this.bizOwner = bizOwner;
-		this.bizOwnerRegiNo = bizOwnerRegiNo;
-		this.bizZipcode = bizZipcode;
-		this.bizAddressBasic = bizAddressBasic;
-		this.bizAddressDetail = bizAddressDetail;
-		this.bizContact = bizContact;
-		this.bizMail = bizMail;
-		this.bizIndustry = bizIndustry;
-		this.bizStatus = bizStatus;
-		this.storeUrl = storeUrl;
-		this.suretyInsurance = suretyInsurance;
-		this.suretyInsuranceAmt = suretyInsuranceAmt;
-		this.bankCode = bankCode;
-		this.bankAccountNo = bankAccountNo;
-		this.bankAccountName = bankAccountName;
-		this.maxInstallmentLimit = maxInstallmentLimit;
-		this.minPaymentAmt = minPaymentAmt;
-		this.paymentLimitOnce = paymentLimitOnce;
-		this.paymentLimitDaily = paymentLimitDaily;
-		this.paymentLimitMonthly = paymentLimitMonthly;
-		this.feePg = feePg;
-		this.feeHead = feeHead;
-		this.feeBranch = feeBranch;
-		this.feeAgency = feeAgency;
-		this.transFeePg = transFeePg;
-		this.transFeeHead = transFeeHead;
-		this.transFeeBranch = transFeeBranch;
-		this.transFeeAgency = transFeeAgency;
-		this.minDeposit = minDeposit;
-		this.depositNo = depositNo;
-		this.membershipFee = membershipFee;
-		this.group = group;
-	}
 
 	public Store hideFee() {
 		

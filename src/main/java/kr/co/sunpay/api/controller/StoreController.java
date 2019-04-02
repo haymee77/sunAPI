@@ -20,7 +20,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import io.swagger.annotations.ApiOperation;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
-import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.service.GroupService;
@@ -121,7 +120,7 @@ public class StoreController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping("/old")
+	@PostMapping("")
 	@ApiOperation(value="상점 생성", notes="본사 소속으로만 생성 가능")
 	public ResponseEntity<Object> createStore(@RequestBody Store store) throws Exception {
 		
@@ -130,28 +129,6 @@ public class StoreController {
 		Member storeOwner = newStore.getMembers().get(0);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/" + storeOwner.getUid() + "/{uid}")
 				.buildAndExpand(newStore.getUid()).toUri();
-		
-		return ResponseEntity.created(location).build();
-	}
-	
-	/**
-	 * StoreRequest 받아서 상점 등록(본사소속)
-	 * @param storeRequest
-	 * @return
-	 * @throws Exception
-	 */
-	@PostMapping("")
-	@ApiOperation(value="상점 등록", notes="본사 소속 상점 등록")
-	public ResponseEntity<Object> regist(@RequestBody StoreRequest storeRequest) throws Exception {
-		
-		Store newStore = storeService.regist(storeRequest);
-		
-		if (Sunpay.isEmpty(newStore)) {
-			throw new IllegalArgumentException("상점 생성 오류, 관리자 문의바람");
-		}
-		
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{memUid}/{uid}")
-				.buildAndExpand(newStore.getMembers().get(0), newStore.getUid()).toUri();
 		
 		return ResponseEntity.created(location).build();
 	}

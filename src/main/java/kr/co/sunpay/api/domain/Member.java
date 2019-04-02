@@ -96,4 +96,15 @@ public class Member extends BaseEntity {
 		this.roles = roles;
 		this.group = group;
 	}
+	
+	public Member(String id, String password, String name, String email, String mobile, Boolean activate, Boolean agreeEventMail, List<MemberRole> roles) {
+		this.id = id;
+		this.password = password;
+		this.name = name;
+		this.email = email;
+		this.mobile = mobile;
+		this.activate = activate;
+		this.agreeEventMail = agreeEventMail;
+		this.roles = roles;
+	}
 }
