@@ -16,7 +16,7 @@ import lombok.Setter;
 public class StoreRequest {
 
 	@NotNull
-	@ApiModelProperty(notes="소속 그룹 UID", hidden=true)
+	@ApiModelProperty(notes="소속 그룹 UID")
 	private int groupUid;
 	
 	// 상점 정보
@@ -28,6 +28,7 @@ public class StoreRequest {
 	private String bizOwnerRegiNo;
 	
 	@ApiModelProperty(notes="사업자 등록번호")
+	@Pattern(regexp = "[0-9]{10}", message = "사업자 등록번호 형식이 맞지 않습니다.")
 	private String bizNo;
 	
 	@NotBlank(message="사업자 구분을 선택해주세요.")

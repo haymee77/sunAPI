@@ -54,6 +54,15 @@ public class GroupService {
 	}
 	
 	/**
+	 * 본사 그룹을 리턴한다
+	 * 
+	 * @return
+	 */
+	public Group findHead() {
+		return groupRepo.findByRoleCode(ROLE_HEAD).orElse(null);
+	}
+	
+	/**
 	 * 하위 모든 그룹 리스트 반환(leaf 그룹까지 포함)
 	 * @param group
 	 * @param isRoot
