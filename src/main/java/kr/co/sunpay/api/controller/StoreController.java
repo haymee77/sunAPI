@@ -16,14 +16,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.swagger.annotations.ApiOperation;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
-import kr.co.sunpay.api.model.MemberRequest;
 import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
@@ -115,25 +113,6 @@ public class StoreController {
 		Store newStore = storeService.create(store, memberUid);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{uid}")
 						.buildAndExpand(newStore.getUid()).toUri();
-		
-		return ResponseEntity.created(location).build();
-	}
-	
-	/**
-	 * 상점 생성
-	 * @param store
-	 * @return
-	 * @throws Exception
-	 */
-	@PostMapping("/old")
-	@ApiOperation(value="상점 생성", notes="본사 소속으로만 생성 가능")
-	public ResponseEntity<Object> createStore(@RequestBody Store store) throws Exception {
-		
-		store.setGroup(groupRepo.findByRoleCode(GroupService.ROLE_HEAD).get());
-		Store newStore = storeService.create(store);
-		Member storeOwner = newStore.getMembers().get(0);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/" + storeOwner.getUid() + "/{uid}")
-				.buildAndExpand(newStore.getUid()).toUri();
 		
 		return ResponseEntity.created(location).build();
 	}

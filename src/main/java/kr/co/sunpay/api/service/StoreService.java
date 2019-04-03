@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.transaction.Transactional;
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -20,7 +19,6 @@ import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
-import kr.co.sunpay.api.model.MemberRequest;
 import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
