@@ -209,7 +209,7 @@ public class GroupService {
 			throw new BadCredentialsException("권한이 없습니다.(Need MANAGER qualification.)");
 		
 		// 그룹 정보 Validation 검사
-		Group parent;
+		Group parent = new Group();
 		try {
 			parent = getGroup(group.getParentGroupUid());
 		} catch (Exception e) {

@@ -37,6 +37,9 @@ public class Store extends BaseEntity {
 	
 	@Column(name="ACTIVATE", columnDefinition="BIT(1)", insertable=false)
 	private Boolean activate;
+	
+	@Column(name="STATE_CD", length=25)
+	private String stateCode;
 
 	@Column(name="BIZ_TYPE_CD", length=20)
 	private String bizTypeCode;

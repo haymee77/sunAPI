@@ -22,6 +22,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import io.swagger.annotations.ApiOperation;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
+import kr.co.sunpay.api.model.MemberResponse;
 import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.GroupRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
@@ -174,5 +175,17 @@ public class StoreController {
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
 
 		return ResponseEntity.created(location).build();
+	}
+	
+	@GetMapping("/owner/{storeUid}")
+	@ApiOperation(value = "상점 담당자 정보 반환", notes = "")
+	public MemberResponse findOwner(@PathVariable("storeUid") int storeUid) {
+		
+		Store store = storeService.getStore(storeUid);
+		if (!Sunpay.isEmpty(store)) {
+			return storeService.findOwner(store);
+		}
+		
+		return null;
 	}
 }

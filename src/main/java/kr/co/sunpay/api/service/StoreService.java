@@ -19,6 +19,7 @@ import kr.co.sunpay.api.domain.Group;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
+import kr.co.sunpay.api.model.MemberResponse;
 import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
@@ -51,7 +52,27 @@ public class StoreService extends MemberService {
 	public static final String BIZ_TYPE_NONE = "NONE";
 	public static final String BIZ_TYPE_CORPORATION = "CORPORATION";
 	public static final String BIZ_TYPE_INDIVIDUAL = "INDIVIDUAL";
+	
+	public static final String STATE_NEW = "NEW";
+	public static final String STATE_UPLOADED = "UPLOADED";
+	public static final String STATE_DOCUMENT_PASS = "DOCUMENT_PASS";
+	public static final String STATE_PASS = "PASS";
+	public static final String STATE_REJECTED = "REJECTED";
+	public static final String STATE_REVIEW = "REVIEW";
 
+	public MemberResponse findOwner(Store store) {
+		
+		Iterator<Member> members = store.getMembers().iterator();
+		
+		while (members.hasNext()) {
+			Member owner = members.next();
+			
+			if (hasRole(owner, MemberService.ROLE_OWNER)) return new MemberResponse(owner);
+		}
+		
+		return null;
+	}
+	
 	/**
 	 * 상점 데이터 검사기
 	 * 
@@ -254,6 +275,9 @@ public class StoreService extends MemberService {
 	public Store regist(StoreRequest storeReq) {
 
 		Store store = storeReq.toEntity();
+		
+		// 상점 생싱 시 상태값 NEW로 초기화
+		store.setStateCode(STATE_NEW);
 
 		// 사업자 구분에 따른 데이터 체크
 		validatorBiz(store);
