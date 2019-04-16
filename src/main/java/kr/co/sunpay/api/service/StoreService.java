@@ -52,27 +52,28 @@ public class StoreService extends MemberService {
 	public static final String BIZ_TYPE_NONE = "NONE";
 	public static final String BIZ_TYPE_CORPORATION = "CORPORATION";
 	public static final String BIZ_TYPE_INDIVIDUAL = "INDIVIDUAL";
-	
-	public static final String STATE_NEW = "NEW";	// 상점 등록 상태
-	public static final String STATE_UPLOADED = "UPLOADED";	// 구비서류 업로드 완료 상태
-	public static final String STATE_DOCUMENT_PASS = "DOCUMENT_PASS";	// 구비서류 통과 된 상태
-	public static final String STATE_PASS = "PASS";	// 최종 통과된 상태
-	public static final String STATE_REJECTED = "REJECTED";	// 거부됨
-	public static final String STATE_REVIEW = "REVIEW";	// 재심사
+
+	public static final String STATE_NEW = "NEW"; // 상점 등록 상태
+	public static final String STATE_UPLOADED = "UPLOADED"; // 구비서류 업로드 완료 상태
+	public static final String STATE_DOCUMENT_PASS = "DOCUMENT_PASS"; // 구비서류 통과 된 상태
+	public static final String STATE_PASS = "PASS"; // 최종 통과된 상태
+	public static final String STATE_REJECTED = "REJECTED"; // 거부됨
+	public static final String STATE_REVIEW = "REVIEW"; // 재심사
 
 	public MemberResponse findOwner(Store store) {
-		
+
 		Iterator<Member> members = store.getMembers().iterator();
-		
+
 		while (members.hasNext()) {
 			Member owner = members.next();
-			
-			if (hasRole(owner, MemberService.ROLE_OWNER)) return new MemberResponse(owner);
+
+			if (hasRole(owner, MemberService.ROLE_OWNER))
+				return new MemberResponse(owner);
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * 상점 데이터 검사기
 	 * 
@@ -275,7 +276,7 @@ public class StoreService extends MemberService {
 	public Store regist(StoreRequest storeReq) {
 
 		Store store = storeReq.toEntity();
-		
+
 		// 상점 생싱 시 상태값 NEW로 초기화
 //		store.setStateCode(STATE_NEW);
 		store.setStateCode(STATE_PASS);
@@ -707,6 +708,9 @@ public class StoreService extends MemberService {
 			StoreId nId = new StoreId();
 			nId.setId(id.getId());
 			nId.setServiceTypeCode(id.getServiceTypeCode());
+			
+			// 상점ID 생성 시 비활성화로 등록함
+			nId.setActivated(false);
 			nIds.add(nId);
 		}
 
@@ -800,11 +804,9 @@ public class StoreService extends MemberService {
 
 		// 순간정산인 경우 리턴함
 		StoreId nowId = store.getActivatedId();
-		
-		if (!Sunpay.isEmpty(nowId)) {
-			if (!isEmpty(nowId) && nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
-				return true;
-			}
+
+		if (!isEmpty(nowId) && nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
+			return true;
 		}
 
 		boolean isInstantOn = false;
@@ -844,11 +846,9 @@ public class StoreService extends MemberService {
 
 		// 순간정산이 아닌경우 리턴함
 		StoreId nowId = store.getActivatedId();
-		
-		if (!Sunpay.isEmpty(nowId)) {
-			if (!isEmpty(nowId) && !nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
-				return true;
-			}
+
+		if (!isEmpty(nowId) && !nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
+			return true;
 		}
 
 		boolean isInstantOff = false;
