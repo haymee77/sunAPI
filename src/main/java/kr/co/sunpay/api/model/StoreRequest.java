@@ -56,7 +56,7 @@ public class StoreRequest {
 
 	@ApiModelProperty(notes="사업자 연락처")
 	@NotBlank(message="사업장 연락처를 입력해주세요.")
-	@Pattern(regexp = "[0-9]{10,11}", message = "10~11자리의 숫자만 입력가능합니다")
+	@Pattern(regexp = "[0-9]{8,12}", message = "8~12자리의 숫자만 입력가능합니다")
 	private String bizContact;
 	
 	@ApiModelProperty(notes="업태")
