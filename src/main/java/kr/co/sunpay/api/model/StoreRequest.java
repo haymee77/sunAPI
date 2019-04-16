@@ -35,7 +35,6 @@ public class StoreRequest {
 	private String bizTypeCode;
 	
 	@ApiModelProperty(notes="사업자 상호명")
-	@NotBlank(message="상점명을 입력해주세요.")
 	private String bizName;
 	
 	@ApiModelProperty(notes="사업자 우편번호")
@@ -50,7 +49,6 @@ public class StoreRequest {
 	@NotBlank(message="사업장 상세 주소를 입력해주세요.")
 	private String bizAddressDetail;
 	
-	@NotBlank(message="사업장 이메일을 입력해주세요.")
 	@Email(message="사업장 이메일이 메일 형식에 맞지 않습니다.")
 	private String bizMail;
 

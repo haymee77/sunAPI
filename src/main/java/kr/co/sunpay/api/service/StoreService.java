@@ -53,12 +53,12 @@ public class StoreService extends MemberService {
 	public static final String BIZ_TYPE_CORPORATION = "CORPORATION";
 	public static final String BIZ_TYPE_INDIVIDUAL = "INDIVIDUAL";
 	
-	public static final String STATE_NEW = "NEW";
-	public static final String STATE_UPLOADED = "UPLOADED";
-	public static final String STATE_DOCUMENT_PASS = "DOCUMENT_PASS";
-	public static final String STATE_PASS = "PASS";
-	public static final String STATE_REJECTED = "REJECTED";
-	public static final String STATE_REVIEW = "REVIEW";
+	public static final String STATE_NEW = "NEW";	// 상점 등록 상태
+	public static final String STATE_UPLOADED = "UPLOADED";	// 구비서류 업로드 완료 상태
+	public static final String STATE_DOCUMENT_PASS = "DOCUMENT_PASS";	// 구비서류 통과 된 상태
+	public static final String STATE_PASS = "PASS";	// 최종 통과된 상태
+	public static final String STATE_REJECTED = "REJECTED";	// 거부됨
+	public static final String STATE_REVIEW = "REVIEW";	// 재심사
 
 	public MemberResponse findOwner(Store store) {
 		
@@ -277,7 +277,8 @@ public class StoreService extends MemberService {
 		Store store = storeReq.toEntity();
 		
 		// 상점 생싱 시 상태값 NEW로 초기화
-		store.setStateCode(STATE_NEW);
+//		store.setStateCode(STATE_NEW);
+		store.setStateCode(STATE_PASS);
 
 		// 사업자 구분에 따른 데이터 체크
 		validatorBiz(store);
