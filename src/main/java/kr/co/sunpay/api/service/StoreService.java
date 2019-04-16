@@ -800,9 +800,11 @@ public class StoreService extends MemberService {
 
 		// 순간정산인 경우 리턴함
 		StoreId nowId = store.getActivatedId();
-
-		if (!isEmpty(nowId) && nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
-			return true;
+		
+		if (!Sunpay.isEmpty(nowId)) {
+			if (!isEmpty(nowId) && nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
+				return true;
+			}
 		}
 
 		boolean isInstantOn = false;
@@ -842,9 +844,11 @@ public class StoreService extends MemberService {
 
 		// 순간정산이 아닌경우 리턴함
 		StoreId nowId = store.getActivatedId();
-
-		if (!isEmpty(nowId) && !nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
-			return true;
+		
+		if (!Sunpay.isEmpty(nowId)) {
+			if (!isEmpty(nowId) && !nowId.getServiceTypeCode().equals(SERVICE_TYPE_INSTANT)) {
+				return true;
+			}
 		}
 
 		boolean isInstantOff = false;
