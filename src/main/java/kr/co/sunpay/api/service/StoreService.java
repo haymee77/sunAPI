@@ -278,8 +278,8 @@ public class StoreService extends MemberService {
 		Store store = storeReq.toEntity();
 
 		// 상점 생싱 시 상태값 NEW로 초기화
-//		store.setStateCode(STATE_NEW);
-		store.setStateCode(STATE_PASS);
+		store.setStateCode(STATE_NEW);
+//		store.setStateCode(STATE_PASS);
 
 		// 사업자 구분에 따른 데이터 체크
 		validatorBiz(store);
