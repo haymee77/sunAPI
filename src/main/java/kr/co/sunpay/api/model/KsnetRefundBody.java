@@ -13,7 +13,7 @@ import lombok.ToString;
 @ApiModel(description="결제 취소 요청 시 Parameters")
 public class KsnetRefundBody {
 
-	@ApiModelProperty(notes="상점 ID", example="2999199999", required=true)
+	@ApiModelProperty(notes="상점 ID", example="2003300001", required=true)
 	private String storeid;
 	
 	private String storepasswd;
