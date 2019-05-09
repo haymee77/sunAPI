@@ -108,4 +108,4 @@ public class Example {
 		System.out.println("-- RESULT");
 		System.out.println(oPayResult.get().getAmt());
 	}
-}
+} 
