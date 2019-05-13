@@ -40,8 +40,8 @@ public class KsnetService {
 	KsnetPayResultRepository ksnetPayResultRepo;
 
 	// 소켓통신(KSPAY 소켓 설치된 서버의 IP, PORT) 
-	public static final String IPG_IP_ADDR = "210.181.28.137";
-	public static final int IPG_PORT = 21001;
+	public static final String IPG_IP_ADDR = "13.209.200.120";
+	public static final int IPG_PORT = 29991;
 
 	public static final String KSPAY_AUTHTY_CREDIT = "1010";
 	public static final String KSPAY_AUTHTY_BANK_CANCEL = "2010";
