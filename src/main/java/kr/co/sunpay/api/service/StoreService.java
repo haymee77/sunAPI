@@ -181,19 +181,49 @@ public class StoreService extends MemberService {
 
 		// 상점 수정 정보 검사
 		updateValidator(store);
+		
+		//기본 추가(ko heon woo)
+		updatedStore.setBizTypeCode(store.getBizTypeCode());
+		updatedStore.setMaxInstallmentLimit(store.getMaxInstallmentLimit());
+		updatedStore.setStoreUrl(store.getStoreUrl());
+		updatedStore.setSuretyInsurance(store.getSuretyInsurance());
+		updatedStore.setSuretyInsuranceAmt(store.getSuretyInsuranceAmt());
+		updatedStore.setMinPaymentAmt(store.getMinPaymentAmt());
+		updatedStore.setMinDeposit(store.getMinDeposit());		
+		
+		//계좌 추가(ko heon woo)
+		updatedStore.setBankAccountName(store.getBankAccountName());	
+		updatedStore.setBankAccountNo(store.getBankAccountNo());	
+		updatedStore.setBankCode(store.getBankCode());	
+		
+		//결제한도 추가(ko heon woo)
+		updatedStore.setPaymentLimitOnce(store.getPaymentLimitOnce());	
+		updatedStore.setPaymentLimitDaily(store.getPaymentLimitDaily());	
+		updatedStore.setPaymentLimitMonthly(store.getPaymentLimitMonthly());	
+		updatedStore.setPaymentLimitQuarterly(store.getPaymentLimitQuarterly());	
+		updatedStore.setPaymentLimitAnnual(store.getPaymentLimitAnnual());	
 
 		// 수정 가능한 항목만 수정함
 		// 사업자정보
 		updatedStore.setBizOwner(store.getBizOwner());
-		updatedStore.setBizOwnerRegiNo(store.getBizOwnerRegiNo());
+		updatedStore.setBizNo(store.getBizNo()); // 사업자정보 추가(ko heon woo)
 		updatedStore.setBizName(store.getBizName());
+		updatedStore.setBizOwnerRegiNo(store.getBizOwnerRegiNo());
+		updatedStore.setBizZipcode(store.getBizZipcode()); // 사업자정보 추가(ko heon woo)
 		updatedStore.setBizAddressBasic(store.getBizAddressBasic());
 		updatedStore.setBizAddressDetail(store.getBizAddressDetail());
 		updatedStore.setBizContact(store.getBizContact());
+		updatedStore.setBizMail(store.getBizMail()); // 사업자정보 추가(ko heon woo)
+		updatedStore.setBizStatus(store.getBizStatus()); // 사업자정보 추가(ko heon woo)	 	
+		updatedStore.setBizIndustry(store.getBizIndustry()); // 사업자정보 추가(ko heon woo)
 
-		// 가입비
-		updatedStore.setMembershipFee(store.getMembershipFee());
-
+		// 가입비(수수료중)
+		updatedStore.setMembershipFee(store.getMembershipFee());			
+		//PG, 순간정산(수수료중)
+		//각각 4가 존재하여야  한다(DB 참조시)?
+		//updatedStore.setPgFee(store.getFeePg());
+		//updatedStore.settransFee(store.gettransFee());
+		
 		storeRepo.save(updatedStore);
 
 		return updatedStore;
