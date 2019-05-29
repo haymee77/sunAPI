@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
+//import java.util.concurrent.ThreadLocalRandom;
 
 import javax.transaction.Transactional;
 
@@ -24,7 +25,6 @@ import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.util.Sunpay;
-
 import lombok.extern.java.Log;
 
 @Log
@@ -544,16 +544,39 @@ public class StoreService extends MemberService {
 
 		return storeRepo.save(newStore);
 	}
-
+	
 	public String createDepositNo() {
-		int randNo = ThreadLocalRandom.current().nextInt(100000, 999999 + 1);
-		String depositNo = String.valueOf(randNo);
+		
+		Random rnd = new Random();
 
-		if (storeRepo.findByDepositNo(depositNo).isPresent()) {
+		StringBuffer randNo = new StringBuffer();		
+		
+		for(int i=0; i<3; i++) {
+			randNo.append(String.valueOf((char)((int)(rnd.nextInt(26))+97)));
+		}
+		
+		for(int i=0; i<3; i++) {
+			randNo.append((rnd.nextInt(10)));
+		}
+		
+		String depositNo = String.valueOf(randNo);
+		
+		if(storeRepo.findByDepositNo(depositNo).isPresent()) {
 			return createDepositNo();
 		}
-
-		return String.valueOf(randNo);
+		
+		return String.valueOf(randNo);			
+		
+		/*
+		 * int randNo = ThreadLocalRandom.current().nextInt(100000, 999999 + 1); 
+		 * String depositNo = String.valueOf(randNo);
+		 * 
+		 * if (storeRepo.findByDepositNo(depositNo).isPresent()) { return
+		 * createDepositNo(); }
+		 * 
+		 * return String.valueOf(randNo);
+		 */
+		 
 	}
 
 	/**
