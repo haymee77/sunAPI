@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import kr.co.sunpay.api.domain.KsnetPay;
 import kr.co.sunpay.api.domain.KsnetPayResult;
+import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
 import kr.co.sunpay.api.model.DepositService;
 import kr.co.sunpay.api.repository.KsnetPayRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.StoreIdRepository;
+import kr.co.sunpay.api.service.MemberService;
 import kr.co.sunpay.api.service.PushService;
 import kr.co.sunpay.api.service.StoreService;
 import lombok.extern.java.Log;
@@ -45,6 +47,9 @@ public class KsnetWrapperController {
 	
 	@Autowired
 	DepositService depositService;
+	
+	@Autowired
+	MemberService memberService;
 
 	/**
 	 * 결제데이터 받아서 저장 및 KSNet 통신 시작
@@ -62,7 +67,11 @@ public class KsnetWrapperController {
 		// 단 예치금 부족하거나 결제한도 초과 시 일반정산으로 결제
 		
 		// 상점ID로 상점 검색하여 현재 Activated 상태인 상점ID 구함
-		Store store = storeService.getStoreByStoreId(ksnetPay.getSndStoreid());
+		//Store store = storeService.getStoreByStoreId(ksnetPay.getSndStoreid());
+		
+		// ko id
+		Member member= memberService.getMember(ksnetPay.getMemberId());  
+		Store store = storeService.getStoreByStoreMember(member);
 		if (store == null) {
 			model.addAttribute("err", "상점정보를 찾을 수 없습니다. 관리자에게 문의해주시기 바랍니다.[1]");
 			return;
@@ -124,6 +133,11 @@ public class KsnetWrapperController {
 	public String payment(@PathVariable int uid, Model model) {
 		log.info("-- KsnetWrapperController.payment called...");
 		KsnetPay ksnetPay = ksnetPayRepo.findByUid(uid);
+		String realStoreId=ksnetPay.getSndStoreid();
+		String[] idArray = realStoreId.split("_");		
+		String storeidForKsnet=idArray[0];
+		
+		ksnetPay.setSndStoreid(storeidForKsnet);
 		model.addAttribute("order", ksnetPay);
 
 		return "ksnet/payment";

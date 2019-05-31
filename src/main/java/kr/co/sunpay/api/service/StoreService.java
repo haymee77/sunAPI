@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
+//import java.util.concurrent.ThreadLocalRandom;
 
 import javax.transaction.Transactional;
 
@@ -24,7 +25,6 @@ import kr.co.sunpay.api.model.StoreRequest;
 import kr.co.sunpay.api.repository.StoreIdRepository;
 import kr.co.sunpay.api.repository.StoreRepository;
 import kr.co.sunpay.api.util.Sunpay;
-
 import lombok.extern.java.Log;
 
 @Log
@@ -546,14 +546,37 @@ public class StoreService extends MemberService {
 	}
 
 	public String createDepositNo() {
-		int randNo = ThreadLocalRandom.current().nextInt(100000, 999999 + 1);
-		String depositNo = String.valueOf(randNo);
+		
+		Random rnd = new Random();
 
-		if (storeRepo.findByDepositNo(depositNo).isPresent()) {
+		StringBuffer randNo = new StringBuffer();		
+		
+		for(int i=0; i<3; i++) {
+			randNo.append(String.valueOf((char)((int)(rnd.nextInt(26))+97)));
+		}
+		
+		for(int i=0; i<3; i++) {
+			randNo.append((rnd.nextInt(10)));
+		}
+		
+		String depositNo = String.valueOf(randNo);
+		
+		if(storeRepo.findByDepositNo(depositNo).isPresent()) {
 			return createDepositNo();
 		}
-
-		return String.valueOf(randNo);
+		
+		return String.valueOf(randNo);			
+		
+		/*
+		 * int randNo = ThreadLocalRandom.current().nextInt(100000, 999999 + 1); 
+		 * String depositNo = String.valueOf(randNo);
+		 * 
+		 * if (storeRepo.findByDepositNo(depositNo).isPresent()) { return
+		 * createDepositNo(); }
+		 * 
+		 * return String.valueOf(randNo);
+		 */
+		 
 	}
 
 	/**
@@ -640,17 +663,21 @@ public class StoreService extends MemberService {
 
 		// 상점 멤버인 경우 해당 상점만 반환
 		if (hasRole(member, ROLE_STORE)) {
+			//stores.add(member.getStore());
+			stores.clear();
 			stores.add(member.getStore());
-			return stores;
+			//return stores;
 		}
 
 		// 대리점 멤버인 경우 해당 대리점의 상점리스트 반환
 		if (hasRole(member, ROLE_AGENCY)) {
+			stores.clear();
 			stores = member.getGroup().getStores();
 		}
 
 		// 지사 멤버인 경우 해당 지사와 하위 대리점 소속의 상점리스트 반환
 		if (hasRole(member, ROLE_BRANCH)) {
+			stores.clear();
 			stores = getStoresByGroup(member.getGroup());
 		}
 
@@ -660,6 +687,17 @@ public class StoreService extends MemberService {
 		}
 
 		return stores;
+	}
+	public Store getStoreByStoreMember(Member member) {
+		
+		//List<Store> stores = new ArrayList<Store>();
+				
+		// 상점 멤버인 경우 해당 상점만 반환
+		Store store= null;
+		if (hasRole(member, ROLE_STORE)) {
+			store=member.getStore();
+		}		
+		return store;
 	}
 
 	/**

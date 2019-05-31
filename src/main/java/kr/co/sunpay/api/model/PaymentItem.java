@@ -33,4 +33,13 @@ public class PaymentItem {
 	
 	@ApiModelProperty(notes="상점 주문번호")
 	private String orderNo;
+	
+	@ApiModelProperty(notes="소속레벨")
+	private String groupRoleName;
+	
+	@ApiModelProperty(notes="그룹명")
+	private String groupBizName;
+	
+	@ApiModelProperty(notes="상점명")
+	private String storeBizeName;
 }

@@ -4,10 +4,12 @@ package kr.co.sunpay.api.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -56,5 +58,8 @@ public class KsnetPay extends BaseEntity {
 	
 	@Column(name="REPLY", length=200)
 	private String sndReply;
-	
+
+	// ko id
+	@Transient
+	private String memberId;	
 }

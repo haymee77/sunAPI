@@ -569,7 +569,15 @@ public class KsnetService {
 		} 
 
 		// KSPay 통신 시작
-		result = sendKSPay(refund);
+		String realStoreId=refund.getStoreid();
+		String[] idArray = realStoreId.split("_");		
+		String storeidForKsnet=idArray[0];
+		refund.setStoreid(storeidForKsnet);
+		//KSNet 에 공식 상점 아이디를 준후 전체로 되돌린다.  ko id
+		result = sendKSPay(refund);		
+		
+		refund.setStoreid(realStoreId);
+		
 		// KSPay 통신 오류 시
 		if (!result.getRStatus().equals("O")) {
 			

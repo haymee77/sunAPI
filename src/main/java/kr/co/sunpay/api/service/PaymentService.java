@@ -17,6 +17,12 @@ public class PaymentService {
 	@Autowired
 	KsnetPayResultRepository ksnetPayResultRepo;
 	
+	@Autowired
+	StoreService storeService;
+	
+	@Autowired
+	CodeService codeService;
+	
 	/**
 	 * 상점별 결제데이터 검색, 리스트 리턴
 	 * @param storeUid
@@ -26,12 +32,16 @@ public class PaymentService {
 	 * @param serviceTypeCodes
 	 * @return
 	 */
-	public List<PaymentItem> getPaymentItems(Store store, String sDate, String eDate, List<String> paymethods, List<String> serviceTypeCodes) {
+	public List<PaymentItem> getPaymentItems(List<Store> stores, String sDate, String eDate, List<String> paymethods, List<String> serviceTypeCodes) {
 		
-		List<String> storeIds = new ArrayList<String>();
-		store.getStoreIds().forEach(storeId -> {
-			storeIds.add(storeId.getId());
-		});
+		
+		
+		List<String> storeIds = new ArrayList<String>();	
+		for (Store store : stores) {
+			store.getStoreIds().forEach(storeId -> {
+				storeIds.add(storeId.getId());
+			});			
+		}	
 		
 		List<KsnetPayResult> payList = ksnetPayResultRepo.findByStoreIdAndtrddtAndserviceTypeCd(storeIds, sDate, eDate, serviceTypeCodes);
 		
@@ -52,6 +62,14 @@ public class PaymentService {
 			item.setGoodsName(pay.getKsnetPay().getSndGoodname());
 			item.setOrderName(pay.getKsnetPay().getSndOrdername());
 			item.setOrderNo(pay.getKsnetPay().getSndOrdernumber());
+			//putStoreInfo(item);
+			Store store=storeService.getStoreByStoreId(pay.getStoreId());
+			String groupRoleName =codeService.getCodeMap("GROUP_ROLE").get(store.getGroup().getRoleCode());
+			item.setGroupRoleName(groupRoleName);
+			item.setGroupBizName(store.getGroup().getBizName());
+			item.setStoreBizeName(store.getBizName());
+			//
+			
 			
 			list.add(item);
 		});

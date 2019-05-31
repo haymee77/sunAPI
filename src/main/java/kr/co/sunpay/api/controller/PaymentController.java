@@ -30,7 +30,7 @@ public class PaymentController {
 	@Autowired
 	StoreService storeService;
 
-	@GetMapping("/{memberUid}/{storeUid}")
+	@GetMapping("/{memberUid}/{storeUid}")   //storeUid 사용치 않는다 ko hreonwoo
 	@ApiOperation(value = "결제통계 데이터 요청", notes = "검색 조건: 상점ID(필수), 기간, 결제방법, 정산방법")
 	public List<PaymentItem> retrieveList(
 			@ApiParam(value = "멤버UID", required = true) @PathVariable(value = "memberUid") int memberUid,
@@ -40,20 +40,23 @@ public class PaymentController {
 			@ApiParam(value = "결제수단(코드값)", required = true) @RequestParam(value = "paymethod", required = true) List<String> paymethods,
 			@ApiParam(value = "서비스 타입(순간정산, D2 등 코드값)", required = true) @RequestParam(value = "serviceTypeCode", required = true) List<String> serviceTypeCodes) {
 		
-		Store store = storeService.getStore(storeUid);
+		//Store store = storeService.getStore(storeUid);
 		Member member = storeService.getMember(memberUid);
 		
 		// 파라미터 Null 체크
 		if (member == null)
 			throw new EntityNotFoundException("멤버를 찾을 수 없습니다.");
-		
+        /*		
 		if (store == null)
-			throw new EntityNotFoundException("상점을 찾을 수 없습니다.");
+			throw new EntityNotFoundException("상점을 찾을 수 없습니다.");*/
 		
 		// 멤버 권한 확인
+		/*
 		if (!storeService.hasStoreQualification(member, store))
-			throw new BadCredentialsException("상점 조회 권한이 없습니다.");
+			throw new BadCredentialsException("상점 조회 권한이 없습니다.");*/
 		
-		return paymentService.getPaymentItems(store, startDate, endDate, paymethods, serviceTypeCodes);
+		List<Store> stores=storeService.getStores(member);
+		
+		return paymentService.getPaymentItems(stores, startDate, endDate, paymethods, serviceTypeCodes);
 	}
 }
