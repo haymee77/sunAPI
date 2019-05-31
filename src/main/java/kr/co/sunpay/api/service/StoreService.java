@@ -544,7 +544,7 @@ public class StoreService extends MemberService {
 
 		return storeRepo.save(newStore);
 	}
-
+	
 	public String createDepositNo() {
 		
 		Random rnd = new Random();
