@@ -118,8 +118,17 @@ public class KsnetWrapperController {
 		}
 		
 		// 상점ID는 예치금 확인 후 변경된 ID로 적용
-		model.addAttribute("storeId", ksnetPay.getSndStoreid());
+		//model.addAttribute("storeId", ksnetPay.getSndStoreid());
+		// storeId 를 KSnet 등록된 형태로 전달한다.
+		String realStoreId=ksnetPay.getSndStoreid();
+		String[] idArray = realStoreId.split("_");		
+		String storeidForKsnet=idArray[0];		
+		//ksnetPay.setSndStoreid(storeidForKsnet);
+		
+		//model.addAttribute("storeId", ksnetPay.getSndStoreid());
+		model.addAttribute("storeId", storeidForKsnet);
 		model.addAttribute("uid", newPay.getUid());
+		
 	}
 
 	/**
@@ -133,11 +142,12 @@ public class KsnetWrapperController {
 	public String payment(@PathVariable int uid, Model model) {
 		log.info("-- KsnetWrapperController.payment called...");
 		KsnetPay ksnetPay = ksnetPayRepo.findByUid(uid);
+        /*		
 		String realStoreId=ksnetPay.getSndStoreid();
 		String[] idArray = realStoreId.split("_");		
-		String storeidForKsnet=idArray[0];
-		
+		String storeidForKsnet=idArray[0];		
 		ksnetPay.setSndStoreid(storeidForKsnet);
+		*/
 		model.addAttribute("order", ksnetPay);
 
 		return "ksnet/payment";
