@@ -96,7 +96,7 @@ public class KsnetWrapperController {
 		
 		// 활성화상태의 상점ID가 없음
 		if (activatedId == null) {
-			model.addAttribute("err", "상점정보를 찾을 수 없습니다. 관리자에게 문의해주시기 바랍니다.[3]");
+			model.addAttribute("err", store.toString()+" 상점정보를 찾을 수 없습니다. 관리자에게 문의해주시기 바랍니다.[3]");
 			return;
 		}
 		
