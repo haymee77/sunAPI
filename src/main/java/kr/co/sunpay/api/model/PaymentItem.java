@@ -42,4 +42,30 @@ public class PaymentItem {
 	
 	@ApiModelProperty(notes="상점명")
 	private String storeBizeName;
+	
+	
+	@ApiModelProperty(notes="영수증 번호(신용카드)")
+	private String cbtrno;
+	
+	@ApiModelProperty(notes="승인번호(신용카드)")
+	private String authno;
+	
+	@ApiModelProperty(notes="소유자 이름")
+	private String bizOwner;
+	
+	@ApiModelProperty(notes="owner 권한을 갖는 상점 멤버의  아이디")
+	private String ownerMemberId;
+	
+	@ApiModelProperty(notes="사업장 연락처")
+	private String bizContact;
+	
+	@ApiModelProperty(notes="구매자 연락처")
+	private String sndMobile;
+	
+	@ApiModelProperty(notes="할부")
+	private String halbu;
+	
+	@ApiModelProperty(notes="발급사명")
+	private String msg1;
+
 }

@@ -596,4 +596,14 @@ public class MemberService extends Sunpay {
 		Member member = memberRepo.findById(id).get();		
 		return member;
 	}
+	public Member getOwnerMember(List<Member> members) {
+		Member ownerMember=null;
+		for (Member member : members) {
+			if(hasRole(member, ROLE_OWNER)) {
+				ownerMember=member;
+				break;
+			}
+		}		
+		return ownerMember;
+	}
 }
