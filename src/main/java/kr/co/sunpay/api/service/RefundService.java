@@ -8,8 +8,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.sunpay.api.domain.KsnetPayResult;
+import kr.co.sunpay.api.domain.KsnetRefundLog;
+import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
+import kr.co.sunpay.api.model.PaymentItem;
 import kr.co.sunpay.api.model.RefundItemResponse;
 import kr.co.sunpay.api.repository.KsnetRefundLogRepository;
 import kr.co.sunpay.api.util.Sunpay;
@@ -23,18 +27,21 @@ public class RefundService extends StoreService {
 	
 	@Autowired
 	KsnetRefundLogRepository ksnetRefundLogRepo;
+	
+	@Autowired
+	CodeService codeService;
+	
+	@Autowired
+	MemberService memberService;	
 
-	public List<RefundItemResponse> getRefundItems(int storeUid, LocalDateTime sDateTime, LocalDateTime eDateTime, List<String> paymethodCodes, List<String> serviceTypeCodes) {
+	public List<RefundItemResponse> getRefundItems(List<Store> stores, LocalDateTime sDateTime, LocalDateTime eDateTime, List<String> paymethodCodes, List<String> serviceTypeCodes) {
 		
-		Store store = getStore(storeUid);
-		if (Sunpay.isEmpty(store)) return null;
-		
-		List<String> storeIds = new ArrayList<String>();
-		
-		// 환불정보는 상점의 상점ID로 저장되므로 선택된 상점의 모든 상점 ID 가져옴
-		for (StoreId id : store.getStoreIds()) {
-			storeIds.add(id.getId());
-		}
+		List<String> storeIds = new ArrayList<String>();	
+		for (Store store : stores) {
+			store.getStoreIds().forEach(storeId -> {
+				storeIds.add(storeId.getId());
+			});			
+		}	
 		
 		// 정산타입이 없는 경우
 		if (Sunpay.isEmpty(serviceTypeCodes)) {
@@ -44,9 +51,9 @@ public class RefundService extends StoreService {
 		// 결제수단이 없는 경우
 		if (Sunpay.isEmpty(paymethodCodes)) {
 			return getRefundItemsByServiceTypeCodes(storeIds, sDateTime, eDateTime, serviceTypeCodes);
-		}
-			
-		return getRefundItems(storeIds, sDateTime, eDateTime, paymethodCodes, serviceTypeCodes);
+		}						
+		
+		return getRefundItemsByAll(storeIds, sDateTime, eDateTime, paymethodCodes, serviceTypeCodes);
 	}
 	
 	/**
@@ -58,13 +65,51 @@ public class RefundService extends StoreService {
 	 * @param serviceTypeCodes
 	 * @return
 	 */
-	public List<RefundItemResponse> getRefundItems(List<String> storeIds, LocalDateTime sDateTime,
+	public List<RefundItemResponse> getRefundItemsByAll(List<String> storeIds, LocalDateTime sDateTime,
 			LocalDateTime eDateTime, List<String> paymethodCodes, List<String> serviceTypeCodes) {
+		
+		List<KsnetRefundLog> refundList=
+				ksnetRefundLogRepo.findByStoreIdInAndCreatedDateBetweenAndStatusCodeAndServiceTypeCodeInAndPaymethodCodeInOrderByCreatedDateDesc(storeIds,
+				sDateTime, eDateTime, REFUND_STATUS_COMPLETED, serviceTypeCodes, paymethodCodes);
+		
+		List<RefundItemResponse> list = new ArrayList<RefundItemResponse>(); 
+		
+		refundList.forEach(refund -> {					
+			RefundItemResponse response = new RefundItemResponse(refund);
+			//추가 작업0
+			response.setGoodsName(refund.getKsnetPayResult().getKsnetPay().getSndGoodname());
+			//추가 작업1
+			Store store=storeService.getStoreByStoreId(refund.getStoreId());
+			String groupRoleName =codeService.getCodeMap("GROUP_ROLE").get(store.getGroup().getRoleCode());
+			response.setGroupRoleName(groupRoleName);
+			response.setGroupBizName(store.getGroup().getBizName());
+			response.setStoreBizeName(store.getBizName());
+			
+			//추가 작업2
+			response.setCbtrno(refund.getKsnetPayResult().getCbtrno());//영수증 번호(신용카드),cbtrno
+			response.setAuthno(refund.getKsnetPayResult().getAuthno());//승인번호(신용카드)
+			response.setBizOwner(store.getBizOwner());// 소유자 이름
+			
+			List<Member> members=store.getMembers();
+			Member ownerMember=memberService.getOwnerMember(members);
+			// 문제있는 "테스트 데이타" 가 존재하는  store 와  관계있는  데이트는 가져 오지 않는다.
+			if(ownerMember==null) {
+				return;
+			}
 
-		return ksnetRefundLogRepo
-				.findByStoreIdInAndCreatedDateBetweenAndStatusCodeAndServiceTypeCodeInAndPaymethodCodeInOrderByCreatedDateDesc(storeIds,
-						sDateTime, eDateTime, REFUND_STATUS_COMPLETED, serviceTypeCodes, paymethodCodes)
-				.stream().map(RefundItemResponse::new).collect(Collectors.toList());
+			response.setOwnerMemberId(ownerMember.getId()); // owner 권한을 갖는 상점 멤버의  아이디 
+			response.setBizContact(store.getBizContact());// 사업장 연락처
+			
+			response.setSndMobile(refund.getKsnetPayResult().getKsnetPay().getSndMobile());// 구매자 연락처(SP_KSNET_PAY.mobile)
+			response.setHalbu(refund.getKsnetPayResult().getHalbu());// 할부(SP_KSNET_PAY_RESULT.INSTALMENT, halbu)
+			response.setMsg1(refund.getKsnetPayResult().getMsg1());// 발급사명(SP_KSNET_PAY_RESULT.MSG1)
+			//			
+			
+			list.add(response);
+		});
+		
+		return list;
+	
 	}
 	
 	/**
