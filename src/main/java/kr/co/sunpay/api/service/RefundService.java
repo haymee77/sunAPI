@@ -76,8 +76,7 @@ public class RefundService extends StoreService {
 		
 		refundList.forEach(refund -> {					
 			RefundItemResponse response = new RefundItemResponse(refund);
-			//추가 작업0
-			response.setGoodsName(refund.getKsnetPayResult().getKsnetPay().getSndGoodname());
+
 			//추가 작업1
 			Store store=storeService.getStoreByStoreId(refund.getStoreId());
 			String groupRoleName =codeService.getCodeMap("GROUP_ROLE").get(store.getGroup().getRoleCode());

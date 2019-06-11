@@ -88,5 +88,6 @@ public class RefundItemResponse {
 		buyerName = log.getKsnetPayResult().getKsnetPay().getSndOrdername();
 		orderNo = log.getKsnetPayResult().getOrdno();
 		statusCode = log.getStatusCode();		
+		goodsName = log.getKsnetPayResult().getKsnetPay().getSndGoodname();	
 	}
 }

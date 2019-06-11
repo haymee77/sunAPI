@@ -83,11 +83,11 @@ public class PaymentService {
 			
 			List<Member> members=store.getMembers();
 			Member ownerMember=memberService.getOwnerMember(members);
-			// 문제있는 "테스트 데이타" 가 존재하는  store 와  관계있는  데이트는 가져 오지 않는다.
+			// 문제있는 "테스트 데이타" 가 존재하는  store 는  가져 오지 않는다.
 			if(ownerMember==null) {
 				return;
 			}
-
+	
 			item.setOwnerMemberId(ownerMember.getId()); // owner 권한을 갖는 상점 멤버의  아이디 
 			item.setBizContact(store.getBizContact());// 사업장 연락처
 			
@@ -98,7 +98,7 @@ public class PaymentService {
 			
 			list.add(item);
 		});
-
+	
 		return list;
 	}
 }
