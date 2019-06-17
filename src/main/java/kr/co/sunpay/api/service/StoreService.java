@@ -161,8 +161,9 @@ public class StoreService extends MemberService {
 				throw new IllegalArgumentException("사업자등록번호가 누락되었습니다.");
 			}
 		}
-
-		return true;
+		
+		throw new IllegalArgumentException("서버 에러 테스트.");
+		//return true;
 	}
 
 	/**
@@ -656,28 +657,19 @@ public class StoreService extends MemberService {
 
 		List<Store> stores = new ArrayList<Store>();
 
-		// 최고관리자 또는 본사 멤버인 경우 모든 상점리스트 반환
-		if (hasRole(member, ROLE_TOP) || hasRole(member, ROLE_HEAD)) {
+		
+		if (hasRole(member, ROLE_TOP) || hasRole(member, ROLE_HEAD)) { // 최고관리자 또는 본사 멤버인 경우 모든 상점리스트 반환
 			stores = getStoresByGroup(member.getGroup());
-		}
-
-		// 상점 멤버인 경우 해당 상점만 반환
-		if (hasRole(member, ROLE_STORE)) {
+		} else if (hasRole(member, ROLE_STORE)) { // 상점 멤버인 경우 해당 상점만 반환
 			//stores.add(member.getStore());
-			stores.clear();
+			//stores.clear();
 			stores.add(member.getStore());
 			//return stores;
-		}
-
-		// 대리점 멤버인 경우 해당 대리점의 상점리스트 반환
-		if (hasRole(member, ROLE_AGENCY)) {
-			stores.clear();
+		} else if (hasRole(member, ROLE_AGENCY)) { // 대리점 멤버인 경우 해당 대리점의 상점리스트 반환
+			//stores.clear();
 			stores = member.getGroup().getStores();
-		}
-
-		// 지사 멤버인 경우 해당 지사와 하위 대리점 소속의 상점리스트 반환
-		if (hasRole(member, ROLE_BRANCH)) {
-			stores.clear();
+		} else if (hasRole(member, ROLE_BRANCH)) { //// 지사 멤버인 경우 해당 지사와 하위 대리점 소속의 상점리스트 반환
+			//stores.clear();
 			stores = getStoresByGroup(member.getGroup());
 		}
 
