@@ -15,6 +15,7 @@ import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.domain.StoreId;
 import kr.co.sunpay.api.model.DepositService;
+import kr.co.sunpay.api.model.PaymentItem;
 import kr.co.sunpay.api.repository.KsnetPayRepository;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 import kr.co.sunpay.api.repository.StoreIdRepository;
@@ -60,6 +61,25 @@ public class KsnetWrapperController {
 	@RequestMapping({"/init", "/m/init"})
 	public void init(KsnetPay ksnetPay, Model model) {
 		log.info("-- KsnetWrapperController.init called...");
+		// ko id
+		Member member= memberService.getMember(ksnetPay.getMemberId());  
+		Store store = storeService.getStoreByStoreMember(member);	
+		
+		ksnetPay.setFeePg(store.getFeePg());
+		ksnetPay.setFeeHead(store.getFeeHead());
+		ksnetPay.setFeeBranch(store.getFeeBranch());
+		ksnetPay.setFeeAgency(store.getFeeAgency());
+		
+		ksnetPay.setInstantFeePg(store.getInstantFeePg());
+		ksnetPay.setInstantFeeHead(store.getInstantFeeHead());
+		ksnetPay.setInstantFeeBranch(store.getInstantFeeBranch());
+		ksnetPay.setInstantFeeAgency(store.getInstantFeeAgency());
+		
+		ksnetPay.setTransFeePg(store.getTransFeePg());
+		ksnetPay.setTransFeeHead(store.getTransFeeHead());
+		ksnetPay.setTransFeeBranch(store.getTransFeeBranch());
+		ksnetPay.setTransFeeAgency(store.getTransFeeAgency());
+		
 		// 결제요청 저장
 		KsnetPay newPay = ksnetPayRepo.save(ksnetPay);
 		
@@ -69,9 +89,7 @@ public class KsnetWrapperController {
 		// 상점ID로 상점 검색하여 현재 Activated 상태인 상점ID 구함
 		//Store store = storeService.getStoreByStoreId(ksnetPay.getSndStoreid());
 		
-		// ko id
-		Member member= memberService.getMember(ksnetPay.getMemberId());  
-		Store store = storeService.getStoreByStoreMember(member);
+
 		if (store == null) {
 			model.addAttribute("err", "상점정보를 찾을 수 없습니다. 관리자에게 문의해주시기 바랍니다.[1]");
 			return;
@@ -88,8 +106,8 @@ public class KsnetWrapperController {
 		for (StoreId sId : store.getStoreIds()) {
 			if (sId.getActivated()) {
 				activatedId = sId;
-				newPay.setSndStoreid(activatedId.getId());
-				ksnetPayRepo.save(newPay);
+				//newPay.setSndStoreid(activatedId.getId());
+				//newPay=ksnetPayRepo.save(newPay);
 				break;
 			}
 		}
@@ -110,17 +128,23 @@ public class KsnetWrapperController {
 				storeService.instantOff(store.getUid(), sendPush);
 				
 				// 결제 상점 ID를 일반결제 ID로 전환
-				ksnetPay.setSndStoreid(storeService.getActivatedId(store));
-				ksnetPayRepo.save(ksnetPay);
+				
+				//newPay.setSndStoreid(storeService.getActivatedId(store));			
+				//newPay=ksnetPayRepo.save(newPay);
+				activatedId = storeService.getActivatedId(store);
+				
 				depositService.pushDepositLack(store);
 			}
 
 		}
+		newPay.setSndStoreid(activatedId.getId());	
+		//newPay.setStoreIdsUidFk();	
+		newPay=ksnetPayRepo.save(newPay);
 		
 		// 상점ID는 예치금 확인 후 변경된 ID로 적용
 		//model.addAttribute("storeId", ksnetPay.getSndStoreid());
 		// storeId 를 KSnet 등록된 형태로 전달한다.
-		String realStoreId=ksnetPay.getSndStoreid();
+		String realStoreId=newPay.getSndStoreid();
 		String[] idArray = realStoreId.split("_");		
 		String storeidForKsnet=idArray[0];		
 		//ksnetPay.setSndStoreid(storeidForKsnet);
@@ -202,6 +226,9 @@ public class KsnetWrapperController {
 			ksnetPayResult.setAqucd(ipg.kspay_get_value("aqucd"));
 			ksnetPayResult.setHalbu(ipg.kspay_get_value("halbu"));
 			ksnetPayResult.setCbtrno(ipg.kspay_get_value("cbtrno"));
+			
+			//fee 추가
+			putProfitInto(ksnetPayResult);
 		}
 
 		ksnetPayResult = ksnetPayResultRepo.save(ksnetPayResult);
@@ -268,6 +295,7 @@ public class KsnetWrapperController {
 			if (null != authyn && 1 == authyn.length()) {
 //				ipg.send_msg("3");
 			}
+			
 		}
 
 		ksnetPayResult = ksnetPayResultRepo.save(ksnetPayResult);
@@ -282,4 +310,69 @@ public class KsnetWrapperController {
 
 		return "ksnet/m/finish";
 	}
+	
+	private void putProfitInto(KsnetPayResult ksnetPayResult) {							
+		int profitPg=0 ; 
+		int profitHead=0 ;
+		int profitBranch=0 ;
+		int profitAgency=0 ;
+		int profitStore=0 ;
+		
+		int totalTransFee=0 ;
+		
+		KsnetPay ksnetPay=ksnetPayResult.getKsnetPay();
+		int amt=ksnetPayResult.getAmt();
+		
+		if(StoreService.SERVICE_TYPE_INSTANT.equals(ksnetPayResult.getServiceTypeCd())) {//순간거래			
+			int profitPg0=(int)( amt*ksnetPay.getInstantFeePg()*0.01 );
+			int transFeePg=ksnetPay.getTransFeePg();
+			profitPg= profitPg0+transFeePg;
+			
+			int profitHead0=(int)( amt*ksnetPay.getInstantFeeHead()*0.01 );
+			int transFeeHead=ksnetPay.getTransFeeHead();
+			profitHead= profitHead0+transFeeHead; //본사수익 : 매출액*본사순간정산수수료 + 본사순간송금수수료, 소숫점 이하 버림
+			
+			int profitBranch0= (int)( amt*ksnetPay.getInstantFeeBranch()*0.01 );; 
+			int transFeeBranch=ksnetPay.getTransFeeBranch();
+			profitBranch= profitBranch0+transFeeBranch;; 
+			
+			int profitAgency0= (int)( amt*ksnetPay.getInstantFeeAgency()*0.01 );; 
+			int transFeeAgency=ksnetPay.getTransFeeAgency();
+			profitAgency= profitAgency0+transFeeAgency; 
+			
+			int profit0= profitPg0+profitHead0+profitBranch0+profitAgency0;
+			totalTransFee= transFeePg+transFeeHead+transFeeBranch+transFeeAgency;
+			profitStore= (int)( amt-(profit0)*1.1-totalTransFee*1.1 ); //상점 정산금액 : 매출액 – ( 매출액 *(순간정산수수료)*1.1) – 순간송금수수료*1.1		
+		}else { //일반거래
+			int profitPg0=(int)( amt*ksnetPay.getFeePg()*0.01 );
+			//int transFeePg=ksnetPay.getTransFeePg();
+			profitPg= profitPg0;
+			
+			int profitHead0=(int)( amt*ksnetPay.getFeeHead()*0.01 );
+			//int transFeeHead=ksnetPay.getTransFeeHead();
+			profitHead= profitHead0; //본사수익 : 매출액*본사순간정산수수료 , 소숫점 이하 버림
+			
+			int profitBranch0= (int)( amt*ksnetPay.getFeeBranch()*0.01 );
+			//int transFeeBranch=ksnetPay.getTransFeeBranch();
+			profitBranch= profitBranch0;
+			
+			int profitAgency0= (int)( amt*ksnetPay.getFeeAgency()*0.01 );
+			//int transFeeAgency=ksnetPay.getTransFeeAgency();
+			profitAgency= profitAgency0;
+			
+			int profit0= profitPg0+profitHead0+profitBranch0+profitAgency0;
+			totalTransFee= 0;
+			profitStore= (int)( amt-(profit0)*1.1 ); //상점 정산금액 : 매출액 – ( 매출액 *(일반정산수수료)*1.1)				
+		}
+		
+		ksnetPayResult.setProfitPg(profitPg);		
+		ksnetPayResult.setProfitHead(profitHead);
+		ksnetPayResult.setProfitBranch(profitBranch);
+		ksnetPayResult.setProfitAgency(profitAgency);
+		ksnetPayResult.setProfitStore(profitStore);
+		
+		ksnetPayResult.setTotalTransFee(totalTransFee);
+	}	
+		
+	
 }

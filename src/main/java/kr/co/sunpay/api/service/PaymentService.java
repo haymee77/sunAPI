@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.co.sunpay.api.domain.KsnetPayResult;
+import kr.co.sunpay.api.domain.KsnetPay;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.model.PaymentItem;
@@ -55,7 +56,8 @@ public class PaymentService {
 		List<PaymentItem> list = new ArrayList<PaymentItem>(); 
 		
 		payList.forEach(pay -> {
-			if (!paymethods.contains(pay.getKsnetPay().getSndPaymethod())) {
+			KsnetPay ksnetPay=pay.getKsnetPay();
+			if (!paymethods.contains(ksnetPay.getSndPaymethod())) {
 				return;
 			}
 			
@@ -65,10 +67,10 @@ public class PaymentService {
 			item.setAmount(pay.getAmt());
 			item.setServiceTypeCode(pay.getServiceTypeCd());
 			item.setTrNo(pay.getTrno());
-			item.setPaymethodCode(pay.getKsnetPay().getSndPaymethod());
-			item.setGoodsName(pay.getKsnetPay().getSndGoodname());
-			item.setOrderName(pay.getKsnetPay().getSndOrdername());
-			item.setOrderNo(pay.getKsnetPay().getSndOrdernumber());
+			item.setPaymethodCode(ksnetPay.getSndPaymethod());
+			item.setGoodsName(ksnetPay.getSndGoodname());
+			item.setOrderName(ksnetPay.getSndOrdername());
+			item.setOrderNo(ksnetPay.getSndOrdernumber());
 			//추가 작업1
 			Store store=storeService.getStoreByStoreId(pay.getStoreId());
 			String groupRoleName =codeService.getCodeMap("GROUP_ROLE").get(store.getGroup().getRoleCode());
@@ -91,14 +93,82 @@ public class PaymentService {
 			item.setOwnerMemberId(ownerMember.getId()); // owner 권한을 갖는 상점 멤버의  아이디 
 			item.setBizContact(store.getBizContact());// 사업장 연락처
 			
-			item.setSndMobile(pay.getKsnetPay().getSndMobile());// 구매자 연락처(SP_KSNET_PAY.mobile)
+			item.setSndMobile(ksnetPay.getSndMobile());// 구매자 연락처(SP_KSNET_PAY.mobile)
 			item.setHalbu(pay.getHalbu());// 할부(SP_KSNET_PAY_RESULT.INSTALMENT, halbu)
 			item.setMsg1(pay.getMsg1());// 발급사명(SP_KSNET_PAY_RESULT.MSG1)
-			//			
+			// fee 계산
+			//putProfitInto(item, pay);
+			item.setProfitPg(pay.getProfitPg());		
+			item.setProfitHead(pay.getProfitHead());
+			item.setProfitBranch(pay.getProfitBranch());
+			item.setProfitAgency(pay.getProfitAgency());
+			item.setProfitStore(pay.getProfitStore());
 			
+			item.setKsnetPay(ksnetPay);  //단지 fee 에 대한 %등 검증을 위해 필요(browser console.log 로 볼 예정 )
+			//
 			list.add(item);
 		});
 	
 		return list;
 	}
+	/*
+	private void putProfitInto(PaymentItem item, KsnetPayResult pay) {							
+		int profitPg=0 ; 
+		int profitHead=0 ;
+		int profitBranch=0 ;
+		int profitAgency=0 ;
+		int profitStore=0 ;
+		
+		KsnetPay ksnetPay=pay.getKsnetPay();
+		int amt=pay.getAmt();
+		
+		if(StoreService.SERVICE_TYPE_INSTANT.equals(pay.getServiceTypeCd())) {//순간거래			
+			int profitPg0=(int)( amt*ksnetPay.getInstantFeePg() );
+			int transFeePg=ksnetPay.getTransFeePg();
+			profitPg= profitPg0+transFeePg;
+			
+			int profitHead0=(int)( amt*ksnetPay.getInstantFeeHead() );
+			int transFeeHead=ksnetPay.getTransFeeHead();
+			profitHead= profitHead0+transFeeHead; //본사수익 : 매출액*본사순간정산수수료 + 본사순간송금수수료, 소숫점 이하 버림
+			
+			int profitBranch0= (int)( amt*ksnetPay.getInstantFeeBranch() );; 
+			int transFeeBranch=ksnetPay.getTransFeeBranch();
+			profitBranch= profitBranch0+transFeeBranch;; 
+			
+			int profitAgency0= (int)( amt*ksnetPay.getInstantFeeAgency() );; 
+			int transFeeAgency=ksnetPay.getTransFeeAgency();
+			profitAgency= profitAgency0+transFeeAgency; 
+			
+			int profit0= profitPg0+profitHead0+profitBranch0+profitAgency0;
+			int transFee= transFeePg+transFeeHead+transFeeBranch+transFeeAgency;
+			profitStore= (int)( amt-(profit0)*1.1-transFee*1.1 ); //상점 정산금액 : 매출액 – ( 매출액 *(순간정산수수료)*1.1) – 순간송금수수료*1.1		
+		}else { //일반거래
+			int profitPg0=(int)( amt*ksnetPay.getInstantFeePg() );
+			//int transFeePg=ksnetPay.getTransFeePg();
+			profitPg= profitPg0;
+			
+			int profitHead0=(int)( amt*ksnetPay.getInstantFeeHead() );
+			//int transFeeHead=ksnetPay.getTransFeeHead();
+			profitHead= profitHead0; //본사수익 : 매출액*본사순간정산수수료 , 소숫점 이하 버림
+			
+			int profitBranch0= (int)( amt*ksnetPay.getInstantFeeBranch() );
+			//int transFeeBranch=ksnetPay.getTransFeeBranch();
+			profitBranch= profitBranch0;
+			
+			int profitAgency0= (int)( amt*ksnetPay.getInstantFeeAgency() );
+			//int transFeeAgency=ksnetPay.getTransFeeAgency();
+			profitAgency= profitAgency0;
+			
+			int profit0= profitPg0+profitHead0+profitBranch0+profitAgency0;
+			//int transFee= transFeePg+transFeeHead+transFeeBranch+transFeeAgency;
+			profitStore= (int)( amt-(profit0)*1.1 ); //상점 정산금액 : 매출액 – ( 매출액 *(일반정산수수료)*1.1)				
+		}
+		
+		item.setProfitPg(profitPg);		
+		item.setProfitHead(profitHead);
+		item.setProfitBranch(profitBranch);
+		item.setProfitAgency(profitAgency);
+		item.setProfitStore(profitStore);
+	}	*/
+	
 }

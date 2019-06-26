@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.sunpay.api.domain.KsnetPay;
 import kr.co.sunpay.api.domain.KsnetPayResult;
 import kr.co.sunpay.api.domain.KsnetRefundLog;
 import kr.co.sunpay.api.domain.Member;
@@ -102,14 +103,33 @@ public class RefundService extends StoreService {
 			response.setSndMobile(refund.getKsnetPayResult().getKsnetPay().getSndMobile());// 구매자 연락처(SP_KSNET_PAY.mobile)
 			response.setHalbu(refund.getKsnetPayResult().getHalbu());// 할부(SP_KSNET_PAY_RESULT.INSTALMENT, halbu)
 			response.setMsg1(refund.getKsnetPayResult().getMsg1());// 발급사명(SP_KSNET_PAY_RESULT.MSG1)
-			//			
-			
+			// fee 계산			
+			putProfitInto(response, refund);
+			//
 			list.add(response);
 		});
 		
 		return list;
-	
 	}
+	
+	private void putProfitInto(RefundItemResponse response, KsnetRefundLog refund) {							
+		
+		KsnetPayResult ksnetPayResult=refund.getKsnetPayResult();
+		Integer profitStore=ksnetPayResult.getProfitStore();
+		Integer totalTransFee=ksnetPayResult.getTotalTransFee();
+		
+		response.setProfitPg(ksnetPayResult.getProfitPg());		
+		response.setProfitHead(ksnetPayResult.getProfitHead());
+		response.setProfitBranch(ksnetPayResult.getProfitBranch());
+		response.setProfitAgency(ksnetPayResult.getProfitAgency());
+		response.setProfitStore(profitStore);
+		
+		response.setStoreDeductionn(totalTransFee);
+		Integer depositDeduction= ( profitStore== null ? 0:profitStore) + (totalTransFee==null ? 0:totalTransFee );
+		response.setDepositDeduction(depositDeduction);
+		
+		
+	}		
 	
 	/**
 	 * 상점ID + 정산타입으로 환불건 검색

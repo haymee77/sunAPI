@@ -76,6 +76,31 @@ public class RefundItemResponse {
 	@ApiModelProperty(notes="발급사명")
 	private String Msg1;
 	
+	// fee start
+	
+	@ApiModelProperty(notes="")
+	private Integer profitPg = 0;
+	
+	@ApiModelProperty(notes="")
+	private Integer profitHead = 0;
+	
+	@ApiModelProperty(notes="")
+	private Integer profitBranch = 0;
+	
+	@ApiModelProperty(notes="")
+	private Integer profitAgency = 0;
+	
+	@ApiModelProperty(notes="상점정산액(이미 결제한 금액")
+	private Integer profitStore = 0;
+	
+	@ApiModelProperty(notes="송금수수료 합")
+	private Integer storeDeductionn = 0;
+	
+	@ApiModelProperty(notes="취소예치금에서 차감할 금액")
+	private Integer depositDeduction = 0;
+	
+	// fee end
+	
 	public RefundItemResponse() {}
 	
 	public RefundItemResponse(KsnetRefundLog log) {

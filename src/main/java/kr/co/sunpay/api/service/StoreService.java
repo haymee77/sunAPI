@@ -161,9 +161,8 @@ public class StoreService extends MemberService {
 				throw new IllegalArgumentException("사업자등록번호가 누락되었습니다.");
 			}
 		}
-		
-		throw new IllegalArgumentException("서버 에러 테스트.");
-		//return true;
+
+		return true;
 	}
 
 	/**
@@ -712,11 +711,12 @@ public class StoreService extends MemberService {
 	 * @param store
 	 * @return
 	 */
-	public String getActivatedId(Store store) {
+	public StoreId getActivatedId(Store store) {
 
 		StoreId storeId = storeIdRepo.findByStoreAndActivated(store, true).orElse(null);
 		if (!Sunpay.isEmpty(storeId)) {
-			return storeId.getId();
+			//return storeId.getId();
+			return storeId;
 		}
 
 		return null;

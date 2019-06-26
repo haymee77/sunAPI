@@ -1,6 +1,7 @@
 package kr.co.sunpay.api.model;
 
 import io.swagger.annotations.ApiModelProperty;
+import kr.co.sunpay.api.domain.KsnetPay;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -67,5 +68,25 @@ public class PaymentItem {
 	
 	@ApiModelProperty(notes="발급사명")
 	private String msg1;
+	
+	// fee 추가 시작
+	@ApiModelProperty(value="PG사수익")
+	private Integer profitPg = 0;
+	
+	@ApiModelProperty(value=" 본사수익")
+	private Integer profitHead = 0;
+	
+	@ApiModelProperty(value="지사수익")
+	private Integer profitBranch = 0;
+	
+	@ApiModelProperty(value="대리점수익")
+	private Integer profitAgency = 0;
+	
+	@ApiModelProperty(value="상점정산액")
+	private Integer profitStore = 0;
+	
+	@ApiModelProperty(value="KSNet으로 전달될 결제데이터")
+	private KsnetPay ksnetPay;
+	// fee 추가 끝
 
 }
