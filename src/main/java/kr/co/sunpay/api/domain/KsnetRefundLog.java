@@ -95,11 +95,12 @@ public class KsnetRefundLog {
 	public KsnetRefundLog() {
 	}
 	
-	public KsnetRefundLog(String storeId, String storePasswd, String trNo, String authty) {
+	public KsnetRefundLog(String storeId, String storePasswd, String trNo, String authty, String statusCode) {
 		this.storeId = storeId;
 		this.storePasswd = storePasswd;
 		this.trNo = trNo;
 		this.authty = authty;
+		this.statusCode = statusCode;
 	}
 
 	public void setResult(KspayRefundReturns result) {

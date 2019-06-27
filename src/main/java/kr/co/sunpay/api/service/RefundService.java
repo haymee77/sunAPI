@@ -118,14 +118,29 @@ public class RefundService extends StoreService {
 		Integer profitStore=ksnetPayResult.getProfitStore();
 		Integer totalTransFee=ksnetPayResult.getTotalTransFee();
 		
-		response.setProfitPg(ksnetPayResult.getProfitPg());		
-		response.setProfitHead(ksnetPayResult.getProfitHead());
-		response.setProfitBranch(ksnetPayResult.getProfitBranch());
-		response.setProfitAgency(ksnetPayResult.getProfitAgency());
+		int profitPg=0;
+		int profitHead=0;
+		int profitBranch=0;
+		int profitAgency=0;
+		
+		if(StoreService.SERVICE_TYPE_INSTANT.equals(ksnetPayResult.getServiceTypeCd())) {//순간거래			
+			profitPg=ksnetPayResult.getProfitPg();
+			profitHead=ksnetPayResult.getProfitHead();
+			profitBranch=ksnetPayResult.getProfitBranch();
+			profitAgency=ksnetPayResult.getProfitAgency();				
+		} else { //일반거래
+			
+		}
+		response.setProfitPg(profitPg);		
+		response.setProfitHead(profitHead);
+		response.setProfitBranch(profitBranch);
+		response.setProfitAgency(profitAgency);
+		
 		response.setProfitStore(profitStore);
 		
-		response.setStoreDeductionn(totalTransFee);
-		Integer depositDeduction= ( profitStore== null ? 0:profitStore) + (totalTransFee==null ? 0:totalTransFee );
+		int vatTotalTransFee=(int)((totalTransFee==null ? 0:totalTransFee )*1.1);
+		response.setStoreDeductionn(vatTotalTransFee);
+		Integer depositDeduction= ( profitStore== null ? 0:profitStore) + vatTotalTransFee;
 		response.setDepositDeduction(depositDeduction);
 		
 		

@@ -51,7 +51,7 @@ public class PaymentService {
 			});			
 		}	
 		
-		List<KsnetPayResult> payList = ksnetPayResultRepo.findByStoreIdAndtrddtAndserviceTypeCd(storeIds, sDate, eDate, serviceTypeCodes);
+		List<KsnetPayResult> payList = ksnetPayResultRepo.findByStoreIdAndtrddtAndserviceTypeCdAndAuthyn(storeIds, sDate, eDate, serviceTypeCodes, "O");
 		
 		List<PaymentItem> list = new ArrayList<PaymentItem>(); 
 		

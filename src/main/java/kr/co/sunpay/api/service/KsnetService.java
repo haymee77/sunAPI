@@ -58,7 +58,7 @@ public class KsnetService {
 	public KsnetRefundLog saveRefundLog(KsnetRefundBody refund) {
 
 		KsnetRefundLog log = new KsnetRefundLog(refund.getStoreid(), refund.getStorepasswd(), refund.getTrno(),
-				refund.getAuthty());
+				refund.getAuthty(), refund.getStatusCode());
 
 		return refundLogRepo.save(log);
 	};
@@ -582,7 +582,8 @@ public class KsnetService {
 		if (!result.getRStatus().equals("O")) {
 			
 			// 순간정산이었다면 예치금원복
-			if (isInstantPaid) {
+			//if (isInstantPaid) {
+			if (isInstantPaid && refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
 				try {
 					depositService.resetDeposit(refund);
 				} catch (Exception e) {
@@ -595,17 +596,19 @@ public class KsnetService {
 			updateRefundLog(refundLog, result);
 			return result;
 		}
-		
+        
 		// KSPay 통신 성공, 환불 완료 처리
 		// 순간정산 환불 시 처리
-		if (isInstantPaid) {
+		
+		//if (isInstantPaid) {
+		if (isInstantPaid && refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
 			try {
 				depositService.completeRefund(refund);
 			} catch (Exception e) {
 				log.log(Level.WARNING, "DepositError: trNo - " + refund.getTrno());
 			}
 		}
-		
+
 		refundLog.setStatusCode(KsnetRefundLog.STATUS_COMPLETED);
 		
 		// 환불 완료 시 기존 환불 시도/실패건들 모두 완료상태로 업데이트
