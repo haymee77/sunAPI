@@ -74,7 +74,8 @@ public class KsnetService {
 		List<KsnetRefundLog> logs = refundLogRepo.findByTrNoAndStatusCodeNot(trNo, KsnetRefundLog.STATUS_COMPLETED);
 		
 		logs.forEach(log -> {
-			log.setStatusCode(KsnetRefundLog.STATUS_FINISH);
+			//log.setStatusCode(KsnetRefundLog.STATUS_FINISH);
+			log.setStatusCode(status);
 			refundLogRepo.save(log);
 		});
 	}
@@ -533,7 +534,7 @@ public class KsnetService {
 		refundLog.setAmt(paidResult.getAmt());
 
 		// (순간결제 + 카드결제)건의 취소요청 시 예치금 확인 및 차감
-		if (isInstantPaid && refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
+		if (refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
 			try {
 				depositService.tryRefund(refund.getStoreid(), paidResult);
 			} catch (DepositException ex) {
@@ -583,7 +584,7 @@ public class KsnetService {
 			
 			// 순간정산이었다면 예치금원복
 			//if (isInstantPaid) {
-			if (isInstantPaid && refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
+			if (refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
 				try {
 					depositService.resetDeposit(refund);
 				} catch (Exception e) {
@@ -601,7 +602,7 @@ public class KsnetService {
 		// 순간정산 환불 시 처리
 		
 		//if (isInstantPaid) {
-		if (isInstantPaid && refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
+		if (refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
 			try {
 				depositService.completeRefund(refund);
 			} catch (Exception e) {
@@ -609,10 +610,11 @@ public class KsnetService {
 			}
 		}
 
-		refundLog.setStatusCode(KsnetRefundLog.STATUS_COMPLETED);
 		
 		// 환불 완료 시 기존 환불 시도/실패건들 모두 완료상태로 업데이트
 		updateRefundLogStatus(refundLog.getTrNo(), KsnetRefundLog.STATUS_FINISH);
+		
+		refundLog.setStatusCode(KsnetRefundLog.STATUS_COMPLETED);
 		updateRefundLog(refundLog, result);
 		
 		// 취소 결과 PUSH 발송
