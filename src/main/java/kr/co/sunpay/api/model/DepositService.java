@@ -176,7 +176,7 @@ public class DepositService extends CodeService {
 	}
 	
 	/**
-	 * 상점ID, 환불할 주문의 결제정보 받아서 예치금 임시 차감 및 결제 취소 로그 기록
+	 * 상점ID, 환불 할 순간주문의 결제정보 받아서 상점예치금  차감 및 결제 취소 로그 기록
 	 * 
 	 * @param cancelBody
 	 * @throws Exception
@@ -193,8 +193,9 @@ public class DepositService extends CodeService {
 		//int paidAmount = paidResult.getAmt();
 		Integer totalTransFee=paidResult.getTotalTransFee();
 		int vatTotalTransFee=(int)((totalTransFee==null ? 0:totalTransFee )*1.1);
-		Integer profitStore=paidResult.getProfitStore();
-		int depositDeduction=( profitStore== null ? 0:profitStore) + vatTotalTransFee;
+		Integer profitStore=paidResult.getProfitStore();		
+		int	depositDeduction=( profitStore== null ? 0:profitStore) + vatTotalTransFee;		
+
 		//if (store.getDeposit() < paidAmount) {
 		if (store.getDeposit() < depositDeduction) {
 			throw new DepositException("취소예치금 부족", DepositException.CODE_DEPOSIT_LACK);

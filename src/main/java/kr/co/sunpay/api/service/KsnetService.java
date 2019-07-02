@@ -533,8 +533,9 @@ public class KsnetService {
 		boolean isInstantPaid = paidResult.getServiceTypeCd().equals("INSTANT") ? true : false;
 		refundLog.setAmt(paidResult.getAmt());
 
-		// (순간결제 + 카드결제)건의 취소요청 시 예치금 확인 및 차감
-		if (refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
+		// (순간결제 + 카드결제)건의 취소요청 시 예치금 확인 및 차감, / 일반결제(D+2)시 는 예치금을 차감하지 않는다. SERVICE_TYPE_D2 = "D2"
+		if (StoreService.SERVICE_TYPE_INSTANT.equals(paidResult.getServiceTypeCd())
+			&& refund.getAuthty().equals(KsnetService.KSPAY_AUTHTY_CREDIT)) {
 			try {
 				depositService.tryRefund(refund.getStoreid(), paidResult);
 			} catch (DepositException ex) {

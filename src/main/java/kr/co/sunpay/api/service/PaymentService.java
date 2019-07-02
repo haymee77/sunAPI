@@ -43,7 +43,8 @@ public class PaymentService {
 	public List<PaymentItem> getPaymentItems(List<Store> stores, String sDate, String eDate, List<String> paymethods, List<String> serviceTypeCodes) {
 		
 		
-		
+		// 거래가 일어난(result) 모든 값을 가져와서, 그중 환불완료 된 것이 있는 거래번호는 
+		//1. 상점정산금액(0으로 한다), 2.취소처리(취소완료:날짜), 3.상점차감액, 4.취소예치금차감액 을 환불내역 테이블의 것으로 교체한다.
 		List<String> storeIds = new ArrayList<String>();	
 		for (Store store : stores) {
 			store.getStoreIds().forEach(storeId -> {
