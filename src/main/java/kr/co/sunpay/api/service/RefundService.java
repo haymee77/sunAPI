@@ -143,29 +143,8 @@ public class RefundService extends StoreService {
 		response.setProfitBranch(profitBranch);
 		response.setProfitAgency(profitAgency);		
 		response.setProfitStore(profitStore);
-		
-<<<<<<< HEAD
-		//int vatTotalTransFee=(int)((totalTransFee==null ? 0:totalTransFee )*1.1);
-		response.setStoreDeductionn(vatTotalTransFee);
-		//response.setStoreDeductionn(0);// 환불은 상점정산 금액을 0으로 한다.
-        /*		
-		Integer depositDeduction= 0 ; //일반결제(D+2)시 는 예치금을 차감하지 않는다. SERVICE_TYPE_D2 = "D2"
-		if (StoreService.SERVICE_TYPE_INSTANT.equals(ksnetPayResult.getServiceTypeCd())) {//// 순간결제 건의 취소요청 시 	
-			depositDeduction= ( profitStore== null ? 0:profitStore) + vatTotalTransFee;
-		}*/
-=======
-		int vatTotalTransFee=(int)((totalTransFee==null ? 0:totalTransFee )*1.1);
-		//response.setStoreDeductionn(vatTotalTransFee);
-		response.setStoreDeductionn(0);// 환불은 상점정산 금액을 0으로 한다.
-		
-		Integer depositDeduction= 0 ; //일반결제(D+2)시 는 예치금을 차감하지 않는다. SERVICE_TYPE_D2 = "D2"
-		if (StoreService.SERVICE_TYPE_INSTANT.equals(ksnetPayResult.getServiceTypeCd())) {//// 순간결제 건의 취소요청 시 	
-			depositDeduction= ( profitStore== null ? 0:profitStore) + vatTotalTransFee;
-		}
->>>>>>> branch 'develop' of https://gitlab.swipepay.co.kr:9990/sunpay/api
-		response.setDepositDeduction(depositDeduction);
-		
-		
+		response.setStoreDeductionn(depositDeduction);
+		response.setDepositDeduction(depositDeduction);	
 	}		
 	
 	/**
