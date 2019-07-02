@@ -115,29 +115,45 @@ public class RefundService extends StoreService {
 	private void putProfitInto(RefundItemResponse response, KsnetRefundLog refund) {							
 		
 		KsnetPayResult ksnetPayResult=refund.getKsnetPayResult();
-		Integer profitStore=ksnetPayResult.getProfitStore();
-		Integer totalTransFee=ksnetPayResult.getTotalTransFee();
+		//Integer profitStore=ksnetPayResult.getProfitStore();
+		//Integer totalTransFee=ksnetPayResult.getTotalTransFee();
 		
 		int profitPg=0;
 		int profitHead=0;
 		int profitBranch=0;
 		int profitAgency=0;
+		int profitStore=0; // 환불은 상점정산 금액을 0으로 한다.
+		int vatTotalTransFee=0; 
+		int depositDeduction=0; //일반결제(D+2)시 는 예치금을 차감하지 않는다. SERVICE_TYPE_D2 = "D2"
 		
 		if(StoreService.SERVICE_TYPE_INSTANT.equals(ksnetPayResult.getServiceTypeCd())) {//순간거래			
 			profitPg=ksnetPayResult.getProfitPg();
 			profitHead=ksnetPayResult.getProfitHead();
 			profitBranch=ksnetPayResult.getProfitBranch();
 			profitAgency=ksnetPayResult.getProfitAgency();				
+			profitStore=ksnetPayResult.getProfitStore();	
+			int totalTransFee=ksnetPayResult.getTotalTransFee();
+			vatTotalTransFee=(int)((totalTransFee)*1.1);
+			depositDeduction= profitStore + vatTotalTransFee;
 		} else { //일반거래
 			
 		}
 		response.setProfitPg(profitPg);		
 		response.setProfitHead(profitHead);
 		response.setProfitBranch(profitBranch);
-		response.setProfitAgency(profitAgency);
-		
+		response.setProfitAgency(profitAgency);		
 		response.setProfitStore(profitStore);
 		
+<<<<<<< HEAD
+		//int vatTotalTransFee=(int)((totalTransFee==null ? 0:totalTransFee )*1.1);
+		response.setStoreDeductionn(vatTotalTransFee);
+		//response.setStoreDeductionn(0);// 환불은 상점정산 금액을 0으로 한다.
+        /*		
+		Integer depositDeduction= 0 ; //일반결제(D+2)시 는 예치금을 차감하지 않는다. SERVICE_TYPE_D2 = "D2"
+		if (StoreService.SERVICE_TYPE_INSTANT.equals(ksnetPayResult.getServiceTypeCd())) {//// 순간결제 건의 취소요청 시 	
+			depositDeduction= ( profitStore== null ? 0:profitStore) + vatTotalTransFee;
+		}*/
+=======
 		int vatTotalTransFee=(int)((totalTransFee==null ? 0:totalTransFee )*1.1);
 		//response.setStoreDeductionn(vatTotalTransFee);
 		response.setStoreDeductionn(0);// 환불은 상점정산 금액을 0으로 한다.
@@ -146,6 +162,7 @@ public class RefundService extends StoreService {
 		if (StoreService.SERVICE_TYPE_INSTANT.equals(ksnetPayResult.getServiceTypeCd())) {//// 순간결제 건의 취소요청 시 	
 			depositDeduction= ( profitStore== null ? 0:profitStore) + vatTotalTransFee;
 		}
+>>>>>>> branch 'develop' of https://gitlab.swipepay.co.kr:9990/sunpay/api
 		response.setDepositDeduction(depositDeduction);
 		
 		
