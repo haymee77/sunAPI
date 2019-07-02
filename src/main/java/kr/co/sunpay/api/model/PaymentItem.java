@@ -1,5 +1,7 @@
 package kr.co.sunpay.api.model;
 
+import java.time.LocalDateTime;
+
 import io.swagger.annotations.ApiModelProperty;
 import kr.co.sunpay.api.domain.KsnetPay;
 import lombok.Getter;
@@ -88,5 +90,20 @@ public class PaymentItem {
 	@ApiModelProperty(value="KSNet으로 전달될 결제데이터")
 	private KsnetPay ksnetPay;
 	// fee 추가 끝
+	
+	// 환불 추가 시작
+	@ApiModelProperty(value="환불전 상점정산액")
+	private Integer beforeRefundProfitStore = 0;
+	
+    /*	
+	@ApiModelProperty(value="상점차감액")
+	private Integer storeDeduction = 0;*/
+	
+	@ApiModelProperty(value=" 취소예치금차감액")
+	private Integer depositDeduction = 0;
+	
+	@ApiModelProperty(value="취소완료일")
+	private LocalDateTime refundDateTime;
+	// 환불 추가 끝
 
 }

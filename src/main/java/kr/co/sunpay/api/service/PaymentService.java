@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.co.sunpay.api.domain.KsnetPayResult;
+import kr.co.sunpay.api.domain.KsnetRefundLog;
 import kr.co.sunpay.api.domain.KsnetPay;
 import kr.co.sunpay.api.domain.Member;
 import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.model.PaymentItem;
+import kr.co.sunpay.api.model.RefundItemResponse;
 import kr.co.sunpay.api.repository.KsnetPayResultRepository;
 
 @Service
@@ -40,11 +42,8 @@ public class PaymentService {
 	 * @param serviceTypeCodes
 	 * @return
 	 */
-	public List<PaymentItem> getPaymentItems(List<Store> stores, String sDate, String eDate, List<String> paymethods, List<String> serviceTypeCodes) {
-		
-		
-		// 거래가 일어난(result) 모든 값을 가져와서, 그중 환불완료 된 것이 있는 거래번호는 
-		//1. 상점정산금액(0으로 한다), 2.취소처리(취소완료:날짜), 3.상점차감액, 4.취소예치금차감액 을 환불내역 테이블의 것으로 교체한다.
+	public List<PaymentItem> getPaymentItems(List<Store> stores, String sDate, String eDate, List<String> paymethods, List<String> serviceTypeCodes) {				
+
 		List<String> storeIds = new ArrayList<String>();	
 		for (Store store : stores) {
 			store.getStoreIds().forEach(storeId -> {
@@ -64,7 +63,8 @@ public class PaymentService {
 			
 			PaymentItem item = new PaymentItem();
 			
-			item.setPaidDate(pay.getTrddt() + pay.getTrdtm());
+			item.setPaidDate(pay.getTrddt() +" "+ pay.getTrdtm());
+			//item.setPaidDate(pay.getCreatedDate());
 			item.setAmount(pay.getAmt());
 			item.setServiceTypeCode(pay.getServiceTypeCd());
 			item.setTrNo(pay.getTrno());
@@ -105,13 +105,61 @@ public class PaymentService {
 			item.setProfitAgency(pay.getProfitAgency());
 			item.setProfitStore(pay.getProfitStore());
 			
-			item.setKsnetPay(ksnetPay);  //단지 fee 에 대한 %등 검증을 위해 필요(browser console.log 로 볼 예정 )
+			item.setKsnetPay(ksnetPay);  //단지 fee 에 대한 %등 검증을 위해 필요(browser console.log 로 볼 예정 )			
 			//
-			list.add(item);
+			updateWithRefundInfo(item, pay);
+			
+			list.add(item);			
 		});
-	
 		return list;
 	}
+	private void updateWithRefundInfo(PaymentItem item, KsnetPayResult pay) {
+		List<KsnetRefundLog> refundList=pay.getKsnetRefundLogs();
+		for (Iterator<KsnetRefundLog> iterator = refundList.iterator(); iterator.hasNext();) {
+			KsnetRefundLog refund = iterator.next();
+			if(RefundService.REFUND_STATUS_COMPLETED.equals(refund.getStatusCode())) {
+				putRefundProfitInto(item, refund);
+				break;
+			}						
+		}					
+	}	
+	/*거래가 일어난(result) 모든 값을 가져와서(asis query), 그중 환불완료 된 것이 있는 거래번호는 
+	 1.취소처리(취소완료:날짜), 2. 상점정산금액(0으로 한다), 3.상점차감액, 4.취소예치금차감액 을 환불내역 테이블의 것으로 교체한다.*/
+	private void putRefundProfitInto(PaymentItem item, KsnetRefundLog refund) {
+		
+		KsnetPayResult ksnetPayResult=refund.getKsnetPayResult();
+		
+		int profitPg=0;
+		int profitHead=0;
+		int profitBranch=0;
+		int profitAgency=0;
+		int beforeRefundProfitStore=0; // 매출시 상점 정산액
+		int vatTotalTransFee=0; 
+		int depositDeduction=0; //일반결제(D+2)시 는 예치금을 차감하지 않는다. SERVICE_TYPE_D2 = "D2"
+		
+		if(StoreService.SERVICE_TYPE_INSTANT.equals(ksnetPayResult.getServiceTypeCd())) {//순간거래			
+			profitPg=ksnetPayResult.getProfitPg();
+			profitHead=ksnetPayResult.getProfitHead();
+			profitBranch=ksnetPayResult.getProfitBranch();
+			profitAgency=ksnetPayResult.getProfitAgency();				
+			beforeRefundProfitStore=ksnetPayResult.getProfitStore();	
+			int totalTransFee=ksnetPayResult.getTotalTransFee();
+			vatTotalTransFee=(int)((totalTransFee)*1.1);
+			depositDeduction= beforeRefundProfitStore + vatTotalTransFee;
+		} else { //일반거래
+			
+		}
+		item.setProfitPg(profitPg);		
+		item.setProfitHead(profitHead);
+		item.setProfitBranch(profitBranch);
+		item.setProfitAgency(profitAgency);		
+		item.setProfitStore(-vatTotalTransFee);
+		
+		item.setBeforeRefundProfitStore(beforeRefundProfitStore);//환불전 상점정산액
+		//item.setStoreDeduction(vatTotalTransFee);//송금수수료
+		item.setDepositDeduction(depositDeduction);		
+		item.setRefundDateTime(refund.getCreatedDate());	
+	}	
 	/*
 	private void putProfitInto(PaymentItem item, KsnetPayResult pay) {							
 		int profitPg=0 ; 

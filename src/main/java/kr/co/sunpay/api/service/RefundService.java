@@ -143,7 +143,7 @@ public class RefundService extends StoreService {
 		response.setProfitBranch(profitBranch);
 		response.setProfitAgency(profitAgency);		
 		response.setProfitStore(profitStore);
-		response.setStoreDeductionn(depositDeduction);
+		response.setStoreDeductionn(vatTotalTransFee);
 		response.setDepositDeduction(depositDeduction);	
 	}		
 	

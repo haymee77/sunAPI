@@ -29,13 +29,13 @@ public interface KsnetPayResultRepository extends JpaRepository<KsnetPayResult, 
 			+ "AND TRD_DT <= :trdEndDt "
 			+ "AND SERVICE_TYPE_CD IN :serviceTypeCodes "
 			+ "AND AUTH_YN = :authyn "
-			+ "AND UID NOT IN ( "
-			+ "	SELECT DISTINCT(P.UID) "
-			+"	FROM SP_KSNET_PAY_RESULT P, SP_KSNET_REFUND_LOGS R " 
-			+"	WHERE P.UID=R.KSNET_PAY_RESULT_UID_FK " 
-			+"	AND R.STATUS_CD = 'COMPLETED' " 
+			//+ "AND UID NOT IN ( "
+			//+ "	SELECT DISTINCT(P.UID) "
+			//+"	FROM SP_KSNET_PAY_RESULT P, SP_KSNET_REFUND_LOGS R " 
+			//+"	WHERE P.UID=R.KSNET_PAY_RESULT_UID_FK " 
+			//+"	AND R.STATUS_CD = 'COMPLETED' " 
 			//+"	AND P.SERVICE_TYPE_CD = 'D2' " 
-			+ ") "
+			//+ ") "
 			+ "ORDER BY CREATED_DT DESC", nativeQuery=true)
 	List<KsnetPayResult> findByStoreIdAndtrddtAndserviceTypeCdAndAuthyn(
 			@Param("storeIds") List<String> storeIds, 
