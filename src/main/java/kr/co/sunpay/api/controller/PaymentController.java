@@ -55,8 +55,9 @@ public class PaymentController {
 		if (!storeService.hasStoreQualification(member, store))
 			throw new BadCredentialsException("상점 조회 권한이 없습니다.");*/
 		
-		List<Store> stores=storeService.getStores(member);
+		//List<Store> stores=storeService.getStores(member);
 		
-		return paymentService.getPaymentItems(stores, startDate, endDate, paymethods, serviceTypeCodes);
+		//return paymentService.getPaymentItems(stores, startDate, endDate, paymethods, serviceTypeCodes);
+		return paymentService.getPaymentItems(member, startDate, endDate, paymethods, serviceTypeCodes);
 	}
 }

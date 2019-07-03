@@ -42,8 +42,9 @@ public class PaymentService {
 	 * @param serviceTypeCodes
 	 * @return
 	 */
-	public List<PaymentItem> getPaymentItems(List<Store> stores, String sDate, String eDate, List<String> paymethods, List<String> serviceTypeCodes) {				
+	public List<PaymentItem> getPaymentItems(Member member, String sDate, String eDate, List<String> paymethods, List<String> serviceTypeCodes) {				
 
+		List<Store> stores=storeService.getStores(member);
 		List<String> storeIds = new ArrayList<String>();	
 		for (Store store : stores) {
 			store.getStoreIds().forEach(storeId -> {
@@ -107,13 +108,33 @@ public class PaymentService {
 			
 			item.setKsnetPay(ksnetPay);  //단지 fee 에 대한 %등 검증을 위해 필요(browser console.log 로 볼 예정 )			
 			//
-			updateWithRefundInfo(item, pay);
+			addRefundInfo(item, pay);
+			hideGroupProfit(item, member);
 			
 			list.add(item);			
 		});
+		 
 		return list;
 	}
-	private void updateWithRefundInfo(PaymentItem item, KsnetPayResult pay) {
+	private void hideGroupProfit(PaymentItem item, Member member) {
+		if(memberService.hasRole(member, MemberService.ROLE_TOP) || memberService.hasRole(member, MemberService.ROLE_HEAD)) {
+			//
+		}else if(memberService.hasRole(member, MemberService.ROLE_BRANCH)) { //pg,본사 수익에 *로 대체 		
+			item.setProfitPg(null); 
+			item.setProfitHead(null);  			
+		}else if(memberService.hasRole(member, MemberService.ROLE_AGENCY)) {  //pg, 본사, [지사] 수익에 *로 대체 
+			item.setProfitPg(null); 
+			item.setProfitHead(null);
+			item.setProfitBranch(null);			                      
+		}else{ // ROLE_STORE , //pg, 본사, 지사 , [대리점] 수익에 *로 대체  
+			item.setProfitPg(null); 
+			item.setProfitHead(null);
+			item.setProfitBranch(null);
+			item.setProfitAgency(null);			                       
+		}
+					
+	}	
+	private void addRefundInfo(PaymentItem item, KsnetPayResult pay) {
 		List<KsnetRefundLog> refundList=pay.getKsnetRefundLogs();
 		for (Iterator<KsnetRefundLog> iterator = refundList.iterator(); iterator.hasNext();) {
 			KsnetRefundLog refund = iterator.next();
