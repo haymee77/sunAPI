@@ -94,10 +94,9 @@ public class PaymentItem {
 	// 환불 추가 시작
 	@ApiModelProperty(value="환불전 상점정산액")
 	private Integer beforeRefundProfitStore = 0;
-	
-    /*	
+	 
 	@ApiModelProperty(value="상점차감액")
-	private Integer storeDeduction = 0;*/
+	private Integer storeDeduction = 0;
 	
 	@ApiModelProperty(value=" 취소예치금차감액")
 	private Integer depositDeduction = 0;

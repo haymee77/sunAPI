@@ -166,7 +166,7 @@ public class PaymentService {
 			beforeRefundProfitStore=ksnetPayResult.getProfitStore();	
 			int totalTransFee=ksnetPayResult.getTotalTransFee();
 			vatTotalTransFee=(int)((totalTransFee)*1.1);
-			depositDeduction= beforeRefundProfitStore + vatTotalTransFee;
+			depositDeduction= ksnetPayResult.getAmt() + vatTotalTransFee;
 		} else { //일반거래
 			
 		}
@@ -177,7 +177,7 @@ public class PaymentService {
 		item.setProfitStore(-vatTotalTransFee);
 		
 		item.setBeforeRefundProfitStore(beforeRefundProfitStore);//환불전 상점정산액
-		//item.setStoreDeduction(vatTotalTransFee);//송금수수료
+		item.setStoreDeduction(vatTotalTransFee);//송금수수료
 		item.setDepositDeduction(depositDeduction);		
 		item.setRefundDateTime(refund.getCreatedDate());	
 	}	
