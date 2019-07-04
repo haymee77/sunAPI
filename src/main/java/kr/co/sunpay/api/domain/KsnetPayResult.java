@@ -117,6 +117,34 @@ public class KsnetPayResult {
 	@Column(name="UPDATED_DT")
 	private LocalDateTime updatedDate;
 	
+	//fee start
+	
+	// pg사 수익
+	@Column(name="PROFIT_PG")
+	private Integer profitPg = 0;
+	
+	// 본사 수익
+	@Column(name="PROFIT_HEAD")
+	private Integer profitHead = 0;
+	
+	// 지사 수익
+	@Column(name="PROFIT_BRANCH")
+	private Integer profitBranch = 0;
+	
+	// 대리점 수익
+	@Column(name="PROFIT_AGENCY")
+	private Integer profitAgency = 0;
+	
+	// 상점 수익
+	@Column(name="PROFIT_STORE")
+	private Integer profitStore = 0;
+	
+	// 순간정산시 송금 수수료
+	@Column(name="TOTAL_TRANSFEE")
+	private Integer totalTransFee = 0;
+	
+	//fee end
+	
 	@OneToOne(fetch=FetchType.EAGER, optional=false)
 	@JoinColumn(name="KSNET_PAY_UID_FK")
 	private KsnetPay ksnetPay;

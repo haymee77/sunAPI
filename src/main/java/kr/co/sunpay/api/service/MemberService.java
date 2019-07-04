@@ -498,6 +498,31 @@ public class MemberService extends Sunpay {
 		return qualified;
 	}
 	
+	public List<Store> getStores(Member member) {
+		
+		//boolean qualified = false;
+		
+		//if (member == null) return false;
+		//if (store == null) return false;
+		List<Store> stores=new ArrayList<Store>();
+		// 해당 상점의 멤버인 경우
+		if (member.getStore() != null) {
+			stores.add(member.getStore());
+			
+			// 그룹의 멤버인 경우 멤버가 접근 가능한 그룹 중 상점이 포함되었는지 확인
+		} else if (member.getGroup() != null) {
+			List<Group> groups = groupService.getGroups(member);
+			
+			for (Group g : groups) {
+				for (Store s : g.getStores()) {
+					stores.add(s);
+				}
+			}
+		}
+		
+		return stores;
+	}
+	
 	/**
 	 * 그룹에 대한 수정권한 확인
 	 * 1. 관리자 권한이 없다면 REJECT
@@ -563,5 +588,22 @@ public class MemberService extends Sunpay {
 		}
 		
 		return null;
+	}
+	public Member getMember(String id) {		
+		if (id == null || id.isEmpty()) {
+			throw new IllegalArgumentException("ID can not be null.");
+		}				
+		Member member = memberRepo.findById(id).get();		
+		return member;
+	}
+	public Member getOwnerMember(List<Member> members) {
+		Member ownerMember=null;
+		for (Member member : members) {
+			if(hasRole(member, ROLE_OWNER)) {
+				ownerMember=member;
+				break;
+			}
+		}		
+		return ownerMember;
 	}
 }

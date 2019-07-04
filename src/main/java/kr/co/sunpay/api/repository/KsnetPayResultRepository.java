@@ -21,8 +21,29 @@ public interface KsnetPayResultRepository extends JpaRepository<KsnetPayResult, 
 	 * @param serviceTypeCodes
 	 * @return
 	 */
-	@Query(value="SELECT * FROM SP_KSNET_PAY_RESULT WHERE STORE_ID IN :storeIds AND TRD_DT >= :trdStartDt AND TRD_DT <= :trdEndDt AND SERVICE_TYPE_CD IN :serviceTypeCodes", nativeQuery=true)
-	List<KsnetPayResult> findByStoreIdAndtrddtAndserviceTypeCd(@Param("storeIds") List<String> storeIds, @Param("trdStartDt") String trdStartDt, @Param("trdEndDt") String trdEndDt, @Param("serviceTypeCodes") List<String> serviceTypeCodes);
+	// 거래취소건과 결제실패건은 나오지 말하야 한다.
+	@Query(value=
+			  "SELECT * FROM SP_KSNET_PAY_RESULT "
+			+ "WHERE STORE_ID IN :storeIds "
+			+ "AND TRD_DT >= :trdStartDt "
+			+ "AND TRD_DT <= :trdEndDt "
+			+ "AND SERVICE_TYPE_CD IN :serviceTypeCodes "
+			+ "AND AUTH_YN = :authyn "
+			//+ "AND UID NOT IN ( "
+			//+ "	SELECT DISTINCT(P.UID) "
+			//+"	FROM SP_KSNET_PAY_RESULT P, SP_KSNET_REFUND_LOGS R " 
+			//+"	WHERE P.UID=R.KSNET_PAY_RESULT_UID_FK " 
+			//+"	AND R.STATUS_CD = 'COMPLETED' " 
+			//+"	AND P.SERVICE_TYPE_CD = 'D2' " 
+			//+ ") "
+			+ "ORDER BY CREATED_DT DESC", nativeQuery=true)
+	List<KsnetPayResult> findByStoreIdAndtrddtAndserviceTypeCdAndAuthyn(
+			@Param("storeIds") List<String> storeIds, 
+			@Param("trdStartDt") String trdStartDt, 
+			@Param("trdEndDt") String trdEndDt, 
+			@Param("serviceTypeCodes") List<String> serviceTypeCodes,
+			@Param("authyn") String authyn
+			);
 	
 	Optional<KsnetPayResult> findByTrnoAndStoreIdAndAuthyn(String trno, String storeId, String Authyn);
 	Optional<KsnetPayResult> findByTrnoAndAuthyn(String trno, String Authyn);

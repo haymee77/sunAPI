@@ -4,10 +4,12 @@ package kr.co.sunpay.api.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -56,5 +58,48 @@ public class KsnetPay extends BaseEntity {
 	
 	@Column(name="REPLY", length=200)
 	private String sndReply;
+
+	// fee
+	@Column(name="FEE_PG")
+	private Double feePg = 0.0;
 	
+	@Column(name="FEE_HEAD")
+	private Double feeHead = 0.0;
+
+	@Column(name="FEE_BRANCH")
+	private Double feeBranch = 0.0;
+
+	@Column(name="FEE_AGENCY")
+	private Double feeAgency = 0.0;
+	
+	
+	@Column(name="INSTANT_FEE_PG")
+	private Double instantFeePg = 0.0;
+	
+	@Column(name="INSTANT_FEE_HEAD")
+	private Double instantFeeHead = 0.0;
+	
+	@Column(name="INSTANT_FEE_BRANCH")
+	private Double instantFeeBranch = 0.0;
+	
+	@Column(name="INSTANT_FEE_AGENCY")
+	private Double instantFeeAgency = 0.0;
+	
+	
+	@Column(name="TRANS_FEE_PG")
+	private Integer transFeePg = 0;
+
+	@Column(name="TRANS_FEE_HEAD")
+	private Integer transFeeHead = 0;
+
+	@Column(name="TRANS_FEE_BRANCH")
+	private Integer transFeeBranch = 0;
+
+	@Column(name="TRANS_FEE_AGENCY")
+	private Integer transFeeAgency = 0;
+    // fee	end
+	
+	// ko id
+	@Transient
+	private String memberId;	
 }

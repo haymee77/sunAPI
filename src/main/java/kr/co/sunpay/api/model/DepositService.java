@@ -176,12 +176,12 @@ public class DepositService extends CodeService {
 	}
 	
 	/**
-	 * 상점ID, 환불할 주문의 결제정보 받아서 예치금 임시 차감 및 결제 취소 로그 기록
+	 * 상점ID, 환불 할 순간주문의 결제정보 받아서 상점예치금  차감 및 결제 취소 로그 기록
 	 * 
 	 * @param cancelBody
 	 * @throws Exception
 	 */
-	public void tryRefund(String storeId, KsnetPayResult paidResult) throws Exception {
+	public void tryRefund(String storeId, KsnetPayResult paidResult) throws DepositException, Exception {
 
 		// 예치금 차감할 상점 검색
 		Store store = storeService.getStoreByStoreId(storeId);
@@ -190,18 +190,28 @@ public class DepositService extends CodeService {
 			throw new Exception("상점 정보를 찾을 수 없음");
 		}
 
-		int paidAmount = paidResult.getAmt();
-		if (store.getDeposit() < paidAmount) {
+		//int paidAmount = paidResult.getAmt();
+		Integer totalTransFee=paidResult.getTotalTransFee();
+		int vatTotalTransFee=(int)((totalTransFee==null ? 0:totalTransFee )*1.1);
+		Integer profitStore=paidResult.getProfitStore();		
+		int	depositDeduction=( profitStore== null ? 0:profitStore) + vatTotalTransFee;		
+
+		//if (store.getDeposit() < paidAmount) {
+		if (store.getDeposit() < depositDeduction) {
 			throw new DepositException("취소예치금 부족", DepositException.CODE_DEPOSIT_LACK);
 		}
 
-		store.setDeposit(store.getDeposit() - paidAmount);
+		//store.setDeposit(store.getDeposit() - paidAmount);
+		store.setDeposit(store.getDeposit() - depositDeduction);
 		storeRepo.save(store);
+        /*		
+        writeLog(store, null, null, DepositService.TYPE_WITHDRAW, paidResult.getTrno(), DepositService.STATUS_TRY,
+				paidAmount);*/
 		writeLog(store, null, null, DepositService.TYPE_WITHDRAW, paidResult.getTrno(), DepositService.STATUS_TRY,
-				paidAmount);
+				depositDeduction);
 	}
 	
-	
+    
 	public void completeRefund(KsnetRefundBody cancel) throws Exception {
 		DepositLog log = depositLogRepo.findFirstByTrNoAndStatusCdOrderByCreatedDateDesc(cancel.getTrno(), DepositService.STATUS_TRY).orElse(null);
 		
@@ -210,6 +220,8 @@ public class DepositService extends CodeService {
 		}
 
 		log.setStatusCd(DepositService.STATUS_COMPLETE);
+		depositLogRepo.save(log);  // ko 없어서 넣었다 , 그런데 기존에 ~Repo.save 가 없는데 ,추가한 이 라인과 같이 동작된 것이 이해가 않됨
+		
 	}
 	
 	public void writeLog(Store store, String originalDepositNo, String depositNo, String typeCode, String trNo, String statusCode, int amt) {
@@ -251,13 +263,23 @@ public class DepositService extends CodeService {
 			throw new Exception("결제 정보를 찾을 수 없음");
 		}
 
-		int paidAmount = oPayResult.get().getAmt();
-		System.out.println("RESET DEPOSIT AMOUNT:" + paidAmount);
+		//int paidAmount = oPayResult.get().getAmt();		
+		//int paidAmount = oPayResult.get().getAmt();	
+		KsnetPayResult ksnetPayResult= oPayResult.get();
+		Integer totalTransFee=ksnetPayResult.getTotalTransFee();
+		int vatTotalTransFee=(int)((totalTransFee==null ? 0:totalTransFee )*1.1);
+		Integer profitStore=ksnetPayResult.getProfitStore();
+		int depositDeduction=( profitStore== null ? 0:profitStore) + vatTotalTransFee;
+		System.out.println("RESET DEPOSIT AMOUNT:" + depositDeduction);
 
-		store.setDeposit(store.getDeposit() + paidAmount);
+		//store.setDeposit(store.getDeposit() + paidAmount);
+		store.setDeposit(store.getDeposit() + depositDeduction);
 		storeRepo.save(store);
+        /*		
 		writeLog(store, null, null, DepositService.TYPE_DEPOSIT, cancel.getTrno(), DepositService.STATUS_FAIL,
-				paidAmount);
+				paidAmount);*/
+		writeLog(store, null, null, DepositService.TYPE_DEPOSIT, cancel.getTrno(), DepositService.STATUS_FAIL,
+				depositDeduction);
 		
 	}
 

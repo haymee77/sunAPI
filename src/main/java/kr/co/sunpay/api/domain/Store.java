@@ -123,6 +123,9 @@ public class Store extends BaseEntity {
 	@Column(name="PAYMENT_LIMIT_ANNUAL")
 	private Integer paymentLimitAnnual = 0;
 	
+	@Column(name="MIN_PAYMENT_AMOUNT")
+	private Integer minPaymentAmt = 0;
+	// fee
 	@Column(name="FEE_PG")
 	private Double feePg = 0.0;
 	
@@ -135,8 +138,19 @@ public class Store extends BaseEntity {
 	@Column(name="FEE_AGENCY")
 	private Double feeAgency = 0.0;
 	
-	@Column(name="MIN_PAYMENT_AMOUNT")
-	private Integer minPaymentAmt = 0;
+	
+	@Column(name="INSTANT_FEE_PG")
+	private Double instantFeePg = 0.0;
+	
+	@Column(name="INSTANT_FEE_HEAD")
+	private Double instantFeeHead = 0.0;
+	
+	@Column(name="INSTANT_FEE_BRANCH")
+	private Double instantFeeBranch = 0.0;
+	
+	@Column(name="INSTANT_FEE_AGENCY")
+	private Double instantFeeAgency = 0.0;
+	
 	
 	@Column(name="TRANS_FEE_PG")
 	private Integer transFeePg = 0;
@@ -149,7 +163,8 @@ public class Store extends BaseEntity {
 
 	@Column(name="TRANS_FEE_AGENCY")
 	private Integer transFeeAgency = 0;
-	
+    // fee	
+
 	@Column(name="MEMBERSHIP_FEE")
 	private Integer membershipFee = 0;
 	

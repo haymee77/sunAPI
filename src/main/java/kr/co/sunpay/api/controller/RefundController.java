@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import kr.co.sunpay.api.domain.Member;
+import kr.co.sunpay.api.domain.Store;
 import kr.co.sunpay.api.model.RefundItemResponse;
 import kr.co.sunpay.api.service.RefundService;
+import kr.co.sunpay.api.service.StoreService;
 import kr.co.sunpay.api.util.Sunpay;
 
 @RestController
@@ -28,6 +31,9 @@ public class RefundController {
 	
 	@Autowired
 	RefundService refundService;
+	
+	@Autowired
+	StoreService storeService;	
 
 	@GetMapping("/{memberUid}/{storeUid}")
 	@ApiOperation(value = "환불 데이터 요청(환불 성공건만 반환)", notes = "검색 조건: 상점ID(필수), 기간, 결제방법, 정산방법")
@@ -40,30 +46,40 @@ public class RefundController {
 		
 		// Input data validation check
 		// 1. 멤버 조회
-		if (Sunpay.isEmpty(refundService.getMember(memberUid)))
+		
+		Member member = storeService.getMember(memberUid);
+		
+		// 파라미터 Null 체크
+		if (member == null)
 			throw new EntityNotFoundException("멤버를 찾을 수 없습니다.");
 		
 		// 2. 상점 조회
+        /*		
 		if (Sunpay.isEmpty(refundService.getStore(storeUid)))
-			throw new EntityNotFoundException("상점을 찾을 수 없습니다.");
+			throw new EntityNotFoundException("상점을 찾을 수 없습니다.");*/
 		
 		// 3. 날짜 변환(LocalDate > LocalDateTime) 및 시작일, 종료일 검사(90일 이내 검색 가능)
+		
 		LocalDateTime sDateTime = sDate.atStartOfDay();
 		LocalDateTime eDateTime = eDate.atTime(23, 59, 59);
 
 		// 시작일, 종료일 검사
+        /*		
 		if (sDateTime.isAfter(eDateTime))
 			throw new IllegalArgumentException("종료일이 시작일보다 먼저일 수 없습니다.");
-
+        */
 		// 시작일 - 종료일이 90일 이내인지 검사
+        /*		
 		if (ChronoUnit.DAYS.between(sDateTime, eDateTime) > 90)
-			throw new IllegalArgumentException("검색기간은 90일이내만 가능합니다.");
+			throw new IllegalArgumentException("검색기간은 90일이내만 가능합니다.");*/
 		
 		
 		// 4. 권한 확인
+        /*		
 		if (!refundService.hasStoreQualification(memberUid, storeUid)) 
-			throw new BadCredentialsException("상점 조회 권한이 없습니다.");
+			throw new BadCredentialsException("상점 조회 권한이 없습니다.");*/
+		List<Store> stores=storeService.getStores(member);
 		
-		return refundService.getRefundItems(storeUid, sDateTime, eDateTime, paymethodCodes, serviceTypeCode);
+		return refundService.getRefundItems(stores, sDateTime, eDateTime, paymethodCodes, serviceTypeCode);
 	}
 }
