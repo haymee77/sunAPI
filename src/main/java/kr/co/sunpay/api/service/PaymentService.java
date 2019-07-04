@@ -166,7 +166,7 @@ public class PaymentService {
 			beforeRefundProfitStore=ksnetPayResult.getProfitStore();	
 			int totalTransFee=ksnetPayResult.getTotalTransFee();
 			vatTotalTransFee=(int)((totalTransFee)*1.1);
-			depositDeduction= ksnetPayResult.getAmt() + vatTotalTransFee;
+			depositDeduction= beforeRefundProfitStore + vatTotalTransFee;
 		} else { //일반거래
 			
 		}
