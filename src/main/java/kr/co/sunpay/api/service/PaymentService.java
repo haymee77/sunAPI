@@ -159,11 +159,12 @@ public class PaymentService {
 		int depositDeduction=0; //일반결제(D+2)시 는 예치금을 차감하지 않는다. SERVICE_TYPE_D2 = "D2"
 		
 		if(StoreService.SERVICE_TYPE_INSTANT.equals(ksnetPayResult.getServiceTypeCd())) {//순간거래			
-			profitPg=ksnetPayResult.getProfitPg();
-			profitHead=ksnetPayResult.getProfitHead();
-			profitBranch=ksnetPayResult.getProfitBranch();
-			profitAgency=ksnetPayResult.getProfitAgency();				
-			beforeRefundProfitStore=ksnetPayResult.getProfitStore();	
+			profitPg=ksnetPayResult.getKsnetPay().getTransFeePg();
+			profitHead=ksnetPayResult.getKsnetPay().getTransFeeHead();
+			profitBranch=ksnetPayResult.getKsnetPay().getTransFeeBranch();
+			profitAgency=ksnetPayResult.getKsnetPay().getTransFeeAgency();				
+			
+			beforeRefundProfitStore=ksnetPayResult.getProfitStore();				
 			int totalTransFee=ksnetPayResult.getTotalTransFee();
 			vatTotalTransFee=(int)((totalTransFee)*1.1);
 			depositDeduction= beforeRefundProfitStore + vatTotalTransFee;
