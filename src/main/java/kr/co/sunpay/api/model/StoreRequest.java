@@ -112,18 +112,31 @@ public class StoreRequest {
 	@ApiModelProperty(notes="연간 결제한도")
 	private Integer paymentLimitAnnual = 0;
 	
-	// 수수료 정보 - PG 수수료
-	@ApiModelProperty(notes="PG수수료(%단위) - PG사")
+	// 수수료 정보 - 일반정산 수수료
+	@ApiModelProperty(notes="수수료(%단위) - PG사")
 	private Double feePg = 0.0;
 	
-	@ApiModelProperty(notes="PG수수료(%단위) - 본사")
+	@ApiModelProperty(notes="수수료(%단위) - 본사")
 	private Double feeHead = 0.0;
 
-	@ApiModelProperty(notes="PG수수료(%단위) - 지사")
+	@ApiModelProperty(notes="수수료(%단위) - 지사")
 	private Double feeBranch = 0.0;
 
-	@ApiModelProperty(notes="PG수수료(%단위) - 대리점")
+	@ApiModelProperty(notes="수수료(%단위) - 대리점")
 	private Double feeAgency = 0.0;
+	
+	// 수수료 정보 - 순간정산 수수료
+	@ApiModelProperty(notes="수수료(%단위) - PG사")
+	private Double instantFeePg = 0.0;
+	
+	@ApiModelProperty(notes="수수료(%단위) - 본사")
+	private Double instantFeeHead = 0.0;
+	
+	@ApiModelProperty(notes="수수료(%단위) - 지사")
+	private Double instantFeeBranch = 0.0;
+	
+	@ApiModelProperty(notes="수수료(%단위) - 대리점")
+	private Double instantFeeAgency = 0.0;
 	
 	// 수수료 정보 - 송금수수료
 	@ApiModelProperty(notes="건당 송금수수료 - PG")
@@ -150,7 +163,9 @@ public class StoreRequest {
 				bizAddressDetail, bizMail, bizContact, bizStatus, bizIndustry, storeUrl, suretyInsurance,
 				suretyInsuranceAmt, depositNo, minDeposit, maxInstallmentLimit, minPaymentAmt, bankCode, bankAccountNo,
 				bankAccountName, paymentLimitOnce, paymentLimitDaily, paymentLimitMonthly, paymentLimitQuarterly,
-				paymentLimitAnnual, feePg, feeHead, feeBranch, feeAgency, transFeePg, transFeeHead, transFeeBranch,
+				paymentLimitAnnual, feePg, feeHead, feeBranch, feeAgency, 
+				instantFeePg, instantFeeHead, instantFeeBranch, instantFeeAgency,
+				transFeePg, transFeeHead, transFeeBranch,
 				transFeeAgency, membershipFee);
 	}
 }

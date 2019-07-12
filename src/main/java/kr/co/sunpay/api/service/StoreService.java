@@ -173,14 +173,14 @@ public class StoreService extends MemberService {
 	 * @param memberUid
 	 * @return
 	 */
-	public Store update(int storeUid, Store store, int memberUid) {
-
+	public Store update(int storeUid, Store store, int memberUid) {		
+		
+		// 상점 수정 정보 검사
+		updateValidator(store);	
+		
 		Store updatedStore = getStore(storeUid);
 		if (updatedStore == null)
 			throw new IllegalArgumentException("상점 정보를 찾을 수 없습니다.");
-
-		// 상점 수정 정보 검사
-		updateValidator(store);
 		
 		//기본 추가(ko heon woo)
 		updatedStore.setBizTypeCode(store.getBizTypeCode());
@@ -203,7 +203,6 @@ public class StoreService extends MemberService {
 		updatedStore.setPaymentLimitQuarterly(store.getPaymentLimitQuarterly());	
 		updatedStore.setPaymentLimitAnnual(store.getPaymentLimitAnnual());	
 
-		// 수정 가능한 항목만 수정함
 		// 사업자정보
 		updatedStore.setBizOwner(store.getBizOwner());
 		updatedStore.setBizNo(store.getBizNo()); // 사업자정보 추가(ko heon woo)
@@ -217,16 +216,32 @@ public class StoreService extends MemberService {
 		updatedStore.setBizStatus(store.getBizStatus()); // 사업자정보 추가(ko heon woo)	 	
 		updatedStore.setBizIndustry(store.getBizIndustry()); // 사업자정보 추가(ko heon woo)
 
-		// 가입비(수수료중)
+		//수수료-일반정산
+		updatedStore.setFeePg(store.getFeePg());
+		updatedStore.setFeeHead(store.getFeeHead()); // 사업자정보 추가(ko heon woo)
+		updatedStore.setFeeBranch(store.getFeeBranch());
+		updatedStore.setFeeAgency(store.getFeeAgency());
+		//수수료-순간정산
+		updatedStore.setInstantFeePg(store.getInstantFeePg()); // 사업자정보 추가(ko heon woo)
+		updatedStore.setInstantFeeHead(store.getInstantFeeHead());
+		updatedStore.setInstantFeeBranch(store.getInstantFeeBranch());
+		updatedStore.setInstantFeeAgency(store.getInstantFeeAgency());
+		//수수료-송금
+		updatedStore.setTransFeePg(store.getTransFeePg()); // 사업자정보 추가(ko heon woo)
+		updatedStore.setTransFeeHead(store.getTransFeeHead());
+		updatedStore.setTransFeeBranch(store.getTransFeeBranch());
+		updatedStore.setTransFeeAgency(store.getTransFeeAgency());
+		
+		// 가입비
 		updatedStore.setMembershipFee(store.getMembershipFee());			
 		//PG, 순간정산(수수료중)
 		//각각 4가 존재하여야  한다(DB 참조시)?
 		//updatedStore.setPgFee(store.getFeePg());
 		//updatedStore.settransFee(store.gettransFee());
 		
-		storeRepo.save(updatedStore);
+		Store savedStore=storeRepo.save(updatedStore);
 
-		return updatedStore;
+		return savedStore;
 
 	}
 
@@ -319,9 +334,9 @@ public class StoreService extends MemberService {
 
 		if (Sunpay.isEmpty(group)) {
 			throw new IllegalArgumentException("상위업체 정보를 찾을 수 없습니다.");
+		}else {		
+			store.setGroup(group);
 		}
-
-		store.setGroup(groupService.getGroup(storeReq.getGroupUid()));
 
 		// 담당자 정보 설정
 		Member owner = storeReq.getMemberReq().toEntity(store);
@@ -338,10 +353,11 @@ public class StoreService extends MemberService {
 		store.setMembers(members);
 
 		// 상위업체별 수수료 정보 설정 - 본사 직접 가입인 경우 제외
+		/*
 		if (store.getGroup().getUid() != groupService.findHead().getUid()) {
 			registFee(store);
-		}
-
+		}*/
+		//registFee(store);
 		// 예치금 번호 없으면 랜덤으로 생성, 있으면 중복검사
 		if (Sunpay.isEmpty(store.getDepositNo())) {
 			store.setDepositNo(createDepositNo());
@@ -349,6 +365,7 @@ public class StoreService extends MemberService {
 			throw new DuplicateKeyException("예치금 입금번호가 이미 사용중입니다.");
 		}
 
+		
 		return storeRepo.save(store);
 	}
 
@@ -374,16 +391,24 @@ public class StoreService extends MemberService {
 	 * 
 	 * @param store
 	 */
-	public void registFee(Store store) {
+	
+    /*	
+    public void registFee(Store store) {
 
 		Group group = store.getGroup();
 
-		// PG 수수료는 본사 설정값에서 가져옴
+		// PG 수수료 본사 설정값에서 가져옴
 		store.setFeePg(groupService.getConfig().getFeePg());
+		//store.setInstantFeePg(groupService.getConfig().getInstantFeePg());
 		store.setTransFeePg(groupService.getConfig().getTransFeePg());
+		// 본사설정값
+		store.setFeeHead(groupService.getConfig().getFeeHead());
+		//store.setInstantFeeHead(groupService.getConfig().getInstantFeeHead());
+		store.setTransFeeHead(groupService.getConfig().getTransFeeHead());
 
 		switch (group.getRoleCode()) {
 		case GroupService.ROLE_HEAD:
+			
 			if (!(store.getFeeHead() > 0)) {
 				throw new IllegalArgumentException("수수료 미입력");
 			}
@@ -391,24 +416,37 @@ public class StoreService extends MemberService {
 			if (!(store.getTransFeeHead() > 0)) {
 				throw new IllegalArgumentException("순간정산수수료 미입력");
 			}
-
+            
 			store.setFeeBranch(0.0);
 			store.setFeeAgency(0.0);
+			
+			store.setInstantFeeBranch(0.0);
+			store.setInstantFeeAgency(0.0);
+			
 			store.setTransFeeBranch(0);
 			store.setTransFeeAgency(0);
+			
 			break;
 
 		case GroupService.ROLE_BRANCH:
+			
 			if (!(store.getFeeBranch() > 0)) {
 				throw new IllegalArgumentException("수수료 미입력");
 			}
 			if (!(store.getTransFeeBranch() > 0)) {
 				throw new IllegalArgumentException("순간정산수수료 미입력");
 			}
-
-			store.setFeeHead(group.getFeeHead());
+            
+			//store.setFeeBranch(group.getFeeHead());
 			store.setFeeAgency(0.0);
-			store.setTransFeeHead(group.getTransFeeHead());
+			
+			//store.setFeeHead(group.getFeeHead());
+			store.setFeeAgency(0.0);
+			
+			store.setInstantFeeBranch(0.0);
+			store.setInstantFeeAgency(0.0);
+			
+			//store.setTransFeeHead(group.getTransFeeHead());
 			store.setTransFeeAgency(0);
 			break;
 
@@ -420,14 +458,14 @@ public class StoreService extends MemberService {
 				throw new IllegalArgumentException("순간정산수수료 미입력");
 			}
 
-			store.setFeeHead(group.getFeeHead());
-			store.setFeeBranch(group.getFeeBranch());
-			store.setTransFeeHead(group.getTransFeeHead());
-			store.setTransFeeBranch(group.getTransFeeBranch());
+			//store.setFeeHead(group.getFeeHead());
+			//store.setFeeBranch(group.getFeeBranch());
+			//store.setTransFeeHead(group.getTransFeeHead());
+			//store.setTransFeeBranch(group.getTransFeeBranch());
 			break;
 		}
 	}
-
+    */
 	/**
 	 * memberUid 하위 소속으로 상점 생성
 	 * 
@@ -443,7 +481,32 @@ public class StoreService extends MemberService {
 			throw new IllegalArgumentException("memberUid의 권한으로 생성할 수 없는 그룹 소속입니다.");
 		}
 	}
+	/*
+	 * 상점삭제
+	 */
+	public void deleteStore(int uid) {
 
+		Store store = storeRepo.findByUid(uid).orElse(null);
+		
+		// Cascade 설정때문에 부모-자식관계 제거해주어야 삭제 가능함
+		/*
+		if (member != null) {
+			if (member.getStore() != null) {
+				
+				member.getStore().getMembers().remove(member);
+				
+			} else if (member.getGroup() != null) {
+				
+				member.getGroup().getMembers().remove(member);
+			}
+		} else {
+			throw new IllegalArgumentException("존재하지 않는 멤버UID 입니다.");
+		}
+		*/
+
+		storeRepo.delete(store);
+
+	}
 	/**
 	 * 상점 생성
 	 * 
@@ -516,9 +579,9 @@ public class StoreService extends MemberService {
 				throw new IllegalArgumentException("순간정산수수료 미입력");
 			}
 
-			store.setFeeHead(group.getFeeHead());
+			//store.setFeeHead(group.getFeeHead());
 			store.setFeeAgency(0.0);
-			store.setTransFeeHead(group.getTransFeeHead());
+			//store.setTransFeeHead(group.getTransFeeHead());
 			store.setTransFeeAgency(0);
 			break;
 
@@ -530,10 +593,10 @@ public class StoreService extends MemberService {
 				throw new IllegalArgumentException("순간정산수수료 미입력");
 			}
 
-			store.setFeeHead(group.getFeeHead());
-			store.setFeeBranch(group.getFeeBranch());
-			store.setTransFeeHead(group.getTransFeeHead());
-			store.setTransFeeBranch(group.getTransFeeBranch());
+			//store.setFeeHead(group.getFeeHead());
+			//store.setFeeBranch(group.getFeeBranch());
+			//store.setTransFeeHead(group.getTransFeeHead());
+			//store.setTransFeeBranch(group.getTransFeeBranch());
 			break;
 		}
 		// 상점 생성 시 수수료 데이터 셋팅 끝 ->
@@ -675,6 +738,7 @@ public class StoreService extends MemberService {
 		for (Store store : stores) {
 			store.setGroupName(store.getGroup().getBizName());
 			store.setGroupUid(store.getGroup().getUid());
+			store.setGroupRoleCode(store.getGroup().getRoleCode());
 		}
 
 		return stores;
