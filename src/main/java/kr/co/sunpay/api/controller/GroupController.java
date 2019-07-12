@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -66,10 +67,21 @@ public class GroupController {
 		return groupService.updateGroup(memberUid, groupUid, group);
 	}
 	
+	@DeleteMapping("/{uid}")
+	@ApiOperation(value="지사/대리점 삭제 요청", notes="{uid} 지사/대리점 삭제 요청")
+	public void deletGroup(@ApiParam("삭제할 지사/대리점의 uid") @PathVariable int uid) {
+		
+		groupService.deleteGroup(uid);
+		
+		return;
+	}
+	/*
 	@GetMapping("/fee/{memberUid}/{groupUid}")
 	@ApiOperation(value = "그룹 수수료 정보", notes = "")
 	public Fee getGroupFee(@ApiParam(value="멤버UID") @PathVariable(value="memberUid") int memberUid, @ApiParam(value = "그룹UID") @PathVariable(value = "groupUid") int groupUid) {
 
 		return groupService.getFee(memberUid, groupUid);
 	}
+	*/
+	
 }

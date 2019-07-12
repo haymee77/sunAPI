@@ -294,6 +294,7 @@ public class MemberService extends Sunpay {
 		Member member = memberRepo.findByUid(uid).orElse(null);
 		
 		// Cascade 설정때문에 부모-자식관계 제거해주어야 삭제 가능함
+		/*
 		if (member != null) {
 			if (member.getStore() != null) {
 				
@@ -306,6 +307,7 @@ public class MemberService extends Sunpay {
 		} else {
 			throw new IllegalArgumentException("존재하지 않는 멤버UID 입니다.");
 		}
+		*/
 
 		memberRepo.delete(member);
 
@@ -320,15 +322,15 @@ public class MemberService extends Sunpay {
 		if (member.getPassword() != null && member.getPassword().trim().length() > 0) {
 			dbMember.setPassword(pwEncoder.encode(member.getPassword()));
 		}
-		
+		/*
 		if (Sunpay.isEmpty(member.getAgreeEventMail())) {
 			throw new IllegalArgumentException("이벤트 메일 수신 동의 여부 미체크");
 		}
-
-		dbMember.setActivate(member.getActivate());
-		dbMember.setEmail(member.getEmail());
-		dbMember.setMobile(member.getMobile());
+        */
+		//dbMember.setActivate(member.getActivate());
 		dbMember.setName(member.getName());
+		dbMember.setMobile(member.getMobile());
+		dbMember.setEmail(member.getEmail());
 		dbMember.setAgreeEventMail(member.getAgreeEventMail());
 		
 		log.info("-- 멤버 수정");
@@ -336,7 +338,7 @@ public class MemberService extends Sunpay {
 
 		// 권한 변경 적용
 		// 새로운 권한 추가
-		if (Sunpay.isEmpty(member.getRoles()) && member.getRoles().size() > 0) {
+		if (!Sunpay.isEmpty(member.getRoles()) && member.getRoles().size() > 0) {
 			for (MemberRole role : member.getRoles()) {
 				if (UNAMENDABLE_ROLES.contains(role.getRoleName())) continue;
 				if (!dbMember.getRoles().contains(role)) {

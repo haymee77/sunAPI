@@ -46,7 +46,7 @@ public class MemberRequest {
 
 	private Boolean activate;
 
-	@NotNull(message = "이벤트 메일 수신여부를 선택해주세요.")
+	//@NotNull(message = "이벤트 메일 수신여부를 선택해주세요.")
 	private Boolean agreeEventMail;
 
 	@NotBlank(message = "소속을 선택해주세요.")
