@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.codehaus.groovy.ast.stmt.SwitchStatement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -213,7 +214,7 @@ public class GroupService {
 		try {
 			parent = getGroup(group.getParentGroupUid());
 		} catch (Exception e) {
-			throw new IllegalArgumentException("상위 그룹 설정 오류(parentGroupUid 확인)");
+			throw new IllegalArgumentException("상위 그룹 확인 오류(parentGroupUid 확인)");
 		}
 		
 		// 소유주 멤버 등록
@@ -228,43 +229,58 @@ public class GroupService {
 		group.setDeleted(false);
 		
 		// 그룹 생성 시 PG 수수료는 현재 설정된 값으로 함
+		/*
 		group.setFeePg(config.getFeePg());
-		group.setTransFeePg(config.getTransFeePg());
+		group.setTransFeePg(config.getTransFeePg());*/
 		
 		// 본사, 지점, 대리점 속성값 확인 및 기본값 설정
+		
 		switch (group.getRoleCode()) {
-		// 지사
-		case ROLE_BRANCH:
-			if (!(group.getFeeHead() >= 0)) {
-				throw new IllegalArgumentException("본사 수수료 미입력");
-			}
-			
-			if (!(group.getTransFeeHead() >= 0)) {
-				throw new IllegalArgumentException("본사 순간정산 서비스 수수료 미입력");
-			}
-			
-			group.setFeeBranch(0.0);
-			break;
-			
-		// 대리점
-		case ROLE_AGENCY:
-			if (!parent.getRoleCode().equals(ROLE_BRANCH)) {
-				throw new IllegalArgumentException("대리점은 지사 하위로만 생성 가능");
-			}
-			
-			if (!(group.getFeeBranch() >= 0)) {
-				throw new IllegalArgumentException("지사 수수료 미입력");
-			}
-			
-			if (!(group.getTransFeeBranch() >= 0)) {
-				throw new IllegalArgumentException("지사 송금수수료 미입력");
-			}
-			
-			// 본사 수수료는 지사와 동일하게 셋팅
-			group.setFeeHead(parent.getFeeHead());
-			group.setTransFeeHead(parent.getTransFeeHead());
-			break;
+			// 지사
+			case ROLE_BRANCH:
+				if (!parent.getRoleCode().equals(ROLE_HEAD)) {
+					throw new IllegalArgumentException("지사는 본점 하위로만 생성 가능");
+				}
+				/*
+				if (!(group.getFeeHead() >= 0)) {
+					throw new IllegalArgumentException("본사 수수료 미입력");
+				}
+				
+				if (!(group.getTransFeeHead() >= 0)) {
+					throw new IllegalArgumentException("본사 순간정산 서비스 수수료 미입력");
+				}
+				
+				group.setFeeBranch(0.0);
+				*/
+				break;
+				
+			// 대리점
+			case ROLE_AGENCY:
+				if (!parent.getRoleCode().equals(ROLE_BRANCH)) {
+					throw new IllegalArgumentException("대리점은 지사 하위로만 생성 가능");
+				}
+				/*
+				if (!(group.getFeeBranch() >= 0)) {
+					throw new IllegalArgumentException("지사 수수료 미입력");
+				}
+				
+				if (!(group.getTransFeeBranch() >= 0)) {
+					throw new IllegalArgumentException("지사 송금수수료 미입력");
+				}
+				
+				// 본사 수수료는 지사와 동일하게 셋팅
+				group.setFeeHead(parent.getFeeHead());
+				group.setTransFeeHead(parent.getTransFeeHead());
+				*/
+				break;
+				
+			default:
+				throw new IllegalArgumentException("상위 그룹 설정 오류(parentGroupUid 확인)");
+				//break;
+				
 		}
+
+		
 		// << 그룹 기본값 설정 끝
 		
 		Group newGroup = groupRepo.save(group);
@@ -275,6 +291,31 @@ public class GroupService {
 		return ResponseEntity.created(location).build();
 	}
 
+	public void deleteGroup(int uid) {
+
+		Group group = groupRepo.findByUid(uid).orElse(null);
+		
+		// Cascade 설정때문에 부모-자식관계 제거해주어야 삭제 가능함
+		/*
+		if (member != null) {
+			if (member.getStore() != null) {
+				
+				member.getStore().getMembers().remove(member);
+				
+			} else if (member.getGroup() != null) {
+				
+				member.getGroup().getMembers().remove(member);
+			}
+		} else {
+			throw new IllegalArgumentException("존재하지 않는 멤버UID 입니다.");
+		}
+		*/
+
+		groupRepo.delete(group);
+
+	}	
+	
+	
 	public ResponseEntity<Object> updateGroup(int memberUid, int groupUid, Group group) {
 
 		// 그룹 수정 권한이 있는 멤버인지 확인
@@ -285,7 +326,8 @@ public class GroupService {
 
 		// 수정할 그룹 정보 가져와서 새로운 정보로 수정
 		Group xGroup = getGroup(groupUid);
-		group = editGroup(xGroup, group);
+		Group updatedGroup = editGroup(xGroup, group);
+		groupRepo.save(updatedGroup);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand().toUri();
 
 		return ResponseEntity.created(location).build();
@@ -299,7 +341,8 @@ public class GroupService {
 	 * @return
 	 */
 	public Group editGroup(Group before, Group after) {
-
+		
+		/*
 		if (after.getBankAccountName() != null && !after.getBankAccountName().isEmpty()) {
 			before.setBankAccountName(after.getBankAccountName());
 		}
@@ -311,14 +354,39 @@ public class GroupService {
 		if (after.getBankCode() != null && !after.getBankCode().isEmpty()) {
 			before.setBankCode(after.getBankCode());
 		}
-
+				
+		
 		if (after.getOwnerMemberUid() > 0) {
 			// 기존 소유주멤버의 OWNER 권한 제거 및 새소유주멤버에 OWNER권한 추가
 			changeOwnerTo(before, after.getOwnerMemberUid());
 			before.setOwnerMemberUid(after.getOwnerMemberUid());
 		}
-
-		return before;
+		*/
+		
+		Group updatedGroup=before;
+					
+		updatedGroup.setFee(after.getFee());
+		updatedGroup.setInstantFee(after.getInstantFee());
+		updatedGroup.setTransFee(after.getTransFee());
+		
+		updatedGroup.setBankCode(after.getBankCode());
+		updatedGroup.setBankAccountNo(after.getBankAccountNo());
+		updatedGroup.setBankAccountName(after.getBankAccountName());
+		
+		updatedGroup.setBizTypeCode(after.getBizTypeCode());
+		
+		updatedGroup.setBizZipcode(after.getBizZipcode());
+		updatedGroup.setBizAddressBasic(after.getBizAddressBasic());
+		updatedGroup.setBizAddressDetail(after.getBizAddressDetail());
+		updatedGroup.setBizContact(after.getBizContact());
+		updatedGroup.setBizIndustry(after.getBizIndustry());
+		updatedGroup.setBizName(after.getBizName());
+		updatedGroup.setBizNo(after.getBizNo());
+		updatedGroup.setBizOwner(after.getBizOwner());
+		updatedGroup.setBizOwnerRegiNo(after.getBizOwnerRegiNo());
+		updatedGroup.setBizStatus(after.getBizStatus());
+		
+		return updatedGroup;
 	}
 
 	/**
@@ -359,6 +427,7 @@ public class GroupService {
 	 * @param groupUid
 	 * @return
 	 */
+	/*
 	public Fee getFee(int groupUid) {
 		
 		Fee fee = new Fee();
@@ -388,6 +457,7 @@ public class GroupService {
 		
 		return fee;
 	}
+	*/
 	
 	/**
 	 * memberUid가 groupUid에 대한 권한을 가지고 있는 경우 groupUid에 대한 수수료 정보 리턴
@@ -396,6 +466,7 @@ public class GroupService {
 	 * @param groupUid
 	 * @return
 	 */
+	/*
 	public Fee getFee(int memberUid, int groupUid) {
 		
 		if (hasAuth(memberUid, groupUid)) {
@@ -404,6 +475,7 @@ public class GroupService {
 			throw new BadCredentialsException("그룹 수수료 조회 권한이 없습니다.");
 		}
 	}
+	*/
 	
 	/**
 	 * memberUid가 groupUid에 대한 권한을 가진 경우 TRUE 리턴

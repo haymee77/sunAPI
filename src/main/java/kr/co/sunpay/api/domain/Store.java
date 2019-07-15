@@ -189,13 +189,17 @@ public class Store extends BaseEntity {
 	@Transient
 	private int groupUid;
 	
+	@Transient
+	private String groupRoleCode;
+	
 	public Store() {}
 	
 	public Store(String bizOwner, String bizOwnerRegiNo, String bizNo, String bizTypeCode, String bizName, String bizZipcode, String bizAddressBasic,
 		String bizAddressDetail, String bizMail, String bizContact, String bizStatus, String bizIndustry, String storeUrl, Boolean suretyInsurance,
 		Integer suretyInsuranceAmt, String depositNo, int minDeposit, int maxInstallmentLimit, Integer minPaymentAmt, String bankCode, String bankAccountNo,
 		String bankAccountName, Integer paymentLimitOnce, Integer paymentLimitDaily, Integer paymentLimitMonthly, Integer paymentLimitQuarterly,
-		Integer paymentLimitAnnual, Double feePg, Double feeHead, Double feeBranch, Double feeAgency, Integer transFeePg, Integer transFeeHead, Integer transFeeBranch,
+		Integer paymentLimitAnnual, Double feePg, Double feeHead, Double feeBranch, Double feeAgency,Double instantFeePg, Double instantFeeHead, Double instantFeeBranch,
+		Double instantFeeAgency, Integer transFeePg, Integer transFeeHead, Integer transFeeBranch,
 		Integer transFeeAgency, Integer membershipFee) {
 		
 		this.bizOwner = bizOwner;
@@ -203,6 +207,7 @@ public class Store extends BaseEntity {
 		this.bizNo = bizNo;
 		this.bizTypeCode = bizTypeCode;
 		this.bizName = bizName;
+		this.bizZipcode = bizZipcode;
 		this.bizAddressBasic = bizAddressBasic;
 		this.bizAddressDetail = bizAddressDetail;
 		this.bizMail = bizMail;
@@ -224,10 +229,17 @@ public class Store extends BaseEntity {
 		this.paymentLimitMonthly = paymentLimitMonthly;
 		this.paymentLimitQuarterly = paymentLimitQuarterly;
 		this.paymentLimitAnnual = paymentLimitAnnual;
+		
 		this.feePg = feePg;
 		this.feeHead = feeHead;
 		this.feeBranch = feeBranch;
 		this.feeAgency = feeAgency;
+		
+		this.instantFeePg = instantFeePg;
+		this.instantFeeHead = instantFeeHead;
+		this.instantFeeBranch = instantFeeBranch;
+		this.instantFeeAgency = instantFeeAgency;
+		
 		this.transFeePg = transFeePg;
 		this.transFeeHead = transFeeHead;
 		this.transFeeBranch = transFeeBranch;

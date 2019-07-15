@@ -1,11 +1,17 @@
 package kr.co.sunpay.api.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -16,6 +22,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.annotations.ApiModel;
@@ -36,9 +43,65 @@ import lombok.ToString;
 @ToString
 public class Group extends BaseEntity {
 	
+
+	//@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, orphanRemoval=true)
+	//@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
+	//@JoinColumn(name="PARENT_GROUP_UID")
+	
+	// self join
+	//@ManyToOne(fetch= FetchType.LAZY)
+	
+	
+	
+	
+	/* 작업소스
+	@ManyToOne(cascade={CascadeType.ALL})
+	@JoinColumn(name="PARENT_GROUP_UID")
+    private Group parentGroup;
+	
+	@OneToMany(mappedBy="parentGroup")
+	private List<Group> subGroups=new ArrayList<Group>();
+	*/
+	
+	
+	
+	//
+	
+	/**/
 	@ApiModelProperty(notes="상위 그룹 UID", required=true, position=1)
-	@Column(name="PARENT_GROUP_UID")
+	@Column(name="PARENT_GROUP_UID", insertable = false, updatable = false)
 	private Integer parentGroupUid;
+	
+	/* 작업소스
+	@Transient
+	private Integer parentGroupUid;	
+	
+	public Integer getParentGroupUid(){
+		//Integer parentGroupUid=null;
+		//if(parentGroup != null) {
+		//	parentGroupUid= parentGroup.getParentGroupUid();
+		//}
+		return parentGroupUid;
+	}
+   
+	public void setParentGroupUid(Integer parentGroupUid){		
+		//parentGroup.setUid(parentGroupUid);
+		this.parentGroupUid=parentGroupUid;
+	}
+	*/
+	
+	
+	//@ApiModelProperty(notes="상위 그룹 UID", required=true, position=1)
+	//@Column(name="PARENT_GROUP_UID")
+	//@ApiModelProperty(notes="asis 조정용")
+	//@Transient
+	//private Integer parentGroupUid;
+	/*
+	public String getParentGroupUid() {		
+		parentGroup.
+	*/
+	
+	
 	
 	@ApiModelProperty(notes="*[READ_ONLY]* 상위 그룹 이름", position=2)
 	@Transient
@@ -107,7 +170,7 @@ public class Group extends BaseEntity {
 	@ApiModelProperty(notes="*[READ_ONLY]* 기본사용자")
 	@Transient
 	private int ownerMemberUid;
-	
+	/*
 	@ApiModelProperty(notes="*[READ_ONLY]* PG수수료(%단위) - PG사", accessMode=AccessMode.READ_ONLY)
 	@Column(name="FEE_PG")
 	private Double feePg = 0.0;
@@ -130,7 +193,21 @@ public class Group extends BaseEntity {
 	
 	@ApiModelProperty(notes="건당 송금수수료 - 대리점 등록 시 필수값(지사에 할당될 수수료)")
 	@Column(name="TRANS_FEE_BRANCH")
-	private Integer transFeeBranch = 0;
+	private Integer transFeeBranch = 0;*/
+
+	// fee 변경 추가  시작
+	@ApiModelProperty(notes="PG수수료(%단위) - 지사 등록 시 필수값(할당 될 수수료)")
+	@Column(name="FEE")
+	private Double fee = 0.0;
+	
+	@ApiModelProperty(notes="PG수수료(%단위) - 지사 등록 시 필수값(할당 될 수수료)")
+	@Column(name="INSTANT_FEE")
+	private Double instantFee = 0.0;
+	
+	@ApiModelProperty(notes="건당 송금수수료 - 지사 등록 시 필수값(할당 될 수수료)")
+	@Column(name="TRANS_FEE")
+	private Integer transFee = 0;
+	// fee 변경 추가 끝
 	
 	@JsonManagedReference(value="group-members")
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER, orphanRemoval=true)
@@ -148,6 +225,7 @@ public class Group extends BaseEntity {
 	 */
 	public Group hideFee() {
 		
+		/*
 		switch (this.roleCode) {
 		case GroupService.ROLE_BRANCH:
 			setFeePg(this.feePg + this.feeHead);
@@ -164,7 +242,8 @@ public class Group extends BaseEntity {
 			setFeeBranch(0.0);
 			setTransFeeBranch(0);
 			break;
-		}
+		}*/
+		
 		return this;
 	}
 }
