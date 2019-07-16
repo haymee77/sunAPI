@@ -64,8 +64,8 @@ public class Group extends BaseEntity {
 	//@OneToMany(mappedBy="parentGroup", cascade={CascadeType.ALL})
 	@JsonManagedReference(value="parentGroup-childGroups")
 	@OneToMany(mappedBy="parentGroup", cascade={CascadeType.ALL})
-	//private List<Group> childGroups=new ArrayList<Group>();
-	private List<Group> childGroups;
+	private List<Group> childGroups=new ArrayList<Group>();
+	//private List<Group> childGroups;
 	
 	
 	
