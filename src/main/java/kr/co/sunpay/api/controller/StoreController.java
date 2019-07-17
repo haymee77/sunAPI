@@ -148,8 +148,11 @@ public class StoreController {
 	@DeleteMapping("/{uid}")
 	@ApiOperation(value=" 상점 삭제 요청", notes="{uid}  상점 삭제")
 	public void deleteMember(@ApiParam("상점 uid") @PathVariable int uid) {
-		
-		storeService.deleteStore(uid);
+		try {			
+			storeService.deleteStore(uid);
+		} catch (Exception e) {
+			e.getStackTrace();
+		}
 		
 		return;
 	}
