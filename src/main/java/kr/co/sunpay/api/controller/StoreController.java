@@ -152,9 +152,9 @@ public class StoreController {
 			storeService.deleteStore(uid);
 		} catch (Exception e) {
 			e.getStackTrace();
-		}
-		
-		return;
+			throw e;
+		}		
+		//return;
 	}
 	
 	/**
