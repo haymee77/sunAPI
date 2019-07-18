@@ -47,50 +47,56 @@ public class Group extends BaseEntity {
 	//@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, orphanRemoval=true)
 	//@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
 	//@JoinColumn(name="PARENT_GROUP_UID")
-	
+	//private Integer parentGroupUid;	
 	// self join
 	//@ManyToOne(fetch= FetchType.LAZY)
 	
 	
 	
 	
-	/* 작업소스
-	@ManyToOne(cascade={CascadeType.ALL})
+	/* 작업소스*/
+	//@ManyToOne(cascade={CascadeType.ALL})
+	@JsonBackReference(value="parentGroup-childGroups")
+	@ManyToOne
 	@JoinColumn(name="PARENT_GROUP_UID")
     private Group parentGroup;
 	
-	@OneToMany(mappedBy="parentGroup")
-	private List<Group> subGroups=new ArrayList<Group>();
-	*/
+	//@OneToMany(mappedBy="parentGroup", cascade={CascadeType.ALL})
+	@JsonManagedReference(value="parentGroup-childGroups")
+	@OneToMany(mappedBy="parentGroup", cascade={CascadeType.ALL})
+	private List<Group> childGroups=new ArrayList<Group>();
+	//private List<Group> childGroups;
 	
 	
 	
 	//
 	
-	/**/
+	/*원소스*/
 	@ApiModelProperty(notes="상위 그룹 UID", required=true, position=1)
-	@Column(name="PARENT_GROUP_UID", insertable = false, updatable = false)
+	@Column(name="PARENT_GROUP_UID", insertable=false , updatable=false)
 	private Integer parentGroupUid;
+	
 	
 	/* 작업소스
 	@Transient
 	private Integer parentGroupUid;	
-	
+	*/
+	/*
 	public Integer getParentGroupUid(){
-		//Integer parentGroupUid=null;
-		//if(parentGroup != null) {
-		//	parentGroupUid= parentGroup.getParentGroupUid();
-		//}
+		Integer parentGroupUid=null;
+		if(parentGroup != null) {
+			parentGroupUid= parentGroup.getParentGroupUid();
+		}
 		return parentGroupUid;
 	}
    
 	public void setParentGroupUid(Integer parentGroupUid){		
-		//parentGroup.setUid(parentGroupUid);
-		this.parentGroupUid=parentGroupUid;
+		if( parentGroup == null ){
+			parentGroup = new Group();
+		}
+		parentGroup.setParentGroupUid(parentGroupUid);
 	}
 	*/
-	
-	
 	//@ApiModelProperty(notes="상위 그룹 UID", required=true, position=1)
 	//@Column(name="PARENT_GROUP_UID")
 	//@ApiModelProperty(notes="asis 조정용")
@@ -169,7 +175,7 @@ public class Group extends BaseEntity {
 	
 	@ApiModelProperty(notes="*[READ_ONLY]* 기본사용자")
 	@Transient
-	private int ownerMemberUid;
+	private Integer ownerMemberUid;
 	/*
 	@ApiModelProperty(notes="*[READ_ONLY]* PG수수료(%단위) - PG사", accessMode=AccessMode.READ_ONLY)
 	@Column(name="FEE_PG")
@@ -210,13 +216,15 @@ public class Group extends BaseEntity {
 	// fee 변경 추가 끝
 	
 	@JsonManagedReference(value="group-members")
-	@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER, orphanRemoval=true)
+	//@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER, orphanRemoval=true)
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER)
 	@Fetch(FetchMode.SUBSELECT)
 	@OrderBy("UID DESC")
 	private List<Member> members;
 	
 	@JsonManagedReference(value="group-stores")
-	@OneToMany(mappedBy="group")
+	//@OneToMany(mappedBy="group")
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="group")
 	private List<Store> stores;
 
 	/** 

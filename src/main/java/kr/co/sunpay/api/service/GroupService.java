@@ -216,14 +216,14 @@ public class GroupService {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("상위 그룹 확인 오류(parentGroupUid 확인)");
 		}
-		
+		group.setParentGroup(parent);		
 		// 소유주 멤버 등록
 		List<Member> members = new ArrayList<Member>();
 		group.getMembers().forEach(mem -> {
 			mem.setPassword(pwEncoder.encode(mem.getPassword()));
 			members.add(mem);
 		});
-		group.setMembers(members);
+		group.setMembers(members);	
 		
 		// 그룹 기본값 설정 >>
 		group.setDeleted(false);

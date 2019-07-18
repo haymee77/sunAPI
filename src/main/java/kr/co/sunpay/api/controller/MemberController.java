@@ -52,8 +52,14 @@ public class MemberController {
 	@GetMapping("/list/{memberUid}")
 	@ApiOperation(value="멤버 리스트 요청", notes="멤버 권한으로 볼 수 있는 멤버 리스트 반환")
 	public List<MemberResponse> retrieveMembers(@ApiParam("요청자 UID") @PathVariable int memberUid) {
-		
-		return memberService.getMembers(memberUid);
+		// 에러 발생시, 상세 에러가 나오지 않아서 "e.printStackTrace"사용을 위해 try catch 문 사용
+		try {
+			return memberService.getMembers(memberUid);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 	
 	@PostMapping("")

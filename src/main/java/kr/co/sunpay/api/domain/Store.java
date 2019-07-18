@@ -58,7 +58,7 @@ public class Store extends BaseEntity {
 	private Integer deposit = 0;
 	
 	@Column(name="MIN_DEPOSIT")
-	private int minDeposit;
+	private Integer minDeposit;
 	
 	@Column(name="DEPOSIT_NO", length=10)
 	private String depositNo;
@@ -168,7 +168,8 @@ public class Store extends BaseEntity {
 	@Column(name="MEMBERSHIP_FEE")
 	private Integer membershipFee = 0;
 	
-	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
+	//@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(cascade=CascadeType.ALL)
 	@JoinColumn(name="STORE_UID_FK")
 	private List<StoreId> storeIds;
 	
