@@ -1,11 +1,14 @@
 package kr.co.sunpay.api.service;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.ast.stmt.SwitchStatement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -491,5 +494,292 @@ public class GroupService {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * memberUid 권한으로 볼 수 있는 연동대리점 그룹 리스트 반환 (2019-06-19:JAEROX)
+	 * 
+	 * @param memberUid
+	 * @return
+	 */
+	public List<Group> getAgenciesWithApiAgencyYn(int memberUid, Boolean apiAgencyYn) {
+
+		// 그룹 있는지 확인
+		if (groupRepo.count() < 1)
+			throw new EntityNotFoundException("등록된 대리점이 없습니다.");
+
+		// 멤버 정보 확인
+		Member member = memberService.getMember(memberUid);
+
+		// MANAGER 권한 없으면 권한없음
+		if (!memberService.hasRole(member, "MANAGER"))
+			throw new BadCredentialsException("권한이 없습니다.(Need MANAGER qualification.)");
+
+		if (member.getGroup() == null)
+			throw new BadCredentialsException("권한이 없습니다.(그룹 소속 멤버가 아님)");
+
+		// 멤버권한 확인하여 groups 리스트 생성
+		List<Group> groups = new ArrayList<Group>();
+
+		// 최고관리자, 본사 멤버이면 모든 그룹리스트 반환
+		if (memberService.hasRole(member, MemberService.ROLE_TOP)
+				|| memberService.hasRole(member, MemberService.ROLE_HEAD)) {
+
+			groups = groupRepo.findByRoleCodeAndApiAgencyYn(ROLE_AGENCY, apiAgencyYn);
+		// 권한 없음..
+		} else {
+			throw new BadCredentialsException("권한이 없습니다.(Need one of TOP, HEAD, BRANCH, AGENCY qualification.)");
+		}
+		
+		for (Group g : groups) {
+			g = setParent(g);
+		}
+
+		return groups;
+	}
+	
+	/**
+	 * memberUid 권한으로 볼 수 있는 대리점 그룹 리스트 반환 (2019-06-19:JAEROX)
+	 * 
+	 * @param memberUid
+	 * @return
+	 */
+	public List<Group> getAgencies(int memberUid) {
+
+		// 그룹 있는지 확인
+		if (groupRepo.count() < 1)
+			throw new EntityNotFoundException("등록된 대리점이 없습니다.");
+
+		// 멤버 정보 확인
+		Member member = memberService.getMember(memberUid);
+
+		// MANAGER 권한 없으면 권한없음
+		if (!memberService.hasRole(member, "MANAGER"))
+			throw new BadCredentialsException("권한이 없습니다.(Need MANAGER qualification.)");
+
+		if (member.getGroup() == null)
+			throw new BadCredentialsException("권한이 없습니다.(그룹 소속 멤버가 아님)");
+
+		// 멤버권한 확인하여 groups 리스트 생성
+		List<Group> groups = new ArrayList<Group>();
+
+		// 최고관리자, 본사 멤버이면 모든 그룹리스트 반환
+		if (memberService.hasRole(member, MemberService.ROLE_TOP)
+				|| memberService.hasRole(member, MemberService.ROLE_HEAD)) {
+
+			groups = groupRepo.findByRoleCodeAndDeleted(ROLE_AGENCY, false);
+		// 권한 없음..
+		} else {
+			throw new BadCredentialsException("권한이 없습니다.(Need one of TOP, HEAD, BRANCH, AGENCY qualification.)");
+		}
+		
+		for (Group g : groups) {
+			g = setParent(g);
+		}
+
+		return groups;
+	}
+	
+	/**
+	 * memberUid 권한으로 볼 수 있는 지사 소속 대리점 그룹 리스트 반환 (2019-06-19:JAEROX)
+	 * 
+	 * @param memberUid
+	 * @return
+	 */
+	public List<Group> getAgenciesWithParentGroupUid(int memberUid, int parentGroupUid) {
+
+		// 그룹 있는지 확인
+		if (groupRepo.count() < 1)
+			throw new EntityNotFoundException("등록된 대리점이 없습니다.");
+
+		// 멤버 정보 확인
+		Member member = memberService.getMember(memberUid);
+
+		// MANAGER 권한 없으면 권한없음
+		if (!memberService.hasRole(member, "MANAGER"))
+			throw new BadCredentialsException("권한이 없습니다.(Need MANAGER qualification.)");
+
+		if (member.getGroup() == null)
+			throw new BadCredentialsException("권한이 없습니다.(그룹 소속 멤버가 아님)");
+
+		// 멤버권한 확인하여 groups 리스트 생성
+		List<Group> groups = new ArrayList<Group>();
+
+		// 최고관리자, 본사 멤버이면 모든 그룹리스트 반환
+		if (memberService.hasRole(member, MemberService.ROLE_TOP)
+				|| memberService.hasRole(member, MemberService.ROLE_HEAD)) {
+
+			groups = groupRepo.findByRoleCodeAndParentGroupUid(ROLE_AGENCY, parentGroupUid);
+		// 권한 없음..
+		} else {
+			throw new BadCredentialsException("권한이 없습니다.(Need one of TOP, HEAD, BRANCH, AGENCY qualification.)");
+		}
+		
+		for (Group g : groups) {
+			g = setParent(g);
+		}
+
+		return groups;
+	}
+	
+	/**
+	 * memberUid 권한으로 볼 수 있는 지사 소속 연동대리점 그룹 리스트 반환 (2019-06-19:JAEROX)
+	 * 
+	 * @param memberUid
+	 * @return
+	 */
+	public List<Group> getAgenciesWithParentGroupUidAndApiAgencyYn(int memberUid, int parentGroupUid, Boolean apiAgencyYn) {
+
+		// 그룹 있는지 확인
+		if (groupRepo.count() < 1)
+			throw new EntityNotFoundException("등록된 대리점이 없습니다.");
+
+		// 멤버 정보 확인
+		Member member = memberService.getMember(memberUid);
+
+		// MANAGER 권한 없으면 권한없음
+		if (!memberService.hasRole(member, "MANAGER"))
+			throw new BadCredentialsException("권한이 없습니다.(Need MANAGER qualification.)");
+
+		if (member.getGroup() == null)
+			throw new BadCredentialsException("권한이 없습니다.(그룹 소속 멤버가 아님)");
+
+		// 멤버권한 확인하여 groups 리스트 생성
+		List<Group> groups = new ArrayList<Group>();
+
+		// 최고관리자, 본사 멤버이면 모든 그룹리스트 반환
+		if (memberService.hasRole(member, MemberService.ROLE_TOP)
+				|| memberService.hasRole(member, MemberService.ROLE_HEAD)) {
+
+			groups = groupRepo.findByRoleCodeAndParentGroupUidAndApiAgencyYn(ROLE_AGENCY, parentGroupUid, apiAgencyYn);
+		// 권한 없음..
+		} else {
+			throw new BadCredentialsException("권한이 없습니다.(Need one of TOP, HEAD, BRANCH, AGENCY qualification.)");
+		}
+		
+		for (Group g : groups) {
+			g = setParent(g);
+		}
+
+		return groups;
+	}
+	
+	/**
+	 * memberUid 권한으로 볼 수 있는 지사 그룹 리스트 반환 (2019-06-19:JAEROX)
+	 * 
+	 * @param memberUid
+	 * @return
+	 */
+	public List<Group> getBranches(int memberUid) {
+
+		// 그룹 있는지 확인
+		if (groupRepo.count() < 1)
+			throw new EntityNotFoundException("등록된 대리점이 없습니다.");
+
+		// 멤버 정보 확인
+		Member member = memberService.getMember(memberUid);
+
+		// MANAGER 권한 없으면 권한없음
+		if (!memberService.hasRole(member, "MANAGER"))
+			throw new BadCredentialsException("권한이 없습니다.(Need MANAGER qualification.)");
+
+		if (member.getGroup() == null)
+			throw new BadCredentialsException("권한이 없습니다.(그룹 소속 멤버가 아님)");
+
+		// 멤버권한 확인하여 groups 리스트 생성
+		List<Group> groups = new ArrayList<Group>();
+
+		// 최고관리자, 본사 멤버이면 모든 그룹리스트 반환
+		if (memberService.hasRole(member, MemberService.ROLE_TOP)
+				|| memberService.hasRole(member, MemberService.ROLE_HEAD)) {
+
+			groups = groupRepo.findByRoleCodeAndApiAgencyYn(ROLE_BRANCH, false);
+		// 권한 없음..
+		} else {
+			throw new BadCredentialsException("권한이 없습니다.(Need one of TOP, HEAD, BRANCH, AGENCY qualification.)");
+		}
+		
+		for (Group g : groups) {
+			g = setParent(g);
+		}
+
+		return groups;
+	}
+	
+	/**
+	 * 대리점 연동 등록  (2019-06-19:JAEROX)
+	 * 
+	 * @param memberUid
+	 * @param groupUid
+	 * @param group
+	 * @return
+	 */
+	public Group addApiAgency(int memberUid, int groupUid, Group group) {
+		/*
+		// 그룹 수정 권한이 있는 멤버인지 확인
+		Member member = memberService.getMember(memberUid);
+		if (!memberService.hasGroupQualification(member, group)) {
+			throw new BadCredentialsException("해당 그룹에 대한 권한이 없습니다.");
+		}
+		//*/
+		
+		Group dbGroup = groupRepo.findByUid(groupUid).get();
+		dbGroup.setApiAgencyYn(true);
+		dbGroup.setApiAgencyCreatedDt(LocalDateTime.now());
+		dbGroup.setApiAgencyAdminId(group.getApiAgencyAdminId());
+		dbGroup.setApiAgencyBizNm(group.getApiAgencyBizNm());
+		if (StringUtils.isEmpty(group.getApiAgencyPushUrl()) == false) dbGroup.setApiAgencyPushUrl(group.getApiAgencyPushUrl());
+		dbGroup.setApiAgencyMasterKey(group.getApiAgencyMasterKey());
+		dbGroup.setApiAgencyEncryptAlgorithm(group.getApiAgencyEncryptAlgorithm());
+		if (StringUtils.isEmpty(group.getApiAgencyRm1()) == false) dbGroup.setApiAgencyRm1(group.getApiAgencyRm1());
+		if (StringUtils.isEmpty(group.getApiAgencyRm2()) == false) dbGroup.setApiAgencyRm2(group.getApiAgencyRm2());
+		if (StringUtils.isEmpty(group.getApiAgencyRm3()) == false) dbGroup.setApiAgencyRm3(group.getApiAgencyRm3());
+		if (StringUtils.isEmpty(group.getApiAgencyRm4()) == false) dbGroup.setApiAgencyRm4(group.getApiAgencyRm4());
+		
+		// 연동키 생성
+		String privateKey = RandomStringUtils.random(32, true, true);
+		dbGroup.setApiAgencyPrivateKey(privateKey);
+
+		return groupRepo.save(dbGroup);
+	}
+	
+	/**
+	 * 대리점 연동 수정  (2019-07-08:JAEROX)
+	 * 
+	 * @param memberUid
+	 * @param groupUid
+	 * @param group
+	 * @return
+	 */
+	public Group editApiAgency(int memberUid, int groupUid, Group group) {
+		Group dbGroup = groupRepo.findByUid(groupUid).get();
+		dbGroup.setApiAgencyAdminId(group.getApiAgencyAdminId());
+		dbGroup.setApiAgencyBizNm(group.getApiAgencyBizNm());
+		if (StringUtils.isEmpty(group.getApiAgencyPushUrl()) == false) dbGroup.setApiAgencyPushUrl(group.getApiAgencyPushUrl());
+		dbGroup.setApiAgencyMasterKey(group.getApiAgencyMasterKey());
+		dbGroup.setApiAgencyEncryptAlgorithm(group.getApiAgencyEncryptAlgorithm());
+		if (StringUtils.isEmpty(group.getApiAgencyRm1()) == false) dbGroup.setApiAgencyRm1(group.getApiAgencyRm1());
+		if (StringUtils.isEmpty(group.getApiAgencyRm2()) == false) dbGroup.setApiAgencyRm2(group.getApiAgencyRm2());
+		if (StringUtils.isEmpty(group.getApiAgencyRm3()) == false) dbGroup.setApiAgencyRm3(group.getApiAgencyRm3());
+		if (StringUtils.isEmpty(group.getApiAgencyRm4()) == false) dbGroup.setApiAgencyRm4(group.getApiAgencyRm4());
+		
+		return groupRepo.save(dbGroup);
+	}
+	
+	/**
+	 * 대리점 연동키 수정  (2019-07-08:JAEROX)
+	 * 
+	 * @param groupUid
+	 * @param group
+	 * @return
+	 */
+	public Group editApiAgencyPrivateKey(int groupUid, Group group) {
+		Group dbGroup = groupRepo.findByUid(groupUid).get();
+		
+		// 연동키 재생성
+		String privateKey = RandomStringUtils.random(32, true, true);
+		dbGroup.setApiAgencyPrivateKey(privateKey);
+		
+		return groupRepo.save(dbGroup);
 	}
 }

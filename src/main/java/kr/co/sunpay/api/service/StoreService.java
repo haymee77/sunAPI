@@ -1156,4 +1156,45 @@ public class StoreService extends MemberService {
 
 		return store;
 	}
+	
+	/**
+	 * StoreRequest 받아서 Store Entity 생성 (2019-06-21:JAEROX)
+	 * 
+	 * @param storeReq
+	 * @return
+	 */
+	@Transactional
+	public Store registApiStore(StoreRequest storeReq) {
+
+		Store store = storeReq.toEntity();
+
+		// 상점 생싱 시 상태값 NEW로 초기화
+		store.setStateCode(STATE_NEW);
+
+		// 상위업체 정보 설정
+		Group group = groupService.getGroup(storeReq.getGroupUid());
+
+		if (Sunpay.isEmpty(group)) {
+			throw new IllegalArgumentException("상위업체 정보를 찾을 수 없습니다.");
+		}
+		else {		
+			store.setGroup(group);
+		}
+
+		// 상위업체별 수수료 정보 설정 - 본사 직접 가입인 경우 제외
+		/*
+		if (store.getGroup().getUid() != groupService.findHead().getUid()) {
+			registFee(store);
+		}*/
+		//registFee(store);
+
+		// 예치금 번호 없으면 랜덤으로 생성, 있으면 중복검사
+		if (Sunpay.isEmpty(store.getDepositNo())) {
+			store.setDepositNo(createDepositNo());
+		} else if (storeRepo.findByDepositNo(store.getDepositNo()).isPresent()) {
+			throw new DuplicateKeyException("예치금 입금번호가 이미 사용중입니다.");
+		}
+		
+		return storeRepo.save(store);
+	}
 }

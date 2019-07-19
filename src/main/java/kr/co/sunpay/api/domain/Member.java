@@ -66,6 +66,26 @@ public class Member extends BaseEntity {
 	@JoinColumn(name="GROUP_UID_FK")
 	private Group group;
 	
+	// API 상태 코드 (2019-07-01:JAEROX)
+	@Column(name="API_STATUS_CD", columnDefinition="CHAR")
+	private String apiStatusCd;
+		
+	// 사업장명
+	@Column(name="API_BIZ_NM", length=50)
+	private String apiBizNm;
+		
+	// 사업자 종류
+	@Column(name="API_BIZ_TYPE_CD", length=20)
+	private String apiBizTypeCd;
+		
+	// API 결제(PG)수수료 - 대리점(%단위) (2019-07-01:JAEROX)
+	@Column(name="API_FEE")
+	private Double apiFee = 0.0;
+		
+	// API 순간정산 건당 송금수수료 - 대리점 (2019-07-01:JAEROX)
+	@Column(name="API_TRANS_FEE")
+	private Integer apiTransFee = 0;
+	
 	@ApiModelProperty(notes="TOP(최고관리자), HEAD(본사 권한), BRANCH(지사 권한),  AGENCY(대리점 권한), STORE(가맹점 권한), MANAGER(본사, 지사, 대리점, 상점의 대표/기본 계정), STAFF(본사, 지사, 대리점, 상점의 부계정), CS(고객관리 권한), DEV(개발자 권한)")
 	//@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, orphanRemoval=true)
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)

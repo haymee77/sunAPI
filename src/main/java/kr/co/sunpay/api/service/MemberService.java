@@ -608,4 +608,77 @@ public class MemberService extends Sunpay {
 		}		
 		return ownerMember;
 	}
+	
+	/**
+	 * memberUid 멤버의 권한으로 확인 가능한 API 가입신청 상태인 멤버리스트 반환 (2019-06-20:JAEROX)
+	 * 
+	 * @param memberUid
+	 * @return
+	 */
+	public List<Member> getApiMembers(int memberUid) {
+		Member member = getMember(memberUid);
+		List<Member> members = new ArrayList<Member>();
+		
+		// 본사권한인 경우 모든 멤버리스트 반환
+		if (hasRole(member, ROLE_TOP) || hasRole(member, ROLE_HEAD)) {
+			members = memberRepo.findByApiStatusCd("1");
+		}
+		return members;
+	}
+	
+	/**
+	 * API 회원생성 (2019-06-20:JAEROX)
+	 * 
+	 * @param member
+	 * @return
+	 */
+	public Member createApiMember(Member member) {
+		log.info("-- MemberService.createApiMember called..");
+		
+		if (hasMember(member.getId())) {
+			throw new DuplicateKeyException("ID중복");
+		}
+		
+		// 권한
+		List<MemberRole> roles = new ArrayList<MemberRole>();
+		roles.add(new MemberRole(ROLE_MANAGER));
+		roles.add(new MemberRole(ROLE_STORE));
+		
+		// 멤버 생성
+		Member newMem = new Member();
+		newMem.setId(member.getId());
+		newMem.setPassword(member.getPassword());
+		newMem.setName(member.getName());
+		newMem.setEmail(member.getEmail());
+		newMem.setMobile(member.getMobile());
+		newMem.setApiStatusCd("1");		// 가입신청
+		newMem.setApiBizNm(member.getApiBizNm());
+		newMem.setApiBizTypeCd(member.getApiBizTypeCd());
+		newMem.setApiFee(member.getApiFee());
+		newMem.setApiTransFee(member.getApiTransFee());
+		newMem.setRoles(roles);
+		newMem.setGroup(member.getGroup());
+
+		return memberRepo.save(newMem);
+	}
+	
+	/**
+	 * API 회원생성 승인 요청 (2019-06-20:JAEROX)
+	 * 
+	 * @param uid
+	 * @return
+	 */
+	public Member confirmMember(int uid, int storeUid) {
+		checkUid(uid);
+		
+		Store store = new Store();
+		store.setUid(storeUid);
+
+		Member dbMember = memberRepo.findByUid(uid).get();
+		dbMember.setActivate(true);
+		dbMember.setApiStatusCd("2");		// 가입완료
+		dbMember.setStore(store);
+
+		return memberRepo.save(dbMember);
+	}
 }

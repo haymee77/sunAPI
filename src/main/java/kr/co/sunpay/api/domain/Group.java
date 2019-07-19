@@ -1,5 +1,6 @@
 package kr.co.sunpay.api.domain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -214,6 +215,56 @@ public class Group extends BaseEntity {
 	@Column(name="TRANS_FEE")
 	private Integer transFee = 0;
 	// fee 변경 추가 끝
+	
+	// API 대리점 여부 추가 (2019-06-19:JAEROX)
+	@ApiModelProperty(notes="API 연동대리점 여부")
+	@Column(name="API_AGENCY_YN", columnDefinition="BIT(0)")
+	private Boolean apiAgencyYn;
+		
+	// API 대리점 여부 추가 (2019-06-20:JAEROX)
+	@ApiModelProperty(notes="API 연동대리점 생성일시")
+	@Column(name="API_AGENCY_CREATED_DT")
+	private LocalDateTime apiAgencyCreatedDt;
+		
+	@ApiModelProperty(notes="API 연동대리점 관리자 ID")
+	@Column(name="API_AGENCY_ADMIN_ID", length=45)
+	private String apiAgencyAdminId;
+		
+	@ApiModelProperty(notes="API 연동대리점 업체명")
+	@Column(name="API_AGENCY_BIZ_NM", length=50)
+	private String apiAgencyBizNm;
+		
+	@ApiModelProperty(notes="API 연동대리점 PUSH URL")
+	@Column(name="API_AGENCY_PUSH_URL", length=200)
+	private String apiAgencyPushUrl;
+		
+	@ApiModelProperty(notes="API 연동대리점 마스터키")
+	@Column(name="API_AGENCY_MASTER_KEY", length=100)
+	private String apiAgencyMasterKey;
+		
+	@ApiModelProperty(notes="API 연동대리점 암호화 알고리즘")
+	@Column(name="API_AGENCY_ENCRYPT_ALGORITHM", length=10)
+	private String apiAgencyEncryptAlgorithm;
+		
+	@ApiModelProperty(notes="API 연동대리점 연동키")
+	@Column(name="API_AGENCY_PRIVATE_KEY", length=100)
+	private String apiAgencyPrivateKey;
+		
+	@ApiModelProperty(notes="API 연동대리점 예비1")
+	@Column(name="API_AGENCY_RM1", length=50)
+	private String apiAgencyRm1;
+		
+	@ApiModelProperty(notes="API 연동대리점 예비2")
+	@Column(name="API_AGENCY_RM2", length=200)
+	private String apiAgencyRm2;
+		
+	@ApiModelProperty(notes="API 연동대리점 예비3")
+	@Column(name="API_AGENCY_RM3", length=200)
+	private String apiAgencyRm3;
+		
+	@ApiModelProperty(notes="API 연동대리점 예비4")
+	@Column(name="API_AGENCY_RM4", length=200)
+	private String apiAgencyRm4;
 	
 	@JsonManagedReference(value="group-members")
 	//@OneToMany(cascade=CascadeType.ALL, mappedBy="group", fetch=FetchType.EAGER, orphanRemoval=true)

@@ -121,4 +121,11 @@ public class MemberController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+	
+	// memberUid 멤버의 권한으로 확인 가능한 API 가입신청 상태인 멤버리스트 반환 (2019-06-20:JAEROX)
+		@GetMapping("/list/api/{memberUid}")
+		@ApiOperation(value="멤버 리스트 요청", notes="멤버 권한으로 볼 수 있는 멤버 리스트 반환")
+		public List<Member> apiMembers(@ApiParam("요청자 UID") @PathVariable int memberUid) {
+			return memberService.getApiMembers(memberUid);
+		}
 }
